@@ -1,8 +1,9 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '4.0.1'
-	id 'io.spring.dependency-management' version '1.1.7'
-	id 'org.asciidoctor.jvm.convert' version '4.0.5'
+    id 'java'
+    id 'eclipse'
+    id 'org.springframework.boot' version '3.4.1' // 4.0.1은 라이브러리 명칭이 불안정하므로 3.4.1로 고정합니다.
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.asciidoctor.jvm.convert' version '4.0.5'
 }
 
 group = 'com.project'
@@ -10,71 +11,73 @@ version = '0.0.1-SNAPSHOT'
 description = 'Demo project for Spring Boot'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
+// VS Code 인식률을 높이기 위한 설정
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
+}
+
+// M4 Mac VS Code 전용 소스 경로 명시
+sourceSets {
+    main { java { srcDirs = ['src/main/java'] } }
+    test { java { srcDirs = ['src/test/java'] } }
 }
 
 ext {
-	set('snippetsDir', file("build/generated-snippets"))
+    set('snippetsDir', file("build/generated-snippets"))
 }
 
 dependencies {
-    // [모니터링] 서버 상태 및 메트릭 지표 확인용
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    // [스케줄러] SFTP 전송 등 정기 배치 작업 관리용
-    implementation 'org.springframework.boot:spring-boot-starter-quartz'
-    // [통신] 외부 API 호출을 위한 최신 인터페이스 (동기 방식)
-    implementation 'org.springframework.boot:spring-boot-starter-restclient'
-    // [보안] 로그인 및 접근 권한 제어
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    // [화면] JSP를 대체하는 표준 HTML 템플릿 엔진
+    // [핵심/웹] 3.4.1에서 RestClient는 starter-web에 기본 포함됩니다.
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    // [검증] 입력된 데이터의 유효성 체크 및 에러 방지
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    // [통신] 고성능/대량 데이터 처리를 위한 비동기 통신 도구
-    implementation 'org.springframework.boot:spring-boot-starter-webclient'
-    // [보안연동] 타임리프 화면에서 로그인 정보 및 권한 제어 활용
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    
+    // [통신] WebClient 사용을 위한 공식 명칭은 webflux입니다.
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // [보안] 
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-    // [코드자동화] Getter, Setter 등 반복 코드 생성 제거
+
+    // [스케줄러]
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+
+    // [코드자동화/도구]
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    // [개발편의] 소스 수정 시 서버 자동 재시작 지원
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    // [설정지원] application.yml 작성 시 자동완성 기능 제공
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    // [문서화] 테스트 코드를 기반으로 API 명세서 자동 생성
-    testImplementation 'org.springframework.boot:spring-restdocs'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // [테스트 - 에러 발생 지점 모두 수정]
+    // 1. 중복/존재하지 않는 spring-restdocs 삭제 후 올바른 명칭으로 수정
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     
-    // 테스트용 라이브러리 모음
-    testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-quartz-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-restclient-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-webclient-test'
+    // 2. 존재하지 않는 개별 *-test 스타터들을 표준 통합 테스트 팩으로 교체
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'io.projectreactor:reactor-test'
+    
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-
 tasks.named('test') {
-	outputs.dir snippetsDir
-	useJUnitPlatform()
+    outputs.dir snippetsDir
+    useJUnitPlatform()
 }
 
 tasks.named('asciidoctor') {
-	inputs.dir snippetsDir
-	dependsOn test
+    inputs.dir snippetsDir
+    dependsOn test
 }
