@@ -2,8 +2,44 @@ spring:
   application:
     name: springboot-thymeleaf
 
-# ??? ??? ??
-# server:
-#   port: 8080
-#   servlet:
-#     context-path: /
+  # Java 21 ? Spring Boot 4.0.1 ?? ???
+  threads:
+    virtual:
+      enabled: true # ?? ??? ?? ??
+
+  # ?????? ?? ?? (MySQL ??)
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/your_db?serverTimezone=Asia/Seoul&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: password
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # Thymeleaf ? ?? ??
+  thymeleaf:
+    cache: false # ?? ? ?? ?? ?? ??
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+
+# ?? ?? ??
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      force: true
+
+# MyBatis ?? ??
+mybatis:
+  mapper-locations: classpath:sqlmap/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true # DB(snake_case) -> Java(camelCase) ??
+    jdbc-type-for-null: NULL
