@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'eclipse'
-    id 'org.springframework.boot' version '3.4.1' // 4.0.1은 라이브러리 명칭이 불안정하므로 3.4.1로 고정합니다.
+    id 'org.springframework.boot' version '4.0.1'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.asciidoctor.jvm.convert' version '4.0.5'
 }
@@ -13,13 +13,6 @@ description = 'Demo project for Spring Boot'
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-// VS Code 인식률을 높이기 위한 설정
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
     }
 }
 
@@ -38,13 +31,13 @@ ext {
 }
 
 dependencies {
-    // [핵심/웹] 3.4.1에서 RestClient는 starter-web에 기본 포함됩니다.
+    // [핵심/웹]
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     
-    // [통신] WebClient 사용을 위한 공식 명칭은 webflux입니다.
+    // [통신] WebClient
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // [보안] 
@@ -60,11 +53,8 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-    // [테스트 - 에러 발생 지점 모두 수정]
-    // 1. 중복/존재하지 않는 spring-restdocs 삭제 후 올바른 명칭으로 수정
+    // 테스트
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
-    
-    // 2. 존재하지 않는 개별 *-test 스타터들을 표준 통합 테스트 팩으로 교체
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'io.projectreactor:reactor-test'
