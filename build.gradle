@@ -53,6 +53,9 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
+    // MyBatis Spring Boot Starter
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+
     // 테스트
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
