@@ -26,3 +26,11 @@ server:
     encoding:
       charset: UTF-8
       force: true
+
+# SFTP
+sftp:
+  host: 123.456.78.90
+  port: 22
+  user: myuser
+  password: mypassword
+  directory: /var/www/html/data/
