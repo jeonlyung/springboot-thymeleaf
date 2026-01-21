@@ -53,8 +53,12 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-    // MyBatis Spring Boot Starter
+    // MyBatis
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+
+    // SFTP
+    implementation 'org.springframework.boot:spring-boot-starter-integration'
+    implementation 'org.springframework.integration:spring-integration-sftp'
 
     // 테스트
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
