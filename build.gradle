@@ -61,7 +61,7 @@ dependencies {
     implementation 'org.springframework.integration:spring-integration-sftp'
 
     // 암호화
-    implementation 'org.jasypt:jasypt:1.9.3'
+    implementation 'org.jasypt:jasypt-spring31:1.9.3'
 
     // 테스트
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
