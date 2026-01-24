@@ -29,7 +29,10 @@ server:
 
 # SFTP
 sftp:
-  host: 123.456.78.90
+  hosts:
+    - 123.456.78.10
+    - 123.456.78.20
+    - 123.456.78.30
   port: 22
   user: myuser
   password: mypassword
