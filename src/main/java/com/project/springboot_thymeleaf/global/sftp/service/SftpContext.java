@@ -13,8 +13,8 @@ import java.util.Properties;
 @Slf4j
 @Getter
 public class SftpContext implements AutoCloseable {
-    private Session session;
-    private ChannelSftp channelSftp;
+    private final Session session;
+    private final ChannelSftp channelSftp;
 
     @Resource(name = "sftpConfig")
     private SftpConfig sftpConfig;
