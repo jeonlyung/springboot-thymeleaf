@@ -72,8 +72,10 @@ public class SftpServiceImpl implements SftpService {
                 .reduce("", (base, folder) -> {
                     String nextPath = base + "/" + folder;
                     try {
+                        //폴더 있는지 체크
                         channelSftp.cd(nextPath);
                     } catch (SftpException e) {
+                        //폴더 없으면 생성
                         try {
                             channelSftp.mkdir(nextPath);
                             channelSftp.cd(nextPath);
