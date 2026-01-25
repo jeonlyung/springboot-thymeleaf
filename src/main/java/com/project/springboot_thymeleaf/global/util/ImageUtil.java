@@ -16,7 +16,7 @@ public class ImageUtil {
      * @param mFile 업로드된 원본 파일
      * @return 최적화된 바이트 배열
      */
-    public byte[] compressImgResize(MultipartFile mFile) throws Exception {
+    public static byte[] optimizeImage(MultipartFile mFile) throws Exception {
         // 1. 비어있는 파일 체크
         if (mFile == null || mFile.isEmpty()) {
             throw new IllegalArgumentException("파일이 비어있습니다.");
