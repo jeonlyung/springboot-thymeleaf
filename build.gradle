@@ -66,6 +66,10 @@ dependencies {
     // JSch
     implementation 'com.jcraft:jsch:0.1.55'
 
+    //이미지 리사이징 및 압축
+    //implementation 'co.adventurelette:thumbnailator:0.4.20'
+    implementation 'net.coobird:thumbnailator:0.4.8'
+
     // 테스트
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
