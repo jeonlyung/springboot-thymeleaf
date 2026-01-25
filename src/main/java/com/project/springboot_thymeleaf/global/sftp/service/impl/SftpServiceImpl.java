@@ -87,7 +87,6 @@ public class SftpServiceImpl implements SftpService {
     @Override
     public void deleteFile(String subDir, String customFileNm) throws Exception{
         executeSftp(subDir, customFileNm, ChannelSftp::rm);
-
     }
 
     private void createDir(ChannelSftp channelSftp, String targetPath) throws Exception {
@@ -111,5 +110,5 @@ public class SftpServiceImpl implements SftpService {
                     }
                     return nextPath;
                 });
-    }
+        }
 }
