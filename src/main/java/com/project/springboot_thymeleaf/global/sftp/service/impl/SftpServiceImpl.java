@@ -11,6 +11,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -125,7 +126,10 @@ public class SftpServiceImpl implements SftpService {
             throw new IllegalArgumentException("파일이 비어있습니다.");
         }
 
-        // 2. 최적화 처리
+        // 2. 캐시 생성 방지
+        ImageIO.setUseCache(false);
+
+        // 3. 최적화 처리
         try (InputStream is = mFile.getInputStream();
              ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 
