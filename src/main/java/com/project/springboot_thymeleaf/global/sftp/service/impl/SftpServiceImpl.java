@@ -32,13 +32,14 @@ public class SftpServiceImpl implements SftpService {
     }
 
     // [공통화] 서버 순회 및 자원 관리 전담
-    private void executeSftp(String subDir, String customFileNm, SftpTask task) throws Exception {
-        String targetPath = sftpConfig.getDirectory() + "/" + subDir + customFileNm;
+    private void executeSftp(String subDir, SftpTask task) throws Exception {
+        String targetPath = subDir;
 
         for (String host : sftpConfig.getHosts()) {
             try (SftpContext context = new SftpContext(host, sftpConfig)) {
-                task.doWork(context.getChannelSftp(), targetPath);
-                log.info("[작업성공] 서버: {}, 경로: {}", host, targetPath);
+                // subDir : 서버 루트 경로 밑으로 서브 디렉토리 경로
+                task.doWork(context.getChannelSftp(), subDir);
+                log.info("[작업성공] 서버: {}, 경로: {}", host, subDir);
             } catch (Exception e) {
                 log.error("[작업실패] 서버: {}, 원인: {}", host, e.getMessage());
             }
@@ -73,10 +74,10 @@ public class SftpServiceImpl implements SftpService {
         }
 
         // 엑셀 업로드 업무 수행
-        executeSftp(subDir, customFileNm, (channel, path) -> {
+        executeSftp(subDir, (channelSftp, targetPath) -> {
             try (InputStream is = new ByteArrayInputStream(uploadData)) {
-                createDir(channel, path);
-                channel.put(is, path);
+                createDir(channelSftp, targetPath);
+                channelSftp.put(is, targetPath + "/" + customFileNm);
             }
         });
 
@@ -89,7 +90,8 @@ public class SftpServiceImpl implements SftpService {
      */
     @Override
     public void deleteFromRemote(String subDir, String customFileNm) throws Exception{
-        executeSftp(subDir, customFileNm, ChannelSftp::rm);
+        executeSftp(subDir, (channelSftp, targetPath) ->
+                channelSftp.rm(targetPath + "/" + customFileNm));
     }
 
     private void createDir(ChannelSftp channelSftp, String targetPath) throws Exception {
