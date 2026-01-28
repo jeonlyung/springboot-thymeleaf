@@ -99,6 +99,7 @@ public class SftpServiceImpl implements SftpService {
                         //폴더 없으면 생성
                         try {
                             channelSftp.mkdir(nextPath);
+                            channelSftp.chmod(0775, nextPath);
                             channelSftp.cd(nextPath);
                         } catch (SftpException ex) {
                             log.error("SFTP 폴더 이미 존재 : {}", nextPath);
