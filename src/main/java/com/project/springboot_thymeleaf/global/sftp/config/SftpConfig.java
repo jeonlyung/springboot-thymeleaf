@@ -15,6 +15,6 @@ public class SftpConfig {
     private int port;           // yml의 port
     private String user;        // yml의 user
     private String password;    // yml의 password
-    private String directory;   // yml의 directory
+
 }
 
