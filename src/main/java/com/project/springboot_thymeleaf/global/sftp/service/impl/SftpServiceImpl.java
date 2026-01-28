@@ -5,6 +5,7 @@ import com.jcraft.jsch.SftpException;
 import com.project.springboot_thymeleaf.global.sftp.config.SftpConfig;
 import com.project.springboot_thymeleaf.global.sftp.service.SftpContext;
 import com.project.springboot_thymeleaf.global.sftp.service.SftpService;
+import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -33,8 +34,6 @@ public class SftpServiceImpl implements SftpService {
 
     // [공통화] 서버 순회 및 자원 관리 전담
     private void executeSftp(String subDir, SftpTask task) throws Exception {
-        String targetPath = subDir;
-
         for (String host : sftpConfig.getHosts()) {
             try (SftpContext context = new SftpContext(host, sftpConfig)) {
                 // subDir : 서버 루트 경로 밑으로 서브 디렉토리 경로
@@ -60,24 +59,17 @@ public class SftpServiceImpl implements SftpService {
             return;
         }
 
-        // 이미지 여부 확인 및 리사이징/최적화 수행
-        byte[] uploadData;
-        String contentType = mFile.getContentType();
-
-        if (contentType != null && contentType.startsWith("image")) {
-            // 이미지라면 리사이징 + 압축 + 메타데이터 제거 수행
-            log.info("[이미지최적화 시작] 파일명: {}", mFile.getOriginalFilename());
-            uploadData = optimizeImage(mFile);
-        } else {
-            // 이미지가 아니라면 원본 데이터 그대로 사용
-            uploadData = mFile.getBytes();
-        }
+        final String contentType = mFile.getContentType();
+        final boolean isImg = !StringUtils.isEmpty(contentType) && contentType.startsWith("image");
+        // 이미지일 경우 fileData 및 fileNm 변환
+        final byte[] finalFileData = getFinalData(isImg, mFile);
+        final String finalFileNm = getFinalNm(isImg, customFileNm);
 
         // 엑셀 업로드 업무 수행
         executeSftp(subDir, (channelSftp, targetPath) -> {
-            try (InputStream is = new ByteArrayInputStream(uploadData)) {
+            try (InputStream is = new ByteArrayInputStream(finalFileData)) {
                 createDir(channelSftp, targetPath);
-                channelSftp.put(is, targetPath + "/" + customFileNm);
+                channelSftp.put(is, finalFileNm);
             }
         });
 
@@ -117,6 +109,23 @@ public class SftpServiceImpl implements SftpService {
         });
     }
 
+    private byte[] getFinalData(boolean isImg, MultipartFile mFile) throws  Exception{
+        // 이미지일 경우 최적화
+        if(isImg) {
+            return optimizeImage(mFile);
+        }
+
+        return mFile.getBytes();
+    }
+
+    private String getFinalNm(boolean isImg, String fileNm){
+        // 이미지일 경우 확장자 변경
+        if(isImg){
+            return fileNm.replaceAll("\\.[^.]+$" , ".jpg");
+        }
+
+        return fileNm;
+    }
     /**
      * 고해상도 이미지를 서버 저장용으로 최적화 메소드
      * @param mFile 업로드된 원본 파일
@@ -130,7 +139,6 @@ public class SftpServiceImpl implements SftpService {
 
         // 2. 캐시 생성 방지
         ImageIO.setUseCache(false);
-
         // 3. 최적화 처리
         try (InputStream is = mFile.getInputStream();
              ByteArrayOutputStream os = new ByteArrayOutputStream()) {
