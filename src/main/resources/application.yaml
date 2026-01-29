@@ -60,16 +60,3 @@ sftp:
   port: 22
   user: myuser
   password: mypassword
-
-
-logging:
-  level:
-    root: INFO
-    com.yourpackage.name: com.project.springboot_thymeleaf
-    org.springframework.web.servlet: DEBUG
-    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
-    com.jcraft.jsch: WARN
-    org.apache.tomcat.util.http.fileupload: DEBUG
-
-  pattern:
-    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"

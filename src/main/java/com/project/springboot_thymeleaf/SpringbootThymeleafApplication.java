@@ -2,8 +2,9 @@ package com.project.springboot_thymeleaf;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class}) // DB 설정 제외
 public class SpringbootThymeleafApplication {
 
 	public static void main(String[] args) {
