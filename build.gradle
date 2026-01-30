@@ -56,8 +56,8 @@ dependencies {
 
     // MyBatis
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-    // MySQL Connector
-    runtimeOnly 'com.mysql:mysql-connector-j'
+    // MariaDB 커넥터
+    implementation 'org.mariadb.jdbc:mariadb-java-client'
 
     // SFTP
     implementation 'org.springframework.boot:spring-boot-starter-integration'
