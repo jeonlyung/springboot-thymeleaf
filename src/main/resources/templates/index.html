@@ -1,70 +1,35 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>댕댕이 월드 | 커뮤니티</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body class="bg-orange-50">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultLayout}"> <div layout:fragment="content">
 
-<nav class="bg-white shadow-md">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-        <a href="/" class="text-2xl font-bold text-orange-500">🐶 댕댕이월드</a>
-        <div class="space-x-6 text-gray-600 font-medium">
-            <a href="/board" class="hover:text-orange-500">커뮤니티</a>
-            <a href="/gallery" class="hover:text-orange-500">댕스토리</a>
-            <a href="/market" class="hover:text-orange-500">중고장터</a>
-            <a href="/login" class="bg-orange-500 text-white px-4 py-2 rounded-full hover:bg-orange-600">로그인</a>
+    <header class="max-w-6xl mx-auto mt-10 p-8 bg-white rounded-3xl shadow-sm flex items-center justify-between">
+        <div class="w-1/2">
+            <h1 class="text-4xl font-extrabold text-gray-800 leading-tight">
+                우리 집 강아지의 <br> <span class="text-orange-500">특별한 일상</span>을 공유하세요
+            </h1>
+            <p class="mt-4 text-gray-500">전국 댕댕이 집사들과 소통하는 가장 따뜻한 공간</p>
+            <button class="mt-6 bg-orange-400 text-white font-bold py-3 px-8 rounded-2xl hover:bg-orange-500 transition">
+                글쓰기 시작
+            </button>
         </div>
-    </div>
-</nav>
+        <div class="w-1/2 flex justify-end">
+            <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=500&q=80"
+                 class="rounded-3xl shadow-lg w-80 h-80 object-cover" alt="Happy Dog">
+        </div>
+    </header>
 
-<header class="max-w-6xl mx-auto mt-10 p-8 bg-white rounded-3xl shadow-sm flex items-center justify-between">
-    <div class="w-1/2">
-        <h1 class="text-4xl font-extrabold text-gray-800 leading-tight">
-            우리 집 강아지의 <br> <span class="text-orange-500">특별한 일상</span>을 공유하세요
-        </h1>
-        <p class="mt-4 text-gray-500">전국 댕댕이 집사들과 소통하는 가장 따뜻한 공간</p>
-        <button class="mt-6 bg-orange-400 text-white font-bold py-3 px-8 rounded-2xl hover:bg-orange-500 transition">
-            글쓰기 시작
-        </button>
-    </div>
-    <div class="w-1/2 flex justify-end">
-        <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=500&q=80"
-             class="rounded-3xl shadow-lg w-80 h-80 object-cover" alt="Happy Dog">
-    </div>
-</header>
-
-<main class="max-w-6xl mx-auto mt-12 mb-20">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">🔥 지금 뜨는 댕댕이 소식</h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div th:each="post : ${hotPosts}" class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition">
-            <img th:src="${post.imageUrl}" class="w-full h-48 object-cover" alt="post image">
-            <div class="p-5">
-                <span class="text-xs font-bold text-orange-500 bg-orange-100 px-2 py-1 rounded" th:text="${post.category}">자유게시판</span>
-                <h3 class="font-bold text-lg mt-2 text-gray-800" th:text="${post.title}">우리 집 댕댕이 산책 코스 추천!</h3>
-                <div class="flex items-center mt-4 text-gray-400 text-sm">
-                    <i class="fa-regular fa-heart mr-1"></i> <span th:text="${post.likeCount}" class="mr-3">12</span>
-                    <i class="fa-regular fa-comment mr-1"></i> <span th:text="${post.commentCount}">5</span>
+    <main class="max-w-6xl mx-auto mt-12 mb-20">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">🔥 지금 뜨는 댕댕이 소식</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white rounded-2xl overflow-hidden shadow-sm">
+                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80" class="w-full h-48 object-cover">
+                <div class="p-5">
+                    <span class="text-xs font-bold text-blue-500 bg-blue-100 px-2 py-1 rounded">질문/답변</span>
+                    <h3 class="font-bold text-lg mt-2 text-gray-800">강아지 사료 추천 좀 해주세요!</h3>
                 </div>
             </div>
         </div>
+    </main>
 
-        <div class="bg-white rounded-2xl overflow-hidden shadow-sm">
-            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80" class="w-full h-48 object-cover">
-            <div class="p-5">
-                <span class="text-xs font-bold text-blue-500 bg-blue-100 px-2 py-1 rounded">질문/답변</span>
-                <h3 class="font-bold text-lg mt-2 text-gray-800">강아지가 갑자기 사료를 안 먹어요 ㅠ</h3>
-                <div class="flex items-center mt-4 text-gray-400 text-sm">
-                    <i class="fa-regular fa-heart mr-1"></i> 24
-                    <i class="fa-regular fa-comment mr-1"></i> 10
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
-
-</body>
+</div>
 </html>
