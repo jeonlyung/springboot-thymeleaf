@@ -1,12 +1,23 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<header th:fragment="headerFragment">
-    <div style="background: #333; color: white; padding: 1rem;">
-        <h2>🚀 M4 맥북 SFTP 시스템</h2>
-        <nav>
-            <a th:href="@{/}" style="color: white;">홈</a> |
-            <a th:href="@{/upload}" style="color: white;">이미지 업로드</a>
-        </nav>
+
+<head th:fragment="headerHead">
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+<nav th:fragment="headerNav" class="bg-white shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold text-orange-500">🐶 댕댕이월드</a>
+        <div class="space-x-6 text-gray-600 font-medium">
+            <a href="/board" class="hover:text-orange-500">커뮤니티</a>
+            <a href="/gallery" class="hover:text-orange-500">댕스토리</a>
+            <a href="/market" class="hover:text-orange-500">중고장터</a>
+            <a href="/login" class="bg-orange-500 text-white px-4 py-2 rounded-full hover:bg-orange-600">로그인</a>
+        </div>
     </div>
-</header>
+</nav>
+</body>
 </html>
