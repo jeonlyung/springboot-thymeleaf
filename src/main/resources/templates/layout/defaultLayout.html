@@ -1,25 +1,20 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SpringBoot-thymeleaf</title>
-
-        <link rel="stylesheet" th:href="@{/css/common.css}">
-
-        <th:block layout:fragment="css"></th:block>
-
-        <script th:src="@{/js/common.js}" defer></script>
+        <th:block th:replace="~{fragments/header :: headerHead}"></th:block>
+        <title layout:title-pattern="$CONTENT_TITLE | $LAYOUT_TITLE">댕댕이 월드</title>
     </head>
+    <body class="bg-orange-50">
 
-    <body>
-        <div th:replace="~{fragments/header :: headerFragment}"></div>
-        <div layout:fragment="content" style="min-height: 500px; padding: 20px;"></div>
-        <div th:replace="~{fragments/footer :: footerFragment}"></div>
+    <div th:replace="~{fragments/header :: headerNav}"></div>
 
-        <th:block layout:fragment="script"></th:block>
-    </body>
+    <div layout:fragment="content">
+    </div>
 
+    <div th:replace="~{fragments/footer :: footerNav}"></div>
+
+    <th:block layout:fragment="script"></th:block>
+</body>
 </html>
