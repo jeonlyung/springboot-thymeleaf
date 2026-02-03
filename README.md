@@ -9,6 +9,8 @@
 - **Language**: Java 21
 - **Build Tool**: Gradle
 - **Template Engine**: Thymeleaf
+- **DB : Maria DB
+- **Tool : DBeaver
 
 ### Frontend
 - **Styling**: Vanilla JS
