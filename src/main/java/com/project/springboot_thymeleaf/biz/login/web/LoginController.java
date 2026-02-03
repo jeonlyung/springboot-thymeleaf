@@ -9,11 +9,10 @@ public class LoginController {
 
     @GetMapping("/")
     public String goLogin() {
-
         return "login/login";
     }
 
-    @PostMapping("/processLogin")
+    @PostMapping("/process")
     public String processLogin() {
 
         return "login/login";
