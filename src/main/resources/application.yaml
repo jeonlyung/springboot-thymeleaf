@@ -2,60 +2,64 @@ spring:
   application:
     name: springboot-thymeleaf
 
-    # [Multipart] ?? ??? ?? ?? ??
-    servlet:
-      multipart:
-        max-file-size: 50MB          # ?? ? ?? ?? ??
-        max-request-size: 100MB      # ? ?? ??(?? ?? ??)? ?? ??
-        enabled: true
+  # [Multipart]
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+      enabled: true
 
-    # [Thymeleaf] ? ??? ?? ??
-    thymeleaf:
-      cache: false                   # ?? ??? false? ???? ?? ? ???? ? ?? ???
-      prefix: classpath:/templates/
-      suffix: .html
-      mode: HTML
-      encoding: UTF-8
+  # [Thymeleaf]
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
 
-    # [Resources] ?? ??(JS, CSS) ??
-    web:
-      resources:
-        static-locations: classpath:/static/
-        chain:
-          cache: false               # ??? JS ?? ?? ? ?? ??? ?? ?? ??
+  # [Resources]
+  web:
+    resources:
+      static-locations: classpath:/static/
+      chain:
+        cache: false
 
-  # [Message] message.xml ?? (?? ?? ??)
+  # [Message]
   messages:
     basename: i18n/messages
     encoding: UTF-8
 
-  # [Batch] batch.xml ?? (?? ??? ?? ???)
+  # [Batch]
   batch:
     job:
-      enabled: false # ?? ? ?? ?? ??
+      enabled: false
     jdbc:
       initialize-schema: never
 
-  # [AOP] aop.xml ?? (??? ??? ??)
+  # [AOP]
   aop:
     proxy-target-class: true
 
+  # [DataSource] ㅡㅡ+ 이 부분이 spring 바로 밑에 있어야 DB가 연결됩니다!
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://localhost:3306/dangdang_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
     password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      pool-name: MungMarketPool
+      connection-timeout: 30000
 
+# [MyBatis] ㅡㅡ+ 최상위 레벨
 mybatis:
-  # Mapper XML 파일 위치
   mapper-locations: classpath:mapper/*.xml
-  # VO(DTO) 패키지 경로 (XML에서 짧은 이름 사용 가능)
   type-aliases-package: com.example.demo.model
   configuration:
-    # 카멜케이스 자동 변환 (db_column -> dbColumn)
     map-underscore-to-camel-case: true
 
-# [Server] ?? ?? ??
+# [Server] ㅡㅡ+ 최상위 레벨
 server:
   port: 8080
   servlet:
@@ -64,8 +68,7 @@ server:
       charset: UTF-8
       force: true
 
-
-# SFTP
+# [SFTP] ㅡㅡ+ 최상위 레벨
 sftp:
   hosts:
     - 123.456.78.10
@@ -74,3 +77,19 @@ sftp:
   port: 22
   user: myuser
   password: mypassword
+
+# [Logging] ㅡㅡ+ 최상위 레벨
+logging:
+  level:
+    com.zaxxer.hikari: TRACE
+    org.springframework.jdbc: DEBUG
+
+# [Management/Actuator] ㅡㅡ+ 최상위 레벨
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
