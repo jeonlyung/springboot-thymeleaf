@@ -38,4 +38,4 @@ out/
 
 
 ### DDL ####
-!**/src/main/resources/mapper/ddl/*
+/src/main/resources/mapper/ddl/*
