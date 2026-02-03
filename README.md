@@ -10,7 +10,7 @@
 - **Build Tool**: Gradle
 - **Template Engine**: Thymeleaf
 - **DB : Maria DB
-- *Tool : DBeaver
+- **Tool : DBeaver
 
 ### Frontend
 - **Styling**: Vanilla JS
