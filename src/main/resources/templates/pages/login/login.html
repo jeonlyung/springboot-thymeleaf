@@ -1,203 +1,43 @@
-<!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>댕댕이 마켓 로그인</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap'); /* 나눔고딕 폰트 */
+    <!DOCTYPE html>
+    <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>댕댕이 월드 로그인</title>
+        <link rel="stylesheet" th:href="@{/css/login.css}">
+    </head>
+    <body>
+    <div class="login-container">
+        <div class="paw-icon">🐾</div>
+        <h1>댕댕이 마켓</h1>
+        <p>로그인하여 댕댕이 친구들을 만나보세요!</p>
 
-        body {
-            font-family: 'Nanum Gothic', sans-serif;
-            background-color: #ffe0b2; /* 연한 오렌지 계열 배경색 (따뜻한 느낌) */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            overflow: hidden; /* 배경 애니메이션이 튀어나가지 않도록 */
-            position: relative;
-        }
+        <form th:action="@{/login}" method="post">
+            <div class="input-group">
+                <label for="username">아이디</label>
+                <input type="text" id="username" name="username" placeholder="아이디를 입력하세요" required>
+            </div>
+            <div class="input-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+            </div>
+            <button type="submit" class="login-button">로그인</button>
+        </form>
 
-        /* 댕댕이 발바닥 배경 애니메이션 */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background:
-                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="25" fill="%23ffd796"/><circle cx="30" cy="30" r="10" fill="%23ffd796"/><circle cx="70" cy="30" r="10" fill="%23ffd796"/><circle cx="30" cy="70" r="10" fill="%23ffd796"/><circle cx="70" cy="70" r="10" fill="%23ffd796"/></svg>') no-repeat;
-            background-size: 80px; /* 발바닥 크기 */
-            animation: pawPrint 20s linear infinite;
-            opacity: 0.3; /* 흐리게 */
-            z-index: 0; /* 로그인 박스 뒤로 */
-        }
+        <div class="social-login-divider">또는 소셜 계정으로 로그인</div>
 
-        @keyframes pawPrint {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 100% 100%; }
-        }
-
-
-        .login-container {
-            background-color: #ffffff; /* 흰색 배경 */
-            padding: 40px;
-            border-radius: 20px; /* 둥근 모서리 */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* 그림자 */
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            position: relative; /* z-index를 위해 */
-            z-index: 1; /* 발바닥 배경 위로 */
-        }
-
-        .login-container h1 {
-            color: #ff9800; /* 댕댕이 느낌의 오렌지색 */
-            margin-bottom: 25px;
-            font-size: 2.2em;
-            font-weight: 700;
-        }
-
-        .login-container .paw-icon {
-            font-size: 3em;
-            color: #ff9800;
-            margin-bottom: 15px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 700;
-        }
-
-        .input-group input {
-            width: calc(100% - 20px);
-            padding: 12px 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1em;
-        }
-
-        .login-button {
-            width: 100%;
-            padding: 12px;
-            background-color: #ff9800;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            font-weight: 700;
-        }
-
-        .login-button:hover {
-            background-color: #e68900;
-        }
-
-        .social-login-divider {
-            margin: 30px 0 20px 0;
-            color: #aaa;
-            position: relative;
-            font-size: 0.9em;
-        }
-
-        .social-login-divider::before,
-        .social-login-divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 40%;
-            height: 1px;
-            background-color: #eee;
-        }
-
-        .social-login-divider::before {
-            left: 0;
-        }
-
-        .social-login-divider::after {
-            right: 0;
-        }
-
-        .social-login-buttons {
-            display: flex;
-            flex-direction: column; /* 세로로 정렬 */
-            gap: 15px; /* 버튼 사이 간격 */
-        }
-
-        .social-login-buttons a {
-            display: block; /* 링크 전체를 버튼처럼 */
-            text-decoration: none;
-        }
-
-        .social-login-buttons img {
-            width: 100%; /* 부모(a 태그)에 꽉 채우기 */
-            height: auto;
-            border-radius: 8px;
-            transition: transform 0.2s ease;
-        }
-
-        .social-login-buttons img:hover {
-            transform: translateY(-2px); /* 호버 시 살짝 떠오르는 효과 */
-        }
-
-        .find-links {
-            margin-top: 25px;
-            font-size: 0.9em;
-        }
-
-        .find-links a {
-            color: #888;
-            text-decoration: none;
-            margin: 0 10px;
-            transition: color 0.3s ease;
-        }
-
-        .find-links a:hover {
-            color: #ff9800;
-        }
-    </style>
-</head>
-<body>
-<div class="login-container">
-    <div class="paw-icon">🐾</div> <h1>댕댕이 마켓</h1>
-    <p>로그인하여 댕댕이 친구들을 만나보세요!</p>
-
-    <form th:action="@{/login}" method="post">
-        <div class="input-group">
-            <label for="username">아이디</label>
-            <input type="text" id="username" name="username" placeholder="아이디를 입력하세요" required>
+        <div class="social-login-buttons">
+            <a th:href="@{/oauth2/authorization/kakao}">
+                <img th:src="@{/images/kakao_icon.png}" alt="카카오 로그인">
+            </a>
+            <a th:href="@{/oauth2/authorization/google}">
+                <img th:src="@{/images/google_icon.png}" alt="구글 로그인">
+            </a>
         </div>
-        <div class="input-group">
-            <label for="password">비밀번호</label>
-            <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+
+        <div class="find-links">
+            <a href="#">아이디 찾기</a> | <a href="#">비밀번호 찾기</a> | <a href="#">회원가입</a>
         </div>
-        <button type="submit" class="login-button">로그인</button>
-    </form>
-
-    <div class="social-login-divider">또는 소셜 계정으로 로그인</div>
-
-    <div class="social-login-buttons">
-        <a th:href="@{/oauth2/authorization/kakao}">
-            <img src="/images/kakao_login_medium_wide.png" alt="카카오 로그인">
-        </a>
-        <a th:href="@{/oauth2/authorization/google}">
-            <img src="/images/btn_google_signin_dark_normal_web.png" alt="구글 로그인">
-        </a>
     </div>
-
-    <div class="find-links">
-        <a href="#">아이디 찾기</a> | <a href="#">비밀번호 찾기</a> | <a href="#">회원가입</a>
-    </div>
-</div>
-</body>
-</html>
+    </body>
+    </html>
