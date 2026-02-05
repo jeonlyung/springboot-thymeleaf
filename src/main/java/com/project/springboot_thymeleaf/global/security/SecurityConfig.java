@@ -1,14 +1,11 @@
 package com.project.springboot_thymeleaf.global.security;
 
-import com.project.springboot_thymeleaf.biz.login.web.OauthController;
+import com.project.springboot_thymeleaf.biz.login.service.OauthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -16,27 +13,31 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final OauthService oauthService;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-
-        OAuth2UserService<OAuth2UserRequest, OAuth2User> OauthController = null;
-        
-        httpSecurity.authorizeHttpRequests(auth -> auth.anyRequest()
-                .permitAll())
-                .csrf(csrf -> csrf.disable())
-                .headers(headers -> headers.frameOptions(frame -> frame.disable())) // H2 콘솔 등을 쓸 경우 대비
-                        .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/", "/login/**", "/css/**", "/js/**", "/images/**").permitAll()
-                                .anyRequest().authenticated() // 나머지는 인증 필요
-                        )
+        httpSecurity.csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+                // 2. 권한 설정(좁은 범위부터 넓은 범위로 설정해야함)
+                .authorizeHttpRequests(auth -> auth
+                        // 정적 리소스 및 로그인 관련 경로는 누구나 접근 가능
+                        .requestMatchers("/", "/login/**", "/css/**", "/js/**", "/images/**").permitAll()
+                        // 그 외 모든 요청은 인증 필요
+                        .anyRequest().authenticated()
+                )
+                // 3. OAuth2 로그인 설정
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login") // 커스텀 로그인 페이지 사용 시
-                        .defaultSuccessUrl("/main", true) // 로그인 성공 후 이동할 페이지
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/main", true)
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(OauthController) // 카카오 정보를 받아올 서비스 등록 ㅡㅡ+
+                                .userService((oauthService))
                         )
-                ).logout(logout -> logout
+                )
+                // 4. 로그아웃 설정
+                .logout(logout -> logout
                         .logoutSuccessUrl("/")
+                        .invalidateHttpSession(true)
                 );
 
         return httpSecurity.build();
