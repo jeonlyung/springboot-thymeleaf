@@ -71,7 +71,7 @@ body::before {
 }
 
 .input-group input {
-    width: calc(100% - 20px);
+    width: calc(100% - 22px); /* 테두리 포함 너비 조정 */
     padding: 12px 10px;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -102,40 +102,58 @@ body::before {
     font-size: 0.9em;
 }
 
-.social-login-divider::before,
-.social-login-divider::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 40%;
-    height: 1px;
-    background-color: #eee;
-}
-
-.social-login-divider::before { left: 0; }
-.social-login-divider::after { right: 0; }
+/* --- 소셜 로그인 버튼 세로 쌓기 추가 섹션 ㅡㅡ+ --- */
 
 .social-login-buttons {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: column; /* 세로 나열 핵심! */
+    gap: 10px;              /* 버튼 사이 간격 */
+    margin-top: 20px;
 }
 
-.social-login-buttons a {
-    display: block;
+.btn-social {
+    display: flex;
+    align-items: center;
     text-decoration: none;
+    height: 48px;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: transform 0.2s, filter 0.2s;
 }
 
-.social-login-buttons img {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-    transition: transform 0.2s ease;
+.btn-social:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.95);
 }
 
-.social-login-buttons img:hover {
-    transform: translateY(-2px);
+/* 아이콘 영역 (왼쪽 사각형) */
+.btn-social .icon {
+    width: 50px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.08); /* 아이콘 배경 구분 */
+    font-size: 1.2em;
 }
+
+/* 텍스트 영역 (가운데 정렬) */
+.btn-social .text {
+    flex-grow: 1;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.95em;
+    color: white;
+}
+
+/* 소셜 브랜드별 색상 ㅡㅡ+ */
+.google { background-color: #df4a32; }
+.facebook { background-color: #3b5998; }
+.kakao { background-color: #f7e317; }
+.kakao .text, .kakao .icon { color: #3c1e1e; } /* 카카오는 어두운 글자색 */
+.naver { background-color: #58c063; }
+
+/* --- 소셜 로그인 끝 --- */
 
 .find-links {
     margin-top: 25px;
