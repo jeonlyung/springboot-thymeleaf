@@ -6,6 +6,7 @@
         <title>댕댕이 월드 로그인</title>
         <link rel="stylesheet" th:href="@{/css/login.css}">
     </head>
+
     <body>
     <div class="login-container">
         <div class="paw-icon">🐾</div>
@@ -27,11 +28,17 @@
         <div class="social-login-divider">또는 소셜 계정으로 로그인</div>
 
         <div class="social-login-buttons">
-            <a th:href="@{/oauth2/authorization/kakao}">
-                <img th:src="@{/images/kakao_icon.png}" alt="카카오 로그인">
+            <a th:href="@{/oauth2/authorization/google}" class="btn-social google">
+                <span class="icon"><i class="fab fa-google"></i></span>
+                <span class="text">구글로 로그인</span>
             </a>
-            <a th:href="@{/oauth2/authorization/google}">
-                <img th:src="@{/images/google_icon.png}" alt="구글 로그인">
+            <a th:href="@{/oauth2/authorization/kakao}" class="btn-social kakao">
+                <span class="icon"><i class="fas fa-comment"></i></span>
+                <span class="text">카카오로 로그인</span>
+            </a>
+            <a th:href="@{/oauth2/authorization/naver}" class="btn-social naver">
+                <span class="icon"><strong style="font-size: 1.1em;">N</strong></span>
+                <span class="text">네이버로 로그인</span>
             </a>
         </div>
 
@@ -39,5 +46,6 @@
             <a href="#">아이디 찾기</a> | <a href="#">비밀번호 찾기</a> | <a href="#">회원가입</a>
         </div>
     </div>
+
     </body>
     </html>
