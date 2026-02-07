@@ -14,6 +14,10 @@ public class LoginController {
         return "login/login";
     }
 
+    /**
+     * 일반 로그인 메소드
+     * @return
+     */
     @PostMapping("/process")
     public String processLogin() {
 
