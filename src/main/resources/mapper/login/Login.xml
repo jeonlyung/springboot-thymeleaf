@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.project.springboot_thymeleaf.biz.login.mapper.LoginMapper">
+
+    <select id="findByUsrId" resultType="MemberDto">
+        SELECT /* findByUsrId */
+               USR_ID
+             , USR_PW
+             , USR_NM
+             , PROFILE_IMG
+             , PROVIDER
+             , PROVIDER_ID
+             , USE_YN
+          FROM TB_USR_F
+         WHERE USR_ID = #{usrId}
+           AND USE_YN = 'Y'
+    </select>
+
+    <select id="findPetsByUsrId" resultType="PetDto">
+        SELECT /* findPetsByUsrId */
+               PET_SEQ
+             , USR_ID
+             , PET_NM
+             , DOG_BREED
+             , PET_BIRTH
+             , PET_IMG
+          FROM TB_PET_F
+         WHERE USR_ID = #{usrId}
+           AND USE_YN = 'Y'
+    </select>
+
+    <insert id="saveUsrInfo">
+        INSERT /* saveUsrInfo */
+          INTO TB_USR_F (
+               USR_ID
+             , USR_PW
+             , USR_NM
+             , PROFILE_IMG
+             , PROVIDER
+             , PROVIDER_ID
+             , USE_YN
+             , FST_REG_DTM
+             , FST_REG_ID
+             , LST_CHG_DTM
+             , LST_CHG_ID
+               )
+        VALUES (
+               #{usrId}           /* 로그인 아이디 */
+             , #{usrPw}           /* 암호화된 비밀번호 */
+             , #{usrNm}           /* 사용자 이름 */
+             , #{profileImg}      /* 프로필 이미지 경로 */
+             , #{provider}        /* 소셜 제공자 (kakao, google 등) */
+             , #{providerId}      /* 소셜 고유 식별값 */
+             , 'Y'                /* 사용 여부 초기값 */
+             , NOW()              /* 최초 등록 일시 */
+             , #{usrId}           /* 최초 등록자 ID (본인) */
+             , NOW()              /* 최종 변경 일시 */
+             , #{usrId}           /* 최종 변경자 ID (본인) */
+               )
+    </insert>
+</mapper>
