@@ -82,9 +82,11 @@ spring:
 
 # [MyBatis] ㅡㅡ+ 최상위 레벨
 mybatis:
-  mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.example.demo.model
+  # DTO가 모여있는 패키지 경로를 지정함
+  type-aliases-package: com.project.springboot_thymeleaf.biz.**.dto
+  mapper-locations: classpath:mapper/**/*.xml
   configuration:
+    #카멜 형식 자동 매핑
     map-underscore-to-camel-case: true
 
 # [Server] ㅡㅡ+ 최상위 레벨
