@@ -16,5 +16,16 @@ public class SftpConfig {
     private String user;        // yml의 user
     private String password;    // yml의 password
 
+    private Download download;
+
+    @Getter @Setter
+    public static class Download {
+        private String host;
+        private String user;
+        private String password;
+        private int port;
+        private String localRootPath;
+    }
+
 }
 

@@ -17,6 +17,10 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 
 @Slf4j
@@ -127,6 +131,7 @@ public class SftpServiceImpl implements SftpService {
 
         return fileNm;
     }
+
     /**
      * 고해상도 이미지를 서버 저장용으로 최적화 메소드
      * @param mFile 업로드된 원본 파일
@@ -152,6 +157,38 @@ public class SftpServiceImpl implements SftpService {
                     .toOutputStream(os);
 
             return os.toByteArray();
+        }
+    }
+
+    @Override
+    public void downloadToLocal(String subDir, String fileNm) throws Exception {
+
+        // 1. 다운로드 전용 설정 (10.60.66.6 정보) 세팅
+        SftpConfig.Download info = sftpConfig.getDownload();
+        SftpConfig downConfig = new SftpConfig();
+        downConfig.setUser(info.getUser());
+        downConfig.setPassword(info.getPassword());
+        downConfig.setPort(info.getPort());
+
+        // 2. SftpContext(즉, JschWrapper)를 활용해 원격지와 연결
+        try (SftpContext context = new SftpContext(info.getHost(), downConfig)) {
+
+            ChannelSftp channel = context.getChannelSftp();
+            String remoteFile = subDir + "/" + fileNm;
+            Path localPath = Paths.get(info.getLocalRootPath());
+
+            // [mkdirs 대체] 우리 서버에 부모 폴더까지 싹 생성
+            if (!Files.exists(localPath)) {
+                Files.createDirectories(localPath);
+            }
+
+            Path targetFile = localPath.resolve(fileNm);
+
+            // 3. 파일 땡겨오기 (get)
+            try (InputStream is = channel.get(remoteFile)) {
+                Files.copy(is, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                log.info("[다운로드성공] 로컬저장경로: {}", targetFile);
+            }
         }
     }
 }

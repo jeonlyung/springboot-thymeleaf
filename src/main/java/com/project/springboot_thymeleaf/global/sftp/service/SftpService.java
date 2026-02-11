@@ -6,4 +6,6 @@ public interface SftpService {
     public void uploadToRemote(MultipartFile mFile, String subDir, String customFileNm) throws Exception;
 
     public void deleteFromRemote(String subDir, String customFileNm) throws Exception;
+
+    public void downloadToLocal(String subDir, String fileNm) throws Exception;
 }
