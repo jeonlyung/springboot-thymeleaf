@@ -164,17 +164,17 @@ public class SftpServiceImpl implements SftpService {
     public void downloadToLocal(String subDir, String fileNm) throws Exception {
 
         // 다운로드 변수값 설정
-        SftpConfig.Download info = sftpConfig.getDownload();
+        SftpConfig.Download downInfo = sftpConfig.getDownload();
         SftpConfig downConfig = new SftpConfig();
-        downConfig.setUser(info.getUser());
-        downConfig.setPassword(info.getPassword());
-        downConfig.setPort(info.getPort());
+        downConfig.setUser(downInfo.getUser());
+        downConfig.setPassword(downInfo.getPassword());
+        downConfig.setPort(downInfo.getPort());
 
-        try (SftpContext context = new SftpContext(info.getHost(), downConfig)) {
+        try (SftpContext context = new SftpContext(downInfo.getHost(), downConfig)) {
 
             ChannelSftp channel = context.getChannelSftp();
             String remoteFile = subDir + "/" + fileNm;
-            Path localPath = Paths.get(info.getLocalRootPath());
+            Path localPath = Paths.get(downInfo.getLocalPath());
 
             // 폴더 없을 경우 부모 폴더까지 생성
             if (!Files.exists(localPath)) {
