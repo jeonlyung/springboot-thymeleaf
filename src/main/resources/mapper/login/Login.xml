@@ -8,7 +8,7 @@
         SELECT /* findByUsrId */
                USR_ID
              , USR_PW
-             , USR_NM
+             , USR_ㅓNM
              , PROFILE_IMG
              , PROVIDER
              , PROVIDER_ID
