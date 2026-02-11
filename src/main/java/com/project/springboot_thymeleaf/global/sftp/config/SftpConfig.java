@@ -24,7 +24,7 @@ public class SftpConfig {
         private String user;
         private String password;
         private int port;
-        private String localRootPath;
+        private String localPath;
     }
 
 }

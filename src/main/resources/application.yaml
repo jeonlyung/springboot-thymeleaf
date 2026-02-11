@@ -108,6 +108,14 @@ sftp:
   user: myuser
   password: mypassword
 
+  # 다운로드 전용 설정
+  download:
+    host: 10.00.00.0
+    user: test
+    password: test
+    port: 22
+    local-path: /app/files/
+
 # [Logging] ㅡㅡ+ 최상위 레벨
 logging:
   level:
