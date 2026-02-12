@@ -171,7 +171,6 @@ public class SftpServiceImpl implements SftpService {
         downConfig.setPort(downInfo.getPort());
 
         try (SftpContext context = new SftpContext(downInfo.getHost(), downConfig)) {
-
             ChannelSftp channel = context.getChannelSftp();
             String remoteFile = subDir + "/" + fileNm;
             Path localPath = Paths.get(downInfo.getLocalPath());
