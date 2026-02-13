@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-spring-security6"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{common/layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>댕댕이 월드 - 메인</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+
+        <!-- 프로필 섹션 -->
+        <div class="profile-section fade-in-up">
+            <div class="profile-header">
+                <!-- 프로필 이미지 -->
+                <div class="profile-image-wrapper">
+                    <img th:if="${profile_img != null and !#strings.isEmpty(profile_img)}"
+                         th:src="${profile_img}"
+                         alt="프로필"
+                         class="profile-avatar">
+                    <div th:unless="${profile_img != null and !#strings.isEmpty(profile_img)}"
+                         class="profile-avatar-placeholder">
+                        🐶
+                    </div>
+                </div>
+
+                <!-- 프로필 정보 -->
+                <div class="profile-info">
+                    <h1>
+                        <span th:text="${usrNm}">사용자</span>님, 환영합니다! 🐾
+                    </h1>
+                    <div class="profile-email">
+                        📧 <span th:text="${email}">이메일</span>
+                    </div>
+                    <div class="mt-2">
+                        <span class="badge badge-provider" th:if="${provider != null}">
+                            <span th:switch="${provider}">
+                                <span th:case="'kakao'">🟡 카카오톡</span>
+                                <span th:case="'google'">🔴 구글</span>
+                                <span th:case="'naver'">🟢 네이버</span>
+                                <span th:case="*" th:text="${provider}">소셜</span>
+                            </span>
+                            로그인
+                        </span>
+                        <span class="badge badge-success ml-2" th:if="${userId != null}">
+                            ✓ 인증됨
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 로그아웃 버튼 -->
+                <div>
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="btn btn-danger">
+                            🚪 로그아웃
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 통계 -->
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <span class="stat-value">0</span>
+                    <span class="stat-label">내 게시글</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">0</span>
+                    <span class="stat-label">댓글</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">0</span>
+                    <span class="stat-label">좋아요</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">0</span>
+                    <span class="stat-label">팔로워</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 댕댕이 월드 소개 -->
+        <div class="card fade-in-up" style="animation-delay: 0.1s;">
+            <div class="card-header">
+                <h2 class="card-title">
+                    🏠 댕댕이 월드에 오신 것을 환영합니다!
+                </h2>
+            </div>
+            <div class="card-body">
+                <p style="color: var(--medium-gray); font-size: 1.125rem; margin-bottom: 2rem;">
+                    전국의 댕댕이 집사들과 소통하며 반려견의 일상을 공유하는 따뜻한 커뮤니티입니다. 💕
+                </p>
+
+                <div class="grid grid-3">
+                    <div class="feature-card">
+                        <span class="feature-icon">📝</span>
+                        <h3 class="feature-title">게시글 작성</h3>
+                        <p class="feature-description">
+                            우리 댕댕이의 귀여운 일상과<br>
+                            재미있는 이야기를 공유해보세요
+                        </p>
+                        <button class="btn btn-outline mt-2" style="width: 100%;">
+                            글쓰기
+                        </button>
+                    </div>
+
+                    <div class="feature-card">
+                        <span class="feature-icon">💬</span>
+                        <h3 class="feature-title">댓글 교류</h3>
+                        <p class="feature-description">
+                            다른 집사님들과 소통하며<br>
+                            정보를 나누고 친구를 만들어요
+                        </p>
+                        <button class="btn btn-outline mt-2" style="width: 100%;">
+                            커뮤니티
+                        </button>
+                    </div>
+
+                    <div class="feature-card">
+                        <span class="feature-icon">❤️</span>
+                        <h3 class="feature-title">좋아요</h3>
+                        <p class="feature-description">
+                            사랑스러운 순간들에<br>
+                            공감과 응원을 보내주세요
+                        </p>
+                        <button class="btn btn-outline mt-2" style="width: 100%;">
+                            인기글
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 최근 활동 -->
+        <div class="grid grid-2 mt-4">
+            <div class="card fade-in-up" style="animation-delay: 0.2s;">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        📌 최근 활동
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div style="text-align: center; padding: 3rem 1rem; color: var(--medium-gray);">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🐕</div>
+                        <p>아직 활동 내역이 없습니다.</p>
+                        <p style="font-size: 0.875rem; margin-top: 0.5rem;">
+                            첫 게시글을 작성해보세요!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card fade-in-up" style="animation-delay: 0.3s;">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        🔥 인기 게시글
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div style="text-align: center; padding: 3rem 1rem; color: var(--medium-gray);">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">✨</div>
+                        <p>곧 인기 게시글이 등장할 예정입니다!</p>
+                        <p style="font-size: 0.875rem; margin-top: 0.5rem;">
+                            댕댕이들의 사랑스러운 순간을 기대해주세요
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 사용자 정보 (개발용) -->
+        <div class="info-section mt-4 fade-in-up" style="animation-delay: 0.4s;" sec:authorize="isAuthenticated()">
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--dark-gray); margin-bottom: 1rem;">
+                🔐 계정 정보
+            </h3>
+
+            <div class="info-row" th:if="${userId != null}">
+                <span class="info-label">👤 사용자 ID</span>
+                <span class="info-value" th:text="${userId}">-</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">📝 이름</span>
+                <span class="info-value" th:text="${usrNm} ?: '미설정'">-</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">📧 이메일</span>
+                <span class="info-value" th:text="${email} ?: '미설정'">-</span>
+            </div>
+
+            <div class="info-row" th:if="${provider != null}">
+                <span class="info-label">🔗 소셜 로그인</span>
+                <span class="info-value">
+                    <span th:switch="${provider}">
+                        <span th:case="'kakao'" class="badge badge-provider">🟡 카카오</span>
+                        <span th:case="'google'" class="badge badge-provider">🔴 구글</span>
+                        <span th:case="'naver'" class="badge badge-provider">🟢 네이버</span>
+                        <span th:case="*" th:text="${provider}">-</span>
+                    </span>
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">🔒 권한</span>
+                <span class="info-value">
+                    <span class="badge badge-success" sec:authentication="authorities">USER</span>
+                </span>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

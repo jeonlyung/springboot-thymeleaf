@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <!-- 공통 헤드 -->
+    <th:block th:replace="~{common/fragments/header :: headerHead}"></th:block>
+
+    <!-- 페이지별 타이틀 -->
+    <title layout:title-pattern="$CONTENT_TITLE | $LAYOUT_TITLE">댕댕이 월드</title>
+</head>
+<body>
+    <!-- 헤더 네비게이션 -->
+    <div th:replace="~{common/fragments/header :: headerNav}"></div>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="main-content" layout:fragment="content">
+        <!-- 페이지별 콘텐츠가 여기에 로드됨 -->
+    </main>
+
+    <!-- 푸터 -->
+    <div th:replace="~{common/fragments/footer :: footerNav}"></div>
+
+    <!-- 페이지별 스크립트 -->
+    <th:block layout:fragment="script"></th:block>
+
+    <style>
+        /* 레이아웃 기본 스타일 */
+        html {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        main.main-content {
+            flex: 1;
+            width: 100%;
+            display: block;
+            min-height: auto;
+        }
+
+        footer {
+            flex-shrink: 0;
+            width: 100%;
+        }
+    </style>
+</body>
+</html>
