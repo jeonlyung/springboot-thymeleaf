@@ -147,9 +147,9 @@ body::before {
 
 /* 버튼 안의 이미지 ㅡㅡ+ */
 .circle-btn img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* 이미지가 원에 꽉 차게 */
+    width: 90%;
+    height: 90%;
+    object-fit: contain; /* 고해상도 이미지를 비율 유지하며 선명하게 */
 }
 
 /* 브랜드별 배경색 (이미지가 투명 PNG일 때 대비) */
