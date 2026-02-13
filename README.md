@@ -5,8 +5,8 @@
 ## 🛠 Tech Stack
 
 ### Backend
-- **Framework**: Spring Boot 4.0.2
-- **Language**: Java 21
+- **Framework**: Spring Boot 3.3.6
+- **Language**: Java 17
 - **Build Tool**: Gradle
 - **Template Engine**: Thymeleaf
 - **DB : Maria DB
