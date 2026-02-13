@@ -53,20 +53,25 @@ public class OAuthAttributes {
 
     /**
      * Kakao 사용자 정보 추출
+     * (account_email 권한이 없을 경우 대비)
      */
     private static OAuthAttributes ofKakao(String userNameAttributeName,
                                           Map<String, Object> attributes) {
         Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
         Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
 
+        // providerId를 기반으로 고유한 사용자 ID 생성 (이메일 권한이 없는 경우 대비)
+        String providerId = String.valueOf(attributes.get("id"));
+        String usrId = "kakao_" + providerId;  // 예: kakao_1234567890
+
         return OAuthAttributes.builder()
                 .name((String) profile.get("nickname"))
-                .email((String) kakaoAccount.get("email"))
+                .email(usrId)  // 이메일 대신 kakao_providerId 형식 사용
                 .picture((String) profile.get("profile_image_url"))
                 .attributes(attributes)
                 .nameAttributeKey(userNameAttributeName)
                 .provider("kakao")
-                .providerId(String.valueOf(attributes.get("id")))
+                .providerId(providerId)
                 .build();
     }
 

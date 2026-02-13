@@ -8,13 +8,28 @@
         SELECT /* findByUsrId */
                USR_ID
              , USR_PW
-             , USR_ㅓNM
+             , USR_NM
              , PROFILE_IMG
              , PROVIDER
              , PROVIDER_ID
              , USE_YN
           FROM TB_USR_F
          WHERE USR_ID = #{usrId}
+           AND USE_YN = 'Y'
+    </select>
+
+    <select id="findByProviderAndProviderId" resultType="MemberDto">
+        SELECT /* findByProviderAndProviderId */
+               USR_ID
+             , USR_PW
+             , USR_NM
+             , PROFILE_IMG
+             , PROVIDER
+             , PROVIDER_ID
+             , USE_YN
+          FROM TB_USR_F
+         WHERE PROVIDER = #{provider}
+           AND PROVIDER_ID = #{providerId}
            AND USE_YN = 'Y'
     </select>
 
@@ -60,4 +75,15 @@
              , #{usrId}           /* 최종 변경자 ID (본인) */
                )
     </insert>
+
+    <update id="updateOAuthUserInfo">
+        UPDATE /* updateOAuthUserInfo */
+               TB_USR_F
+           SET USR_NM      = #{usrNm}         /* 이름 업데이트 */
+             , PROFILE_IMG = #{profileImg}    /* 프로필 이미지 업데이트 */
+             , LST_CHG_DTM = NOW()            /* 최종 수정 일시 */
+             , LST_CHG_ID  = #{usrId}         /* 최종 수정자 */
+         WHERE PROVIDER    = #{provider}
+           AND PROVIDER_ID = #{providerId}
+    </update>
 </mapper>
