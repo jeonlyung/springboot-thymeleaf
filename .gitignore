@@ -36,6 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
-
 ### DDL ####
 /src/main/resources/mapper/ddl/*
+
+/readme파일/*
+/fix-jwt-import.sh
