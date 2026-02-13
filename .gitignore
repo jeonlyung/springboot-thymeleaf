@@ -41,3 +41,7 @@ out/
 
 /readme파일/*
 /fix-jwt-import.sh
+
+### Local Configuration ###
+application-local.yaml
+application-local.properties
