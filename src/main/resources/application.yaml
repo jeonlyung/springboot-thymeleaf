@@ -39,6 +39,10 @@ spring:
   # [AOP] aop.xml ?? (??? ??? ??)
   aop:
     proxy-target-class: true
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
 
 
 # [Server] ?? ?? ??
@@ -46,9 +50,6 @@ server:
   port: 8080
   servlet:
     context-path: /
-    encoding:
-      charset: UTF-8
-      force: true
 
 
 # SFTP
