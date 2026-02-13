@@ -39,7 +39,7 @@ out/
 ### DDL ####
 /src/main/resources/mapper/ddl/*
 
-/readme파일/*
+/readmeFiles/*
 /fix-jwt-import.sh
 
 ### Local Configuration ###
