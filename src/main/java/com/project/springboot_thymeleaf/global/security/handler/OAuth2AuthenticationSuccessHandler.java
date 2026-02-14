@@ -41,6 +41,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         log.info("OAuth2 로그인 성공 - User: {}, Provider: {}", email, provider);
 
+        // 세션에 OAuth2User 저장 (MainController에서 사용)
+        request.getSession().setAttribute("SPRING_SECURITY_CONTEXT",
+            new org.springframework.security.core.context.SecurityContextImpl(authentication));
+
+        log.info("세션에 인증 정보 저장 완료 - Session ID: {}", request.getSession().getId());
+
         // HttpOnly Cookie에 토큰 저장 (최신 보안 방식)
         addTokenCookie(response, "access_token", accessToken, 3600); // 1시간
         addTokenCookie(response, "refresh_token", refreshToken, 604800); // 7일

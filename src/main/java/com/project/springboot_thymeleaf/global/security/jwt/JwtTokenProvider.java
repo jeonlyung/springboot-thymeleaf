@@ -1,6 +1,9 @@
 package com.project.springboot_thymeleaf.global.security.jwt;
 
-import io.jsonwebtoken.*;
+import com.project.springboot_thymeleaf.biz.login.dto.CustomOAuth2User;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,10 +46,19 @@ public class JwtTokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
+        // CustomOAuth2User에서 추가 정보 추출
+        CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+        String name = oAuth2User.getMember().usrNm();
+        String profileImg = oAuth2User.getMember().profileImg();
+        String providerId = oAuth2User.getMember().providerId();
+
         return Jwts.builder()
                 .subject(authentication.getName())
                 .claim("email", email)
                 .claim("provider", provider)
+                .claim("name", name)
+                .claim("profileImg", profileImg)
+                .claim("providerId", providerId)
                 .claim("authorities", authorities)
                 .issuedAt(now)
                 .expiration(expiryDate)

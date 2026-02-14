@@ -33,9 +33,9 @@ public class SecurityConfig {
                 // CSRF 비활성화 (JWT 사용 시 불필요)
                 .csrf(csrf -> csrf.disable())
 
-                // 세션 사용 안 함 (Stateless - 최신 트렌드)
+                // 세션 사용 설정 (OAuth2 사용 시 필요)
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 
                 // Frame Options 설정
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))

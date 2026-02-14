@@ -28,18 +28,29 @@ public class MainController {
 
     @GetMapping("/main")
     public String main(@AuthenticationPrincipal OAuth2User oAuth2User, Model model) {
+        log.info("=== /main 진입 ===");
+        log.info("OAuth2User null 여부: {}", (oAuth2User == null));
+
         if (oAuth2User != null) {
+            log.info("OAuth2User 타입: {}", oAuth2User.getClass().getName());
+            log.info("OAuth2User attributes: {}", oAuth2User.getAttributes());
+
             String username = null;
             String email = null;
             String provider = null;
             String providerId = null;
 
             if (oAuth2User instanceof CustomOAuth2User customUser) {
+                log.info("CustomOAuth2User로 캐스팅 성공");
                 username = customUser.getUsername();
                 email = customUser.getEmail();
                 provider = customUser.getProvider();
                 providerId = customUser.getProviderId();
+
+                log.info("username: {}, email: {}, provider: {}, providerId: {}",
+                    username, email, provider, providerId);
             } else {
+                log.info("기본 OAuth2User 사용");
                 username = oAuth2User.getAttribute("name");
                 email = oAuth2User.getAttribute("email");
             }
@@ -50,9 +61,13 @@ public class MainController {
                 params.put("provider", provider);
                 params.put("providerId", providerId);
 
+                log.info("DB 조회 파라미터: provider={}, providerId={}", provider, providerId);
                 MemberDto member = loginMapper.findByProviderAndProviderId(params);
 
                 if (member != null) {
+                    log.info("DB 사용자 정보 조회 성공: {}", member);
+                    log.info("이름: {}, 프로필 이미지: {}", member.usrNm(), member.profileImg());
+
                     model.addAttribute("member", member);
                     model.addAttribute("usrNm", member.usrNm());           // 테이블 컬럼명으로 매핑
                     model.addAttribute("email", email);
@@ -60,7 +75,7 @@ public class MainController {
                     model.addAttribute("provider", member.provider());
                     model.addAttribute("userId", member.usrId());
 
-                    log.info("DB 사용자 정보 조회 성공: {} ({})", member.usrNm(), member.usrId());
+                    log.info("Model에 데이터 추가 완료");
                 } else {
                     model.addAttribute("usrNm", username);
                     model.addAttribute("email", email);
@@ -70,6 +85,10 @@ public class MainController {
                 model.addAttribute("usrNm", username);
                 model.addAttribute("email", email);
             }
+        } else {
+            log.warn("OAuth2User가 null입니다. 인증 정보가 세션에 없습니다.");
+            log.warn("로그인 페이지로 리다이렉트합니다.");
+            return "redirect:/login";
         }
 
         return "main/main";

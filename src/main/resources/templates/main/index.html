@@ -1,6 +1,13 @@
+<!DOCTYPE html>
 <html
         xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-        layout:decorate="~{layout/defaultLayout}"> <div layout:fragment="content">
+        layout:decorate="~{common/layout}"
+        lang="ko">
+<head>
+    <title>댕댕이월드 - 메인</title>
+</head>
+<body>
+<div layout:fragment="content">
 
     <header class="max-w-6xl mx-auto mt-10 p-8 bg-white rounded-3xl shadow-sm flex items-center justify-between">
         <div class="w-1/2">
@@ -22,7 +29,8 @@
         <h2 class="text-2xl font-bold text-gray-800 mb-6">🔥 지금 뜨는 댕댕이 소식</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="bg-white rounded-2xl overflow-hidden shadow-sm">
-                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80" class="w-full h-48 object-cover">
+                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80"
+                     class="w-full h-48 object-cover" alt="귀여운 강아지">
                 <div class="p-5">
                     <span class="text-xs font-bold text-blue-500 bg-blue-100 px-2 py-1 rounded">질문/답변</span>
                     <h3 class="font-bold text-lg mt-2 text-gray-800">강아지 사료 추천 좀 해주세요!</h3>
@@ -32,4 +40,5 @@
     </main>
 
 </div>
+</body>
 </html>

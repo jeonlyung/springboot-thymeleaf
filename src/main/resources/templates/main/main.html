@@ -18,11 +18,11 @@
             <div class="profile-header">
                 <!-- 프로필 이미지 -->
                 <div class="profile-image-wrapper">
-                    <img th:if="${profile_img != null and !#strings.isEmpty(profile_img)}"
-                         th:src="${profile_img}"
+                    <img th:if="${member != null and member.profileImg != null and !#strings.isEmpty(member.profileImg)}"
+                         th:src="${member.profileImg}"
                          alt="프로필"
                          class="profile-avatar">
-                    <div th:unless="${profile_img != null and !#strings.isEmpty(profile_img)}"
+                    <div th:unless="${member != null and member.profileImg != null and !#strings.isEmpty(member.profileImg)}"
                          class="profile-avatar-placeholder">
                         🐶
                     </div>
@@ -31,7 +31,7 @@
                 <!-- 프로필 정보 -->
                 <div class="profile-info">
                     <h1>
-                        <span th:text="${usrNm}">사용자</span>님, 환영합니다! 🐾
+                        <span th:text="${member != null ? member.usrNm : usrNm}">사용자</span>님, 환영합니다! 🐾
                     </h1>
                     <div class="profile-email">
                         📧 <span th:text="${email}">이메일</span>
