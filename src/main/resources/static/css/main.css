@@ -439,28 +439,57 @@ main {
 
 .profile-image-wrapper {
     flex-shrink: 0;
+    position: relative;
 }
 
+/* 프로필 이미지 */
 .profile-avatar {
     width: 120px;
     height: 120px;
+    aspect-ratio: 1 / 1;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid rgba(255, 255, 255, 0.5);
-    box-shadow: var(--shadow-lg);
+    border: 4px solid rgba(255, 255, 255, 0.8);
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 140, 66, 0.2);
+    transition: var(--transition);
+    will-change: transform;
 }
 
+.profile-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.2), 0 0 0 2px rgba(255, 140, 66, 0.4);
+}
+
+/* 프로필 플레이스홀더 */
 .profile-avatar-placeholder {
     width: 120px;
     height: 120px;
+    aspect-ratio: 1 / 1;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+    background: linear-gradient(135deg,
+                rgba(255, 140, 66, 0.3) 0%,
+                rgba(255, 179, 71, 0.2) 50%,
+                rgba(255, 140, 66, 0.3) 100%);
+    backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3rem;
-    border: 4px solid rgba(255, 255, 255, 0.5);
+    border: 4px solid rgba(255, 255, 255, 0.8);
     box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.02);
+        opacity: 0.95;
+    }
 }
 
 .profile-info {

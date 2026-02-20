@@ -5,10 +5,20 @@
 <head th:fragment="headerHead">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <!-- 외부 리소스 preconnect (성능 최적화) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://lh3.googleusercontent.com" crossorigin>
+    <link rel="preconnect" href="https://k.kakaocdn.net" crossorigin>
+    <link rel="preconnect" href="https://phinf.pstatic.net" crossorigin>
+
+    <!-- 폰트 및 아이콘 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- 커스텀 스타일 -->
     <link th:href="@{/css/main.css}" rel="stylesheet">
 </head>
 

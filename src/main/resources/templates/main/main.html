@@ -18,13 +18,25 @@
             <div class="profile-header">
                 <!-- 프로필 이미지 -->
                 <div class="profile-image-wrapper">
-                    <img th:if="${member != null and member.profileImg != null and !#strings.isEmpty(member.profileImg)}"
-                         th:src="${member.profileImg}"
-                         alt="프로필"
-                         class="profile-avatar">
-                    <div th:unless="${member != null and member.profileImg != null and !#strings.isEmpty(member.profileImg)}"
-                         class="profile-avatar-placeholder">
-                        🐶
+                    <!-- 프로필 이미지가 있는 경우 -->
+                    <picture th:if="${member != null and member.profileImg != null and !#strings.isEmpty(member.profileImg)}">
+                        <img th:src="${member.profileImg}"
+                             th:alt="${member.usrNm + '님의 프로필'}"
+                             class="profile-avatar"
+                             loading="lazy"
+                             referrerpolicy="no-referrer"
+                             onerror="this.onerror=null; this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                    </picture>
+
+                    <!-- 프로필 이미지가 없는 경우 플레이스홀더 -->
+                    <div class="profile-avatar-placeholder"
+                         th:style="${member != null and member.profileImg != null and !#strings.isEmpty(member.profileImg)} ? 'display: none;' : 'display: flex;'">
+                        <span th:switch="${provider}">
+                            <span th:case="'kakao'">💬</span>
+                            <span th:case="'google'">🔍</span>
+                            <span th:case="'naver'">🟢</span>
+                            <span th:case="*">🐶</span>
+                        </span>
                     </div>
                 </div>
 
@@ -215,5 +227,62 @@
 
     </div>
 </div>
+
+<script th:inline="javascript">
+    // OAuth 프로필 이미지 통합 핸들러
+    /*<![CDATA[*/
+    (function() {
+        'use strict';
+
+        const profileData = {
+            imgUrl: /*[[${member != null ? member.profileImg : ''}]]*/ '',
+            provider: /*[[${provider}]]*/ '',
+            userName: /*[[${member != null ? member.usrNm : ''}]]*/ ''
+        };
+
+        console.group('🔐 OAuth 프로필 정보');
+        console.log('Provider:', profileData.provider);
+        console.log('User Name:', profileData.userName);
+        console.log('Profile Image URL:', profileData.imgUrl);
+        console.groupEnd();
+
+        // 프로필 이미지 요소 확인
+        const profileImg = document.querySelector('.profile-avatar');
+        const placeholder = document.querySelector('.profile-avatar-placeholder');
+
+        if (profileImg) {
+            // 이미지 로딩 성공 이벤트
+            profileImg.addEventListener('load', function() {
+                console.log('✅ 프로필 이미지 로딩 성공:', profileData.provider);
+                this.style.opacity = '0';
+                setTimeout(() => {
+                    this.style.transition = 'opacity 0.3s ease-in-out';
+                    this.style.opacity = '1';
+                }, 50);
+            });
+
+            // 이미지 로딩 실패 이벤트
+            profileImg.addEventListener('error', function(e) {
+                console.error('❌ 프로필 이미지 로딩 실패');
+                console.error('Provider:', profileData.provider);
+                console.error('Failed URL:', this.src);
+                console.error('Error:', e);
+
+                // 플레이스홀더로 대체
+                if (placeholder) {
+                    this.parentElement.style.display = 'none';
+                    placeholder.style.display = 'flex';
+                    console.log('🔄 플레이스홀더로 대체됨');
+                }
+            });
+        }
+
+        // 디버그 정보 출력 (개발 환경에서만)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('🛠️ Development Mode: 디버그 정보 활성화');
+        }
+    })();
+    /*]]>*/
+</script>
 </body>
 </html>
