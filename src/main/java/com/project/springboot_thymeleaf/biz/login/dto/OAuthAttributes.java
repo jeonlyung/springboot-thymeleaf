@@ -64,10 +64,18 @@ public class OAuthAttributes {
         String providerId = String.valueOf(attributes.get("id"));
         String usrId = "kakao_" + providerId;  // 예: kakao_1234567890
 
+        // 카카오 프로필 이미지 URL 처리 (고해상도로 변경)
+        String profileImageUrl = (String) profile.get("profile_image_url");
+        if (profileImageUrl != null && profileImageUrl.contains("thumbnail")) {
+            // thumbnail을 original로 변경하여 고해상도 이미지 사용
+            profileImageUrl = profileImageUrl.replace("/C110x110", "/C640x640")
+                                             .replace("thumbnail", "original");
+        }
+
         return OAuthAttributes.builder()
                 .name((String) profile.get("nickname"))
                 .email(usrId)  // 이메일 대신 kakao_providerId 형식 사용
-                .picture((String) profile.get("profile_image_url"))
+                .picture(profileImageUrl)
                 .attributes(attributes)
                 .nameAttributeKey(userNameAttributeName)
                 .provider("kakao")
