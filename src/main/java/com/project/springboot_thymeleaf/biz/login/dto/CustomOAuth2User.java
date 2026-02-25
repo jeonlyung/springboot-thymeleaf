@@ -16,7 +16,6 @@ public class CustomOAuth2User implements OAuth2User {
     private final Collection<? extends GrantedAuthority> authorities;
     private final Map<String, Object> attributes;
     private final String nameAttributeKey;
-
     public CustomOAuth2User(MemberDto member, Map<String, Object> attributes, String nameAttributeKey) {
         this.member = member;
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
