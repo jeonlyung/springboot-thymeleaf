@@ -42,5 +42,3 @@ out/
 /readmeFiles/*
 /fix-jwt-import.sh
 
-### Local Configuration ###
-/src/main/resources/application.yaml
