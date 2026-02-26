@@ -1,13 +1,17 @@
 package com.project.springboot_thymeleaf.global.batch;
 
+import jakarta.annotation.Resource;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class BatchExecutor {
+
     @Autowired
     SqlSessionFactory sqlSessionFactory;
 
