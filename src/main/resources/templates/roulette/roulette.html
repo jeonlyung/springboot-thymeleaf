@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{common/layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이벤트 룰렛</title>
+    <th:block layout:fragment="head-extra">
+        <link rel="stylesheet" th:href="@{/css/roulette.css}">
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content" class="roulette-page">
+    <!-- 배경 애니메이션 효과 -->
+    <div class="background-animation">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <section class="roulette-hero">
+        <div class="hero-text">
+            <p class="hero-badge">🎉 EVENT</p>
+            <h1>오늘의 행운 룰렛</h1>
+            <p class="hero-desc">버튼을 눌러 룰렛을 돌려보세요. 당첨 결과는 바로 공개됩니다.</p>
+        </div>
+        <div class="hero-reward">
+            <div class="reward-card">
+                <p class="reward-title">🎁 오늘의 혜택</p>
+                <ul class="reward-list">
+                    <li>✨ 10% 할인 쿠폰</li>
+                    <li>🚚 무료 배송</li>
+                    <li>⭐ 포인트 적립</li>
+                    <li>🎊 꽝 없이 랜덤 지급</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="roulette-panel">
+        <div class="roulette-stage">
+            <div class="roulette-ring">
+                <div class="roulette-pointer" aria-hidden="true"></div>
+                <canvas id="rouletteCanvas" width="420" height="420" aria-label="이벤트 룰렛"></canvas>
+                <div class="roulette-glow" id="rouletteGlow"></div>
+            </div>
+        </div>
+        <div class="roulette-actions">
+            <h2>🎡 룰렛 돌리기</h2>
+            <p class="roulette-guide">오늘 <span class="remain-count">1</span>회 참여 가능</p>
+            <button id="spinButton" class="btn-spin" type="button">
+                <span class="btn-icon">🎯</span>
+                <span class="btn-text">룰렛 돌리기</span>
+            </button>
+            <button id="resetButton" class="btn-reset" type="button" disabled>
+                <span class="btn-icon">🔄</span>
+                <span class="btn-text">다시 돌리기</span>
+            </button>
+            <p class="roulette-tip">* 결과는 즉시 확정됩니다.</p>
+        </div>
+    </section>
+
+    <section class="roulette-notice">
+        <h3>📋 참여 유의사항</h3>
+        <ul>
+            <li>이벤트 기간 내 1일 1회 참여 가능합니다.</li>
+            <li>쿠폰은 당첨 즉시 자동 발급됩니다.</li>
+            <li>부정 참여는 제재될 수 있습니다.</li>
+        </ul>
+    </section>
+
+    <div id="resultModal" class="roulette-modal" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="modal-badge">🎉 축하합니다!</p>
+                <div class="confetti" id="confetti"></div>
+            </div>
+            <h2 id="resultText" class="modal-title">당첨 결과</h2>
+            <p id="resultDesc" class="modal-desc">당첨 내용을 확인해 주세요.</p>
+            <button id="closeModal" class="btn-close" type="button">✨ 확인</button>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+    /*<![CDATA[*/
+    (function() {
+        'use strict';
+
+        const rouletteState = {
+            items: [
+                { label: "10% 할인 쿠폰", desc: "결제 시 바로 적용됩니다.", color: "#6C5CE7" },
+                { label: "무료 배송", desc: "배송비가 자동으로 면제됩니다.", color: "#00B894" },
+                { label: "5,000 포인트", desc: "포인트가 즉시 적립됩니다.", color: "#0984E3" },
+                { label: "20% 할인 쿠폰", desc: "오늘만 가능한 추가 혜택!", color: "#E17055" },
+                { label: "1,000 포인트", desc: "다음 구매에 사용 가능해요.", color: "#FDCB6E" },
+                { label: "꽝 없이 당첨", desc: "다음 기회에 더 큰 혜택!", color: "#D63031" }
+            ],
+            spinning: false,
+            currentRotation: 0
+        };
+
+        const canvas = document.getElementById("rouletteCanvas");
+        const ctx = canvas.getContext("2d");
+        const spinButton = document.getElementById("spinButton");
+        const resetButton = document.getElementById("resetButton");
+        const resultModal = document.getElementById("resultModal");
+        const resultText = document.getElementById("resultText");
+        const resultDesc = document.getElementById("resultDesc");
+        const closeModal = document.getElementById("closeModal");
+        const rouletteGlow = document.getElementById("rouletteGlow");
+
+        const size = canvas.width;
+        const radius = size / 2;
+
+        function drawWheel(rotation = 0) {
+            const sliceAngle = (Math.PI * 2) / rouletteState.items.length;
+
+            ctx.clearRect(0, 0, size, size);
+            ctx.save();
+            ctx.translate(radius, radius);
+            ctx.rotate(rotation);
+
+            rouletteState.items.forEach((item, index) => {
+                const startAngle = index * sliceAngle;
+                const endAngle = startAngle + sliceAngle;
+
+                // 섹션 배경
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, radius - 6, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = item.color;
+                ctx.fill();
+
+                // 섹션 테두리
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // 텍스트
+                ctx.save();
+                ctx.rotate(startAngle + sliceAngle / 2);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "600 14px 'Noto Sans KR', sans-serif";
+                ctx.textAlign = "right";
+                ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+                ctx.shadowBlur = 4;
+                ctx.fillText(item.label, radius - 20, 4);
+                ctx.restore();
+            });
+
+            // 중앙 버튼
+            ctx.beginPath();
+            ctx.arc(0, 0, 50, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+
+            // 중앙 버튼 그림자
+            ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 4;
+
+            // 중앙 버튼 테두리
+            ctx.strokeStyle = "rgba(91, 70, 246, 0.3)";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = "#3d3d57";
+            ctx.font = "700 18px 'Noto Sans KR', sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("SPIN", 0, 6);
+
+            ctx.restore();
+        }
+
+        function spin() {
+            if (rouletteState.spinning) {
+                return;
+            }
+
+            rouletteState.spinning = true;
+            spinButton.disabled = true;
+            resetButton.disabled = true;
+            spinButton.classList.add("spinning");
+
+            const totalItems = rouletteState.items.length;
+            const targetIndex = Math.floor(Math.random() * totalItems);
+            const sliceAngle = (Math.PI * 2) / totalItems;
+            const baseRotation = Math.PI * 2 * 5;
+            const targetRotation = baseRotation + (Math.PI * 2) - (targetIndex * sliceAngle + sliceAngle / 2);
+
+            const startRotation = rouletteState.currentRotation;
+            const duration = 3500;
+            const startTime = performance.now();
+
+            function animate(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 4);
+                const rotation = startRotation + (targetRotation - startRotation) * eased;
+
+                drawWheel(rotation);
+                rouletteGlow.style.opacity = 0.5 + Math.sin(progress * Math.PI * 4) * 0.3;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    rouletteState.spinning = false;
+                    rouletteState.currentRotation = rotation % (Math.PI * 2);
+                    spinButton.classList.remove("spinning");
+                    showResult(targetIndex);
+                    resetButton.disabled = false;
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function showResult(index) {
+            const item = rouletteState.items[index];
+            resultText.textContent = item.label;
+            resultDesc.textContent = item.desc;
+            resultModal.classList.add("active");
+            resultModal.setAttribute("aria-hidden", "false");
+            createConfetti();
+        }
+
+        function createConfetti() {
+            const confetti = document.getElementById("confetti");
+            confetti.innerHTML = "";
+
+            for (let i = 0; i < 30; i++) {
+                const span = document.createElement("span");
+                span.className = "confetti-piece";
+                span.style.left = Math.random() * 100 + "%";
+                span.style.delay = Math.random() * 0.5 + "s";
+                confetti.appendChild(span);
+            }
+        }
+
+        function closeResult() {
+            resultModal.classList.remove("active");
+            resultModal.setAttribute("aria-hidden", "true");
+            spinButton.disabled = false;
+        }
+
+        function resetRoulette() {
+            if (rouletteState.spinning) {
+                return;
+            }
+            rouletteState.currentRotation = 0;
+            drawWheel(0);
+            spinButton.disabled = false;
+            resetButton.disabled = true;
+        }
+
+        spinButton.addEventListener("click", spin);
+        resetButton.addEventListener("click", resetRoulette);
+        closeModal.addEventListener("click", closeResult);
+        resultModal.addEventListener("click", (event) => {
+            if (event.target === resultModal) {
+                closeResult();
+            }
+        });
+
+        // 캔버스 가운데 버튼 클릭 이벤트
+        canvas.addEventListener("click", (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (event.clientX - rect.left) * scaleX - radius;
+            const y = (event.clientY - rect.top) * scaleY - radius;
+            const distance = Math.sqrt(x * x + y * y);
+
+            if (distance <= 50 && !rouletteState.spinning) {
+                spin();
+            }
+        });
+
+        // 마우스 커서 변경
+        canvas.addEventListener("mousemove", (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (event.clientX - rect.left) * scaleX - radius;
+            const y = (event.clientY - rect.top) * scaleY - radius;
+            const distance = Math.sqrt(x * x + y * y);
+
+            canvas.style.cursor = (distance <= 50 && !rouletteState.spinning) ? "pointer" : "default";
+        });
+
+        // 초기 룰렛 그리기
+        drawWheel(0);
+    })();
+    /*]]>*/
+    </script>
+</th:block>
+</body>
+</html>
+
