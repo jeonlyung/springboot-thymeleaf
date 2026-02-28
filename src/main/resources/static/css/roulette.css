@@ -2,12 +2,8 @@
     --roulette-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --roulette-primary: #5b46f6;
     --roulette-accent: #ff7a59;
-    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    --hover-shadow: 0 15px 50px rgba(91, 70, 246, 0.4);
-}
-
-* {
-    box-sizing: border-box;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 15px 50px rgba(91, 70, 246, 0.3);
 }
 
 .roulette-page {
@@ -15,60 +11,6 @@
     background: var(--roulette-bg);
     color: #ffffff;
     font-family: "Noto Sans KR", sans-serif;
-    position: relative;
-    overflow: hidden;
-}
-
-/* 배경 애니메이션 */
-.background-animation {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.3;
-    animation: float 8s ease-in-out infinite;
-}
-
-.blob-1 {
-    width: 300px;
-    height: 300px;
-    background: rgba(255, 122, 89, 0.4);
-    top: -100px;
-    left: -100px;
-    animation-delay: 0s;
-}
-
-.blob-2 {
-    width: 250px;
-    height: 250px;
-    background: rgba(255, 255, 255, 0.2);
-    top: 50%;
-    right: -50px;
-    animation-delay: 2s;
-}
-
-.blob-3 {
-    width: 200px;
-    height: 200px;
-    background: rgba(91, 70, 246, 0.3);
-    bottom: -50px;
-    left: 30%;
-    animation-delay: 4s;
-}
-
-@keyframes float {
-    0%, 100% {
-        transform: translate(0, 0);
-    }
-    50% {
-        transform: translate(30px, 30px);
-    }
 }
 
 .roulette-hero {
@@ -77,107 +19,49 @@
     gap: 32px;
     margin-bottom: 40px;
     flex-wrap: wrap;
-    position: relative;
-    z-index: 1;
-}
-
-.hero-text {
-    flex: 1;
-    min-width: 250px;
 }
 
 .hero-text h1 {
-    font-size: 2.8rem;
+    font-size: 2.4rem;
     margin: 12px 0;
     color: #ffffff;
-    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
-    animation: slideInDown 0.7s ease-out;
-    font-weight: 800;
-    letter-spacing: -1px;
-}
-
-@keyframes slideInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .hero-badge {
     display: inline-block;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.25);
     color: #ffffff;
-    padding: 8px 16px;
+    padding: 6px 12px;
     border-radius: 999px;
     font-weight: 700;
     backdrop-filter: blur(10px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    animation: fadeInScale 0.8s ease;
-}
-
-@keyframes fadeInScale {
-    from {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .hero-desc {
-    color: rgba(255, 255, 255, 0.95);
-    font-size: 1.15rem;
-    line-height: 1.6;
-    animation: fadeIn 1s ease;
-    margin-top: 12px;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.hero-reward {
-    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
 }
 
 .reward-card {
     background: #ffffff;
-    border-radius: 20px;
-    padding: 24px;
+    border-radius: 18px;
+    padding: 20px 24px;
     box-shadow: var(--card-shadow);
-    min-width: 260px;
+    min-width: 240px;
     transition: all 0.3s ease;
-    animation: slideInUp 0.8s ease-out;
 }
 
 .reward-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-5px);
     box-shadow: var(--hover-shadow);
 }
 
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(40px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 .reward-title {
-    font-weight: 800;
-    margin-bottom: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
     color: #3d3d57;
-    font-size: 1.1rem;
 }
 
 .reward-list {
@@ -188,72 +72,47 @@
 }
 
 .reward-list li {
-    padding: 8px 0;
-    font-size: 0.95rem;
-    line-height: 1.6;
+    padding: 6px 0;
 }
 
 .roulette-panel {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(280px, 1fr) minmax(240px, 320px);
     gap: 40px;
     align-items: center;
     margin-bottom: 40px;
-    position: relative;
-    z-index: 1;
 }
 
 .roulette-stage {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%);
-    border-radius: 28px;
-    padding: 40px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
-    animation: zoomIn 0.7s ease-out;
-    position: relative;
-}
-
-@keyframes zoomIn {
-    from {
-        opacity: 0;
-        transform: scale(0.85);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-.roulette-ring {
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .roulette-pointer {
     position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 18px;
     width: 0;
     height: 0;
-    border-left: 16px solid transparent;
-    border-right: 16px solid transparent;
-    border-top: 30px solid var(--roulette-accent);
-    z-index: 3;
-    filter: drop-shadow(0 4px 8px rgba(255, 122, 89, 0.6));
-    animation: pointerBounce 1.5s ease-in-out infinite;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-bottom: 26px solid var(--roulette-accent);
+    z-index: 2;
+    filter: drop-shadow(0 4px 8px rgba(255, 122, 89, 0.5));
+    animation: bounce 2s infinite;
 }
 
-@keyframes pointerBounce {
+@keyframes bounce {
     0%, 100% {
-        transform: translateX(-50%) translateY(0);
+        transform: translateY(0);
     }
     50% {
-        transform: translateX(-50%) translateY(-8px);
+        transform: translateY(-5px);
     }
 }
 
@@ -261,64 +120,36 @@
     width: 360px;
     height: 360px;
     border-radius: 50%;
-    position: relative;
-    z-index: 2;
-    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.2));
-    cursor: pointer;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2),
+                0 0 0 8px rgba(255, 255, 255, 0.1),
+                0 0 0 12px rgba(255, 255, 255, 0.05);
+    animation: glow 3s ease-in-out infinite;
 }
 
-.roulette-glow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 380px;
-    height: 380px;
-    border-radius: 50%;
-    border: 3px solid rgba(91, 70, 246, 0.4);
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    box-shadow: 0 0 30px rgba(91, 70, 246, 0.5);
+@keyframes glow {
+    0%, 100% {
+        filter: drop-shadow(0 0 10px rgba(91, 70, 246, 0.3));
+    }
+    50% {
+        filter: drop-shadow(0 0 20px rgba(91, 70, 246, 0.6));
+    }
 }
 
 .roulette-actions {
     background: #ffffff;
-    border-radius: 24px;
-    padding: 32px;
+    border-radius: 20px;
+    padding: 28px;
     box-shadow: var(--card-shadow);
     text-align: center;
-    animation: slideInRight 0.7s ease-out;
-}
-
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(40px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
 }
 
 .roulette-actions h2 {
-    margin: 0 0 12px;
-    color: #3d3d57;
-    font-size: 1.5rem;
-    font-weight: 800;
+    margin-bottom: 8px;
 }
 
 .roulette-guide {
     color: #6a6a86;
-    margin-bottom: 24px;
-    font-weight: 600;
-}
-
-.remain-count {
-    background: linear-gradient(135deg, var(--roulette-primary), #7c5dfa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 800;
+    margin-bottom: 20px;
 }
 
 .btn-spin,
@@ -327,67 +158,44 @@
     width: 100%;
     padding: 14px 18px;
     font-size: 1rem;
-    border-radius: 14px;
+    border-radius: 12px;
     border: none;
     cursor: pointer;
     font-weight: 700;
     transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-icon {
-    font-size: 1.2rem;
 }
 
 .btn-spin {
     background: linear-gradient(135deg, var(--roulette-primary) 0%, #7c5dfa 100%);
     color: #ffffff;
     margin-bottom: 12px;
-    box-shadow: 0 6px 20px rgba(91, 70, 246, 0.4);
+    box-shadow: 0 4px 15px rgba(91, 70, 246, 0.3);
 }
 
 .btn-spin:hover:not(:disabled) {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(91, 70, 246, 0.6);
-}
-
-.btn-spin.spinning {
-    animation: spin-button 1s infinite linear;
-}
-
-@keyframes spin-button {
-    from {
-        transform: scale(1) rotate(0deg);
-    }
-    to {
-        transform: scale(1.05) rotate(360deg);
-    }
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(91, 70, 246, 0.5);
 }
 
 .btn-spin:active:not(:disabled) {
-    transform: translateY(-1px);
+    transform: translateY(0);
 }
 
 .btn-spin:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
 }
 
 .btn-reset {
-    background: linear-gradient(135deg, #f0f0f8 0%, #e5e5f0 100%);
+    background: linear-gradient(135deg, #f1f1f8 0%, #e5e5f0 100%);
     color: #4d4d6a;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
 }
 
 .btn-reset:hover:not(:disabled) {
-    background: linear-gradient(135deg, #e5e5f0 0%, #dcdce8 100%);
+    background: linear-gradient(135deg, #e5e5f0 0%, #d9d9e8 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .roulette-tip {
@@ -403,15 +211,11 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    position: relative;
-    z-index: 1;
 }
 
 .roulette-notice h3 {
-    margin: 0 0 16px;
+    margin-bottom: 12px;
     color: #ffffff;
-    font-size: 1.2rem;
-    font-weight: 800;
 }
 
 .roulette-notice ul {
@@ -420,19 +224,16 @@
     color: rgba(255, 255, 255, 0.9);
 }
 
-.roulette-notice li {
-    padding: 8px 0;
-    line-height: 1.6;
-}
-
 .roulette-modal {
     position: fixed;
     inset: 0;
+    background: rgba(15, 15, 24, 0.7);
+    backdrop-filter: blur(5px);
     display: none;
     align-items: center;
     justify-content: center;
     padding: 24px;
-    z-index: 9999;
+    z-index: 999;
 }
 
 .roulette-modal.active {
@@ -440,30 +241,26 @@
     animation: fadeIn 0.3s ease;
 }
 
-.modal-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(15, 15, 24, 0.7);
-    backdrop-filter: blur(8px);
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .modal-content {
     background: #ffffff;
-    border-radius: 28px;
-    padding: 40px 32px;
+    border-radius: 20px;
+    padding: 32px 28px;
     text-align: center;
-    max-width: 420px;
+    max-width: 360px;
     width: 100%;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
-    position: relative;
-    z-index: 1;
-    animation: modalPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.4s ease;
 }
 
-@keyframes modalPop {
+@keyframes modalSlideIn {
     from {
         opacity: 0;
-        transform: scale(0.7) translateY(40px);
+        transform: scale(0.8) translateY(50px);
     }
     to {
         opacity: 1;
@@ -471,16 +268,11 @@
     }
 }
 
-.modal-header {
-    position: relative;
-    margin-bottom: 20px;
-}
-
 .modal-badge {
     display: inline-block;
     background: linear-gradient(135deg, rgba(255, 122, 89, 0.2) 0%, rgba(255, 122, 89, 0.1) 100%);
     color: var(--roulette-accent);
-    padding: 10px 20px;
+    padding: 8px 16px;
     border-radius: 999px;
     font-weight: 700;
     animation: pulse 2s ease-in-out infinite;
@@ -491,46 +283,13 @@
         transform: scale(1);
     }
     50% {
-        transform: scale(1.08);
+        transform: scale(1.05);
     }
-}
-
-.confetti {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.confetti-piece {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background: var(--roulette-accent);
-    border-radius: 50%;
-    animation: confettiFall 2.5s ease-out forwards;
-    top: -10px;
-}
-
-@keyframes confettiFall {
-    to {
-        opacity: 0;
-        transform: translateY(600px) rotate(720deg) scaleX(0);
-    }
-}
-
-.modal-title {
-    font-size: 1.8rem;
-    color: #3d3d57;
-    margin: 16px 0 12px;
-    font-weight: 800;
 }
 
 .modal-desc {
     color: #60607a;
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-bottom: 28px;
+    margin: 12px 0 24px;
 }
 
 .btn-close {
@@ -544,11 +303,9 @@
     box-shadow: 0 10px 30px rgba(91, 70, 246, 0.6);
 }
 
-/* 모바일 대응 */
 @media (max-width: 900px) {
     .roulette-panel {
         grid-template-columns: 1fr;
-        gap: 32px;
     }
 
     .roulette-actions {
@@ -566,7 +323,7 @@
     }
 
     .hero-text h1 {
-        font-size: 2.2rem;
+        font-size: 1.8rem;
     }
 
     .hero-desc {
@@ -579,7 +336,7 @@
     }
 
     .roulette-stage {
-        padding: 28px;
+        padding: 24px;
     }
 
     #rouletteCanvas {
@@ -587,15 +344,10 @@
         height: 300px;
     }
 
-    .roulette-glow {
-        width: 320px;
-        height: 320px;
-    }
-
     .roulette-pointer {
         border-left: 12px solid transparent;
         border-right: 12px solid transparent;
-        border-top: 24px solid var(--roulette-accent);
+        border-bottom: 24px solid var(--roulette-accent);
     }
 
     .roulette-actions {
@@ -625,7 +377,7 @@
     }
 
     .hero-text h1 {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
     }
 
     .hero-reward {
@@ -646,24 +398,15 @@
         height: 260px;
     }
 
-    .roulette-glow {
-        width: 280px;
-        height: 280px;
-    }
-
     .roulette-pointer {
         border-left: 10px solid transparent;
         border-right: 10px solid transparent;
-        border-top: 20px solid var(--roulette-accent);
+        border-bottom: 20px solid var(--roulette-accent);
     }
 
     .modal-content {
         padding: 28px 20px;
         max-width: 340px;
-    }
-
-    .modal-title {
-        font-size: 1.5rem;
     }
 }
 
@@ -765,8 +508,8 @@
 
 .roulette-panel {
     display: grid;
-    grid-template-columns: minmax(280px, 1fr) minmax(240px, 320px);
-    gap: 40px;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
     align-items: center;
     margin-bottom: 40px;
 }
@@ -778,7 +521,7 @@
     align-items: center;
     background: linear-gradient(145deg, #ffffff, #f0f0f0);
     border-radius: 24px;
-    padding: 32px;
+    padding: 16px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.6);
     animation: zoomIn 0.6s ease;
 }
@@ -817,8 +560,8 @@
 }
 
 #rouletteCanvas {
-    width: 360px;
-    height: 360px;
+    width: 300px;
+    height: 300px;
     border-radius: 50%;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2),
                 0 0 0 8px rgba(255, 255, 255, 0.1),
@@ -837,7 +580,7 @@
 
 .roulette-actions {
     background: #ffffff;
-    padding: 28px;
+    padding: 20px;
     border-radius: 20px;
     box-shadow: var(--roulette-shadow);
     text-align: center;
