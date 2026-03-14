@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이벤트 룰렛</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", sans-serif;
+            background: #028bd7;
+            color: #ffffff;
+        }
+
+        :root {
+            --poster-bg-a: #0c9ce7;
+            --poster-bg-b: #047fd0;
+            --poster-highlight: #35f0cd;
+            --poster-accent: #ff6e3d;
+            --poster-text-soft: #ecf8ff;
+        }
+
+        .roulette-page {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 12px;
+            overflow: hidden;
+            isolation: isolate;
+            background: linear-gradient(180deg, #0a8ed8 0%, #056cb3 100%);
+        }
+
+        .roulette-page::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background: linear-gradient(180deg, rgba(2, 72, 123, 0.08) 0%, rgba(1, 48, 89, 0.18) 100%);
+        }
+
+        .poster {
+            z-index: 1;
+            position: relative;
+            width: min(100%, 430px);
+            min-height: calc(100vh - 24px);
+            border-radius: 26px;
+            padding: max(16px, env(safe-area-inset-top)) 18px max(20px, env(safe-area-inset-bottom)) 18px;
+            overflow: hidden;
+            background-color: rgba(3, 137, 210, 0.18);
+            background-image: url('/images/roulette/roulette-event.png?v=20260314-1');
+            background-position: center top;
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 22px 45px rgba(0, 0, 0, 0.28);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .poster::before,
+        .poster::after {
+            content: "";
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+            opacity: 0.35;
+        }
+
+        .poster::before {
+            width: 260px;
+            height: 260px;
+            left: -120px;
+            top: 58%;
+            background: radial-gradient(circle, #67f8ff 0%, rgba(103, 248, 255, 0) 72%);
+        }
+
+        .poster::after {
+            width: 210px;
+            height: 210px;
+            right: -90px;
+            top: 4%;
+            background: radial-gradient(circle, #74d8ff 0%, rgba(116, 216, 255, 0) 72%);
+        }
+
+        .hero {
+            z-index: 1;
+            text-align: center;
+            margin-top: 6px;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .hero-kicker {
+            color: #ffd166;
+            font-weight: 900;
+            font-size: 1.9rem;
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+            text-shadow: 0 2px 0 rgba(0, 0, 0, 0.08);
+        }
+
+        .hero-sub {
+            margin-top: 2px;
+            color: #f3fcff;
+            font-weight: 900;
+            font-size: 1.95rem;
+            line-height: 1.08;
+            letter-spacing: -0.05em;
+            text-shadow: 0 2px 0 rgba(0, 0, 0, 0.08);
+        }
+
+        .hero-title {
+            margin-top: 2px;
+            font-weight: 900;
+            font-size: 4rem;
+            line-height: 0.95;
+            letter-spacing: -0.06em;
+            color: var(--poster-highlight);
+            text-shadow: 0 3px 0 rgba(0, 0, 0, 0.14);
+        }
+
+        .hero-period {
+            margin-top: 16px;
+            color: var(--poster-text-soft);
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            text-shadow: 0 3px 10px rgba(0, 0, 0, 0.22);
+        }
+
+        .roulette-panel {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            padding-top: 5px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .roulette-stage {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 390px;
+            padding: 18px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #f7ffff 0%, #eaf6ff 100%);
+            box-shadow: 0 16px 26px rgba(0, 53, 92, 0.35);
+        }
+
+        .roulette-pointer {
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            width: 34px;
+            height: 34px;
+            transform: translateX(-50%);
+            z-index: 5;
+            filter: drop-shadow(0 8px 10px rgba(255, 110, 61, 0.32));
+        }
+
+        .roulette-pointer::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, #ff6f4a 0%, #ff4f2e 100%);
+            border-radius: 55% 55% 55% 0;
+            transform: rotate(-45deg);
+            transform-origin: center;
+        }
+
+        .roulette-pointer::after {
+            content: "";
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            width: 14px;
+            height: 14px;
+            background: #fffdf7;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10);
+        }
+
+        #rouletteCanvas {
+            width: 344px;
+            height: 344px;
+            border-radius: 50%;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .join-wrap {
+            z-index: 1;
+            width: 100%;
+            margin-top: 24px;
+            padding-top: 0;
+            padding-bottom: 12px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-join {
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 999px;
+            min-width: 186px;
+            padding: 14px 30px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            color: #0c557f;
+            background: linear-gradient(135deg, #9bff53 0%, #50f46e 45%, #28dfc9 100%);
+            box-shadow: 0 12px 24px rgba(10, 120, 103, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.62);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+
+        .btn-join:active {
+            transform: translateY(2px) scale(0.99);
+            box-shadow: 0 7px 14px rgba(10, 120, 103, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+            filter: saturate(0.95);
+        }
+
+        .roulette-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 15, 24, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 999;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px 20px;
+            text-align: center;
+            max-width: 280px;
+            width: 90%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            color: #2f4262;
+            font-size: 1.3rem;
+            margin: 8px 0;
+        }
+
+        .modal-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(255, 122, 89, 0.2) 0%, rgba(255, 122, 89, 0.1) 100%);
+            color: #ff6f4d;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .modal-desc {
+            color: #4e607e;
+            margin: 8px 0 16px;
+            font-size: 0.9rem;
+        }
+
+        .btn-close {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            background: linear-gradient(135deg, #5b46f6 0%, #7c5dfa 100%);
+            color: #ffffff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .notice-card {
+            position: relative;
+            z-index: 1;
+            width: min(100%, 360px);
+            margin-top: 14px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: rgba(7, 87, 145, 0.42);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 10px 24px rgba(0, 38, 71, 0.18);
+            backdrop-filter: blur(10px);
+        }
+
+        .notice-title {
+            font-size: 1rem;
+            font-weight: 900;
+            color: #f1fbff;
+            letter-spacing: -0.03em;
+        }
+
+        .notice-list {
+            margin-top: 10px;
+            padding-left: 18px;
+            color: #e7f7ff;
+            font-size: 0.94rem;
+            line-height: 1.6;
+        }
+
+        .notice-list li + li {
+            margin-top: 6px;
+        }
+
+        @media (min-width: 768px) and (max-width: 1180px) {
+            .roulette-page {
+                padding: 24px;
+            }
+
+            .poster {
+                width: min(100%, 500px);
+                min-height: calc(100vh - 48px);
+                background-position: center, center top;
+                background-size: cover, 100% 100%;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .roulette-page {
+                min-height: 100svh;
+                padding: 0;
+            }
+
+            .roulette-page::before {
+                background: linear-gradient(180deg, rgba(0, 57, 99, 0.12) 0%, rgba(0, 44, 82, 0.22) 100%);
+            }
+
+            .poster {
+                min-height: 100svh;
+                border-radius: 0;
+                width: 100%;
+                padding: max(16px, env(safe-area-inset-top)) 14px max(20px, env(safe-area-inset-bottom)) 14px;
+                background-position: center, center top;
+                background-size: cover, 100% 100%;
+            }
+
+            .notice-card {
+                width: 100%;
+                margin-top: 12px;
+                padding: 15px 16px;
+                border-radius: 16px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .roulette-page {
+                background-size: cover, auto 106%;
+                background-position: center, center top;
+            }
+
+            .hero-kicker,
+            .hero-sub {
+                font-size: 1.6rem;
+            }
+
+            .hero-title {
+                font-size: 3.2rem;
+            }
+
+            .hero-period {
+                font-size: 1.45rem;
+            }
+
+            .roulette-panel {
+                margin-top: 20px;
+            }
+
+            .roulette-stage {
+                max-width: 330px;
+                padding: 16px;
+            }
+
+            #rouletteCanvas {
+                width: 292px;
+                height: 292px;
+            }
+
+            .btn-join {
+                font-size: 1.56rem;
+                min-width: 164px;
+                padding: 12px 24px;
+            }
+
+            .notice-title {
+                font-size: 0.96rem;
+            }
+
+            .notice-list {
+                font-size: 0.88rem;
+                line-height: 1.55;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .roulette-page {
+                background-size: cover, auto 112%;
+                background-position: center, center top;
+            }
+
+            #rouletteCanvas {
+                width: 260px;
+                height: 260px;
+            }
+
+            .roulette-stage {
+                max-width: 290px;
+                padding: 14px;
+            }
+
+            .hero-title {
+                font-size: 2.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="roulette-page">
+    <main class="poster">
+        <header class="hero" aria-label="이벤트 안내">
+            <p class="hero-kicker">돌려라!</p>
+            <p class="hero-sub">행운이 쏟아지는</p>
+            <h1 class="hero-title">룰렛이벤트</h1>
+            <p class="hero-period">기간 : 2024.7.1 ~ 7.31</p>
+        </header>
+
+        <section class="roulette-panel">
+            <div class="roulette-stage">
+                <div class="roulette-pointer" aria-hidden="true"></div>
+                <canvas id="rouletteCanvas" width="420" height="420" aria-label="이벤트 룰렛"></canvas>
+            </div>
+        </section>
+
+        <div class="join-wrap">
+            <button id="joinButton" class="btn-join" type="button">1회 참여가능</button>
+        </div>
+
+        <section class="notice-card" aria-label="참여 유의사항">
+            <h2 class="notice-title">참여 유의사항</h2>
+            <ul class="notice-list">
+                <li>본 이벤트는 계정당 1일 1회만 참여할 수 있습니다.</li>
+                <li>당첨 혜택은 참여 즉시 지급되며, 일부 쿠폰은 사용 기한이 적용됩니다.</li>
+                <li>비정상적인 참여가 확인될 경우 당첨이 취소될 수 있습니다.</li>
+            </ul>
+        </section>
+    </main>
+
+    <div id="resultModal" class="roulette-modal" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal-content">
+            <p class="modal-badge">축하합니다!</p>
+            <h2 id="resultText">당첨 결과</h2>
+            <p id="resultDesc" class="modal-desc">당첨 내용을 확인해 주세요.</p>
+            <button id="closeModal" class="btn-close" type="button">확인</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // 룰렛 항목 값
+        const rouletteState = {
+            items: [
+                { label: "10% 할인 쿠폰", desc: "결제 시 바로 적용됩니다.", color: "#7B72E8" },
+                { label: "무료 배송", desc: "배송비가 자동으로 면제됩니다.", color: "#31C6AB" },
+                { label: "5,000 포인트", desc: "포인트가 즉시 적립됩니다.", color: "#43A1EA" },
+                { label: "20% 할인 쿠폰", desc: "오늘만 가능한 추가 혜택!", color: "#E78A6D" },
+                { label: "1,000 포인트", desc: "다음 구매에 사용 가능해요.", color: "#E6C56F" },
+                { label: "꽝 없이 당첨", desc: "다음 기회에 더 큰 혜택!", color: "#DA5F66" }
+            ],
+            spinning: false,
+            currentRotation: 0
+        };
+
+        const canvas = document.getElementById("rouletteCanvas");
+        const ctx = canvas.getContext("2d");
+        const size = canvas.width;
+        const radius = size / 2;
+
+        // 1칸의 각도(360도 / 항목 수)
+        const sliceAngle = (Math.PI * 2) / rouletteState.items.length;
+        // 한 바퀴(360도)
+        const fullRotation = Math.PI * 2;
+        // 12시 방향 포인터 각도(3시 기준 -90도)
+        const pointerAngle = -Math.PI / 2;
+
+        function normalizeAngle(angle) {
+            return ((angle % fullRotation) + fullRotation) % fullRotation;
+        }
+
+        function getLandedIndex(rotation) {
+            const relativeAngle = normalizeAngle(pointerAngle - rotation);
+            return Math.floor(relativeAngle / sliceAngle) % rouletteState.items.length;
+        }
+
+        let currentRotation = -Math.PI / 2;
+
+        function drawWheel(rotation = 0) {
+            ctx.clearRect(0, 0, size, size);
+            ctx.save();
+            ctx.translate(radius, radius);
+            ctx.rotate(rotation);
+
+            rouletteState.items.forEach((item, index) => {
+                const startAngle = index * sliceAngle;
+                const endAngle = startAngle + sliceAngle;
+
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, radius - 6, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = item.color;
+                ctx.fill();
+
+                ctx.save();
+                ctx.rotate(startAngle + sliceAngle / 2);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "600 16px -apple-system, BlinkMacSystemFont, sans-serif";
+                ctx.textAlign = "right";
+                ctx.fillText(item.label, radius - 30, 6);
+                ctx.restore();
+            });
+
+            ctx.beginPath();
+            ctx.arc(0, 0, 46, 0, Math.PI * 2);
+            ctx.fillStyle = "#2B7EEA";
+            ctx.fill();
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(radius, radius);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "700 20px -apple-system, BlinkMacSystemFont, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("시작", 0, 7);
+            ctx.restore();
+        }
+
+        function spin(targetIndex = null) {
+            if (rouletteState.spinning) return;
+
+            rouletteState.spinning = true;
+
+            if (targetIndex === null) {
+                targetIndex = Math.floor(Math.random() * rouletteState.items.length);
+            }
+
+            const targetCenterAngle = pointerAngle - ((targetIndex + 0.5) * sliceAngle);
+            const currentWrapped = normalizeAngle(currentRotation);
+            const targetWrapped = normalizeAngle(targetCenterAngle);
+            const delta = (targetWrapped - currentWrapped + fullRotation) % fullRotation;
+            const finalTargetAngle = currentRotation + (fullRotation * 3) + delta;
+
+            const duration = 4500;
+            const startTime = performance.now();
+            const startRotation = currentRotation;
+
+            function animate(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                const eased = 1 - Math.pow(1 - progress, 4);
+                currentRotation = startRotation + (finalTargetAngle - startRotation) * eased;
+
+                drawWheel(currentRotation);
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    rouletteState.spinning = false;
+                    const landedIndex = getLandedIndex(currentRotation);
+                    showResult(landedIndex);
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function showResult(index) {
+            const item = rouletteState.items[index];
+            const modal = document.getElementById("resultModal");
+            const resultText = document.getElementById("resultText");
+            const resultDesc = document.getElementById("resultDesc");
+
+            resultText.textContent = item.label;
+            resultDesc.textContent = item.desc;
+            modal.style.display = "flex";
+            modal.setAttribute("aria-hidden", "false");
+        }
+
+        drawWheel(currentRotation);
+
+        const closeModal = document.getElementById("closeModal");
+        const resultModal = document.getElementById("resultModal");
+        const joinButton = document.getElementById("joinButton");
+
+        closeModal.addEventListener("click", () => {
+            resultModal.style.display = "none";
+            resultModal.setAttribute("aria-hidden", "true");
+        });
+
+        resultModal.addEventListener("click", (e) => {
+            if (e.target === resultModal) {
+                resultModal.style.display = "none";
+                resultModal.setAttribute("aria-hidden", "true");
+            }
+        });
+
+        joinButton.addEventListener("click", () => {
+            spin();
+        });
+
+        canvas.addEventListener("click", (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (event.clientX - rect.left) * scaleX - radius;
+            const y = (event.clientY - rect.top) * scaleY - radius;
+            const distance = Math.sqrt(x * x + y * y);
+
+            if (distance <= 46 && !rouletteState.spinning) {
+                spin();
+            }
+        });
+
+        canvas.addEventListener("mousemove", (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (event.clientX - rect.left) * scaleX - radius;
+            const y = (event.clientY - rect.top) * scaleY - radius;
+            const distance = Math.sqrt(x * x + y * y);
+
+            canvas.style.cursor = (distance <= 46 && !rouletteState.spinning) ? "pointer" : "default";
+        });
+    })();
+</script>
+
+</body>
+</html>
+
