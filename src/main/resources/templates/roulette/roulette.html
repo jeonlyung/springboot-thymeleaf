@@ -89,6 +89,17 @@
             const size = canvas.width;
             const radius = size / 2;
             const sliceAngle = (Math.PI * 2) / rouletteState.items.length;
+            const fullRotation = Math.PI * 2;
+            const pointerAngle = -Math.PI / 2;
+
+            function normalizeAngle(angle) {
+                return ((angle % fullRotation) + fullRotation) % fullRotation;
+            }
+
+            function getLandedIndex(rotation) {
+                const relativeAngle = normalizeAngle(pointerAngle - rotation);
+                return Math.floor(relativeAngle / sliceAngle) % rouletteState.items.length;
+            }
 
             // [수정] 12시 방향이 경계선이 되도록 초기값 설정 (3시 기준 -90도)
             const offset = -Math.PI / 2;
@@ -150,21 +161,12 @@
                     targetIndex = Math.floor(Math.random() * rouletteState.items.length);
                 }
 
-                // 2. 한 칸의 각도 (360도 / 항목수)
-                const sliceAngle = (Math.PI * 2) / rouletteState.items.length;
-
-                // 3. 목표 각도 계산 (핵심 공식)
-                // - (targetIndex * sliceAngle) : 해당 항목의 시작 지점
-                // - (sliceAngle / 2) : 해당 항목의 절반(중앙)만큼 더 이동
-                // - (Math.PI / 2) : 12시 포인터 위치 보정 (90도)
-                const overlapAngle = (targetIndex * sliceAngle) + (sliceAngle / 2);
-                const targetAngle = (Math.PI * 2) - overlapAngle + (Math.PI / 2);
-
-                // 4. 자연스러운 회전을 위해 최소 5바퀴 이상 더 돌리기
-                // 현재 회전값(currentRotation)의 기준을 잡고 그 위에 목표 각도를 더함
-                const baseRotation = Math.ceil(currentRotation / (Math.PI * 2)) * (Math.PI * 2);
-                const extraRotations = (Math.PI * 2) * 5;
-                const finalTargetAngle = baseRotation + extraRotations + (targetAngle % (Math.PI * 2));
+                // 포인터(12시)와 목표 항목 중심이 맞도록 목표 회전 각 계산
+                const targetCenterAngle = pointerAngle - ((targetIndex + 0.5) * sliceAngle);
+                const currentWrapped = normalizeAngle(currentRotation);
+                const targetWrapped = normalizeAngle(targetCenterAngle);
+                const delta = (targetWrapped - currentWrapped + fullRotation) % fullRotation;
+                const finalTargetAngle = currentRotation + (fullRotation * 5) + delta;
 
                 const duration = 4500; // 4.5초 동안 회전
                 const startTime = performance.now();
@@ -184,7 +186,8 @@
                         requestAnimationFrame(animate);
                     } else {
                         rouletteState.spinning = false;
-                        showResult(targetIndex);
+                        const landedIndex = getLandedIndex(currentRotation);
+                        showResult(landedIndex);
                         document.getElementById("spinButton").disabled = false;
                         document.getElementById("resetButton").disabled = false;
                     }
