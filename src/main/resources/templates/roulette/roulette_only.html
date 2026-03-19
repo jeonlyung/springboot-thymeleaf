@@ -25,9 +25,9 @@
         :root {
             --poster-bg-a: #0c9ce7;
             --poster-bg-b: #047fd0;
-            --poster-highlight: #35f0cd;
+            --poster-highlight: #20f2c0;
             --poster-accent: #ff6e3d;
-            --poster-text-soft: #ecf8ff;
+            --poster-text-soft: #d8efff;
         }
 
         .roulette-page {
@@ -58,10 +58,10 @@
             border-radius: 26px;
             padding: max(16px, env(safe-area-inset-top)) 18px max(20px, env(safe-area-inset-bottom)) 18px;
             overflow: hidden;
-            background-color: rgba(3, 137, 210, 0.18);
-            background-image: url('/images/roulette/roulette-event.png?v=20260314-1');
-            background-position: center top;
-            background-size: 100% 100%;
+            background-color: rgba(3, 137, 210, 0.55);
+            background-image: linear-gradient(180deg, rgba(7, 151, 230, 0.18) 0%, rgba(4, 97, 176, 0.22) 100%), url('../../static/images/roulette/roulette-event.png');
+            background-position: center, center top;
+            background-size: cover, 100% 100%;
             background-repeat: no-repeat;
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 22px 45px rgba(0, 0, 0, 0.28);
             display: flex;
@@ -98,12 +98,10 @@
             z-index: 1;
             text-align: center;
             margin-top: 6px;
-            visibility: hidden;
-            pointer-events: none;
         }
 
         .hero-kicker {
-            color: #ffd166;
+            color: #ffe089;
             font-weight: 900;
             font-size: 1.9rem;
             line-height: 1.05;
@@ -113,7 +111,7 @@
 
         .hero-sub {
             margin-top: 2px;
-            color: #f3fcff;
+            color: #eefbff;
             font-weight: 900;
             font-size: 1.95rem;
             line-height: 1.08;
@@ -128,7 +126,7 @@
             line-height: 0.95;
             letter-spacing: -0.06em;
             color: var(--poster-highlight);
-            text-shadow: 0 3px 0 rgba(0, 0, 0, 0.14);
+            text-shadow: 0 3px 0 rgba(0, 0, 0, 0.1);
         }
 
         .hero-period {
@@ -137,7 +135,7 @@
             font-size: 2rem;
             font-weight: 800;
             letter-spacing: -0.03em;
-            text-shadow: 0 3px 10px rgba(0, 0, 0, 0.22);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
         .roulette-panel {
@@ -221,7 +219,7 @@
             font-size: 1.8rem;
             font-weight: 900;
             letter-spacing: -0.03em;
-            color: #0c557f;
+            color: #075184;
             background: linear-gradient(135deg, #9bff53 0%, #50f46e 45%, #28dfc9 100%);
             box-shadow: 0 12px 24px rgba(10, 120, 103, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.62);
             cursor: pointer;
@@ -257,7 +255,7 @@
         }
 
         .modal-content h2 {
-            color: #2f4262;
+            color: #3d3d57;
             font-size: 1.3rem;
             margin: 8px 0;
         }
@@ -265,7 +263,7 @@
         .modal-badge {
             display: inline-block;
             background: linear-gradient(135deg, rgba(255, 122, 89, 0.2) 0%, rgba(255, 122, 89, 0.1) 100%);
-            color: #ff6f4d;
+            color: #ff7a59;
             padding: 6px 12px;
             border-radius: 999px;
             font-weight: 700;
@@ -273,7 +271,7 @@
         }
 
         .modal-desc {
-            color: #4e607e;
+            color: #60607a;
             margin: 8px 0 16px;
             font-size: 0.9rem;
         }
@@ -288,7 +286,7 @@
             font-weight: 700;
             background: linear-gradient(135deg, #5b46f6 0%, #7c5dfa 100%);
             color: #ffffff;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 6px 20px rgba(91, 70, 246, 0.4);
         }
 
         .notice-card {
@@ -307,14 +305,14 @@
         .notice-title {
             font-size: 1rem;
             font-weight: 900;
-            color: #f1fbff;
+            color: #f4fbff;
             letter-spacing: -0.03em;
         }
 
         .notice-list {
             margin-top: 10px;
             padding-left: 18px;
-            color: #e7f7ff;
+            color: #dff4ff;
             font-size: 0.94rem;
             line-height: 1.6;
         }
@@ -441,7 +439,7 @@
             <p class="hero-kicker">돌려라!</p>
             <p class="hero-sub">행운이 쏟아지는</p>
             <h1 class="hero-title">룰렛이벤트</h1>
-            <p class="hero-period">기간 : 2024.7.1 ~ 7.31</p>
+            <p class="hero-period">기간 : 2026.4.1 ~ 4.31</p>
         </header>
 
         <section class="roulette-panel">
