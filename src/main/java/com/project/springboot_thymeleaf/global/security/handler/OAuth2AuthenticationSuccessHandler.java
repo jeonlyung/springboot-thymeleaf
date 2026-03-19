@@ -2,6 +2,7 @@ package com.project.springboot_thymeleaf.global.security.handler;
 
 import com.project.springboot_thymeleaf.biz.login.dto.CustomOAuth2User;
 import com.project.springboot_thymeleaf.global.security.jwt.JwtTokenProvider;
+import com.project.springboot_thymeleaf.global.security.jwt.RefreshTokenService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +27,7 @@ import java.io.IOException;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -38,6 +40,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         // JWT 토큰 생성
         String accessToken = jwtTokenProvider.generateAccessToken(authentication, email, provider);
         String refreshToken = jwtTokenProvider.generateRefreshToken(email);
+
+        // ★ Refresh Token을 Redis에 저장 (7일 TTL)
+        refreshTokenService.save(email, refreshToken);
 
         log.info("OAuth2 로그인 성공 - User: {}, Provider: {}", email, provider);
 
