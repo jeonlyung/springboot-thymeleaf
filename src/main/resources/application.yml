@@ -89,7 +89,7 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
-# Redis 설정
+  # Redis 설정
   data:
     redis:
       host: localhost
