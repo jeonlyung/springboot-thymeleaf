@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -54,5 +56,41 @@ public class RefreshTokenService {
         redisTemplate.delete(key);
         log.info("[Redis] Refresh Token 삭제 - key: {}", key);
     }
-}
 
+    /**
+     * refreshToken:* prefix 에 해당하는 키를 모두 삭제
+     * 운영 환경에서는 flushDb()보다 이 메소드 사용을 권장
+     */
+    public long deleteAllRefreshTokens() {
+        Set<String> keys = redisTemplate.keys(KEY_PREFIX + "*");
+        if (keys.isEmpty()) {
+            return 0L;
+        }
+
+        long result = redisTemplate.delete(keys);
+        log.warn("[Redis] Refresh Token 전체 삭제 - deletedCount: {}", result);
+        return result;
+    }
+
+    /**
+     * 현재 선택된 Redis DB의 모든 키를 삭제
+     * 매우 위험하므로 관리자/개발 환경에서만 제한적으로 사용
+     */
+    public void flushCurrentDb() {
+        Objects.requireNonNull(redisTemplate.getConnectionFactory(), "RedisConnectionFactory is null")
+                .getConnection()
+                .serverCommands()
+                .flushDb();
+        log.warn("[Redis] 현재 DB 전체 키 삭제(flushDb) 수행");
+    }
+
+    /**
+     * 특정 Redis 키 1건 삭제
+     * 예) refreshToken:user@email.com
+     */
+    public boolean deleteByKey(String key) {
+        boolean result = redisTemplate.delete(key);
+        log.info("[Redis] 특정 키 삭제 - key: {}, deleted: {}", key, result);
+        return result;
+    }
+}
