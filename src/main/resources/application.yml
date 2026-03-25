@@ -95,7 +95,7 @@ spring:
       host: localhost
       port: 6379
       password:                          # 비밀번호 없으면 빈 칸
-      timeout: 3000ms                    # 연결 타임아웃
+      timeout: 5000ms                    # 연결 타임아웃
       lettuce:
         pool:
           max-active: 8                  # 최대 커넥션
@@ -153,7 +153,7 @@ management:
         include: health,info,metrics
   endpoint:
     health:
-      show-details: when-authorized
+      show-details: always        # Redis 포함 전체 상태 항상 노출 (운영에선 when-authorized 권장)
 
 # 서버 설정
 server:
