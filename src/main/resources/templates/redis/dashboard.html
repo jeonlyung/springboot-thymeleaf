@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redis 대시보드</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-base:    #060b18;
+            --bg-surface: #0d1629;
+            --bg-card:    #111d35;
+            --bg-card2:   #0f1a30;
+            --border:     rgba(99,179,255,0.10);
+            --border-h:   rgba(99,179,255,0.25);
+            --text-1:     #e8f4ff;
+            --text-2:     #7fa8d0;
+            --text-3:     #3d5a7a;
+            --accent:     #38bdf8;
+            --accent2:    #818cf8;
+            --green:      #34d399;
+            --yellow:     #fbbf24;
+            --red:        #f87171;
+            --orange:     #fb923c;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-base);
+            color: var(--text-1);
+            min-height: 100vh;
+        }
+
+        /* ── 배경 장식 ── */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -200px; left: -200px;
+            width: 700px; height: 700px;
+            background: radial-gradient(circle, rgba(56,189,248,.07) 0%, transparent 70%);
+            pointer-events: none; z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -150px; right: -150px;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(129,140,248,.06) 0%, transparent 70%);
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ── 헤더 ── */
+        .header {
+            position: relative; z-index: 10;
+            background: rgba(13,22,41,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            height: 62px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .header-logo {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .header-logo-icon {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 0 16px rgba(56,189,248,.35);
+        }
+        .header h1 {
+            font-size: 1.05rem; font-weight: 700; color: var(--text-1);
+            letter-spacing: -.02em;
+        }
+        .header-sub {
+            font-size: 0.72rem; color: var(--text-3);
+            margin-top: 1px; font-weight: 500;
+        }
+        .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+        .badge-status {
+            display: flex; align-items: center; gap: 6px;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: 0.75rem; font-weight: 700;
+            letter-spacing: .03em;
+        }
+        .badge-status .dot {
+            width: 7px; height: 7px; border-radius: 50%;
+        }
+        .badge-status.ok {
+            background: rgba(52,211,153,.1);
+            border: 1px solid rgba(52,211,153,.3);
+            color: var(--green);
+        }
+        .badge-status.ok .dot {
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green);
+            animation: pulse 1.8s infinite;
+        }
+        .badge-status.fail {
+            background: rgba(248,113,113,.1);
+            border: 1px solid rgba(248,113,113,.3);
+            color: var(--red);
+        }
+        .badge-status.fail .dot { background: var(--red); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: .5; transform: scale(1.4); }
+        }
+
+        .btn-refresh {
+            display: flex; align-items: center; gap: 6px;
+            padding: 7px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-h);
+            background: rgba(99,179,255,.07);
+            color: var(--text-2);
+            font-size: 0.8rem; font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .btn-refresh:hover {
+            background: rgba(56,189,248,.12);
+            color: var(--accent);
+            border-color: rgba(56,189,248,.35);
+        }
+        .btn-refresh .icon { font-size: 1rem; transition: transform .4s; }
+        .btn-refresh:hover .icon { transform: rotate(180deg); }
+
+        /* ── 본문 ── */
+        .container {
+            position: relative; z-index: 1;
+            padding: 28px 32px 40px;
+            max-width: 1500px; margin: 0 auto;
+        }
+
+        /* ── 섹션 레이블 ── */
+        .section-label {
+            font-size: 0.7rem; font-weight: 700;
+            color: var(--text-3);
+            text-transform: uppercase; letter-spacing: .1em;
+            margin-bottom: 12px;
+        }
+
+        /* ── 요약 카드 ── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+        @media (max-width: 1100px) { .stat-grid { grid-template-columns: repeat(3,1fr); } }
+        @media (max-width: 600px)  { .stat-grid { grid-template-columns: repeat(2,1fr); } }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px 16px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color .2s, transform .2s;
+            cursor: default;
+        }
+        .stat-card:hover {
+            border-color: var(--border-h);
+            transform: translateY(-2px);
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            border-radius: 14px 14px 0 0;
+        }
+        .stat-card.c-blue::before   { background: linear-gradient(90deg, #38bdf8, #818cf8); }
+        .stat-card.c-green::before  { background: linear-gradient(90deg, #34d399, #059669); }
+        .stat-card.c-yellow::before { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+        .stat-card.c-purple::before { background: linear-gradient(90deg, #a78bfa, #7c3aed); }
+        .stat-card.c-orange::before { background: linear-gradient(90deg, #fb923c, #ea580c); }
+        .stat-card.c-cyan::before   { background: linear-gradient(90deg, #22d3ee, #0891b2); }
+
+        .stat-icon {
+            font-size: 1.3rem; margin-bottom: 10px; opacity: .85;
+        }
+        .stat-label {
+            font-size: 0.68rem; font-weight: 600;
+            color: var(--text-3);
+            text-transform: uppercase; letter-spacing: .07em;
+        }
+        .stat-value {
+            font-size: 1.55rem; font-weight: 800;
+            margin-top: 4px; color: var(--text-1);
+            letter-spacing: -.03em; line-height: 1;
+        }
+        .stat-value.blue   { color: var(--accent); }
+        .stat-value.green  { color: var(--green); }
+        .stat-value.yellow { color: var(--yellow); }
+        .stat-value.purple { color: #a78bfa; }
+        .stat-value.orange { color: var(--orange); }
+        .stat-value.cyan   { color: #22d3ee; }
+        .stat-value.red    { color: var(--red); }
+
+        /* ── 툴바 ── */
+        .toolbar-row {
+            display: flex; gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap; align-items: center;
+        }
+        .search-wrap {
+            flex: 1; min-width: 220px;
+            position: relative;
+        }
+        .search-wrap .icon {
+            position: absolute; left: 12px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.9rem; color: var(--text-3);
+            pointer-events: none;
+        }
+        .search-wrap input {
+            width: 100%;
+            padding: 9px 14px 9px 36px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            color: var(--text-1);
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .search-wrap input:focus { border-color: rgba(56,189,248,.45); }
+        .search-wrap input::placeholder { color: var(--text-3); }
+
+        .filter-select {
+            padding: 9px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            color: var(--text-2);
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color .2s;
+        }
+        .filter-select:focus { border-color: rgba(56,189,248,.45); }
+
+        /* ── 테이블 ── */
+        .table-wrap {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .table-header {
+            padding: 16px 20px;
+            display: flex; align-items: center; gap: 8px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card2);
+        }
+        .table-header-icon { font-size: 1rem; }
+        .table-header-title {
+            font-size: 0.88rem; font-weight: 700; color: var(--text-2);
+        }
+        .table-header-count {
+            margin-left: auto;
+            padding: 3px 10px;
+            background: rgba(56,189,248,.1);
+            border: 1px solid rgba(56,189,248,.2);
+            border-radius: 999px;
+            font-size: 0.72rem; font-weight: 700; color: var(--accent);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            padding: 10px 18px;
+            text-align: left;
+            font-size: 0.68rem; font-weight: 700;
+            color: var(--text-3);
+            text-transform: uppercase; letter-spacing: .08em;
+            background: rgba(6,11,24,.5);
+            border-bottom: 1px solid var(--border);
+        }
+        tbody tr {
+            border-bottom: 1px solid rgba(99,179,255,.04);
+            transition: background .12s;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: rgba(56,189,248,.04); }
+        tbody td { padding: 11px 18px; font-size: 0.84rem; vertical-align: middle; }
+
+        .td-index {
+            text-align: center;
+            font-size: 0.72rem; font-weight: 700;
+            color: var(--text-3);
+            width: 48px;
+            user-select: none;
+        }
+
+        .td-key {            color: var(--accent);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.8rem;
+            max-width: 280px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .td-value {
+            color: var(--text-2);
+            max-width: 360px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.78rem;
+        }
+        .td-ttl { color: var(--yellow); white-space: nowrap; font-size: 0.8rem; font-weight: 600; }
+        .td-ttl.permanent { color: var(--text-3); }
+
+        /* 타입 배지 */
+        .type-badge {
+            display: inline-flex; align-items: center;
+            padding: 2px 9px;
+            border-radius: 5px;
+            font-size: 0.68rem; font-weight: 700;
+            letter-spacing: .04em;
+        }
+        .type-string { background: rgba(56,189,248,.1);  color: var(--accent);  border: 1px solid rgba(56,189,248,.2); }
+        .type-hash   { background: rgba(167,139,250,.1); color: #a78bfa; border: 1px solid rgba(167,139,250,.2); }
+        .type-list   { background: rgba(52,211,153,.1);  color: var(--green);   border: 1px solid rgba(52,211,153,.2); }
+        .type-set    { background: rgba(251,146,60,.1);  color: var(--orange);  border: 1px solid rgba(251,146,60,.2); }
+        .type-zset   { background: rgba(251,191,36,.1);  color: var(--yellow);  border: 1px solid rgba(251,191,36,.2); }
+        .type-unknown{ background: rgba(61,90,122,.1);   color: var(--text-3);  border: 1px solid rgba(61,90,122,.2); }
+
+        /* 삭제 버튼 */
+        .btn-del {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 11px;
+            font-size: 0.74rem; font-weight: 700;
+            background: rgba(248,113,113,.08);
+            color: var(--red);
+            border: 1px solid rgba(248,113,113,.2);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .btn-del:hover {
+            background: rgba(248,113,113,.18);
+            border-color: rgba(248,113,113,.5);
+        }
+
+        /* 빈 상태 */
+        .empty-row td {
+            text-align: center; padding: 48px;
+            color: var(--text-3); font-size: 0.85rem;
+        }
+        .empty-icon { font-size: 2.2rem; margin-bottom: 10px; opacity: .4; }
+
+        /* 테이블 푸터 */
+        .table-footer {
+            padding: 10px 20px;
+            font-size: 0.74rem; color: var(--text-3);
+            border-top: 1px solid var(--border);
+            background: var(--bg-card2);
+        }
+
+        /* ── 토스트 ── */
+        #toast {
+            position: fixed;
+            bottom: 28px; right: 28px;
+            display: flex; align-items: center; gap: 8px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.84rem; font-weight: 600;
+            background: rgba(52,211,153,.12);
+            color: var(--green);
+            border: 1px solid rgba(52,211,153,.3);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0,0,0,.4);
+            opacity: 0; transform: translateY(12px);
+            transition: opacity .25s, transform .25s;
+            z-index: 9999; pointer-events: none;
+        }
+        #toast.show { opacity: 1; transform: translateY(0); }
+        #toast.error {
+            background: rgba(248,113,113,.12);
+            color: var(--red);
+            border-color: rgba(248,113,113,.3);
+        }
+
+        /* ── 스크롤바 ── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-base); }
+        ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2d5486; }
+
+        /* ── 모달 오버레이 ── */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.65);
+            backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+            opacity: 0; pointer-events: none;
+            transition: opacity .2s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border-h);
+            border-radius: 18px;
+            padding: 28px 28px 24px;
+            width: 480px; max-width: 95vw;
+            box-shadow: 0 24px 60px rgba(0,0,0,.6);
+            transform: translateY(20px);
+            transition: transform .25s;
+        }
+        .modal-overlay.open .modal { transform: translateY(0); }
+
+        .modal-title {
+            font-size: 1rem; font-weight: 800;
+            color: var(--text-1); margin-bottom: 20px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .modal-close {
+            margin-left: auto;
+            background: none; border: none;
+            color: var(--text-3); font-size: 1.2rem;
+            cursor: pointer; line-height: 1;
+            transition: color .15s;
+        }
+        .modal-close:hover { color: var(--red); }
+
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            display: block;
+            font-size: 0.72rem; font-weight: 700;
+            color: var(--text-3);
+            text-transform: uppercase; letter-spacing: .07em;
+            margin-bottom: 6px;
+        }
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 9px 13px;
+            background: var(--bg-card2);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            color: var(--text-1);
+            font-size: 0.88rem;
+            outline: none;
+            transition: border-color .2s;
+            font-family: inherit;
+        }
+        .form-input:focus, .form-textarea:focus { border-color: rgba(56,189,248,.5); }
+        .form-textarea { resize: vertical; min-height: 80px; }
+        .form-input::placeholder, .form-textarea::placeholder { color: var(--text-3); }
+
+        .form-row { display: flex; gap: 10px; }
+        .form-row .form-group { flex: 1; }
+
+        .form-hint {
+            font-size: 0.7rem; color: var(--text-3); margin-top: 4px;
+        }
+
+        .modal-actions {
+            display: flex; gap: 10px; justify-content: flex-end;
+            margin-top: 20px; padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        .btn-cancel {
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-h);
+            background: transparent;
+            color: var(--text-2);
+            font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; transition: all .15s;
+        }
+        .btn-cancel:hover { background: rgba(99,179,255,.08); color: var(--text-1); }
+
+        .btn-submit {
+            padding: 8px 22px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            color: #fff;
+            font-size: 0.85rem; font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(56,189,248,.3);
+            transition: all .2s;
+        }
+        .btn-submit:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-submit:active { transform: translateY(0); }
+
+        /* 추가 버튼 */
+        .btn-add-key {
+            display: flex; align-items: center; gap: 6px;
+            padding: 7px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(56,189,248,.35);
+            background: rgba(56,189,248,.1);
+            color: var(--accent);
+            font-size: 0.8rem; font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .btn-add-key:hover { background: rgba(56,189,248,.2); box-shadow: 0 0 12px rgba(56,189,248,.2); }
+
+        /* 수정 버튼 */
+        .btn-edit {
+            display: inline-flex; align-items: center; gap: 3px;
+            padding: 4px 10px;
+            font-size: 0.74rem; font-weight: 700;
+            background: rgba(129,140,248,.08);
+            color: #a78bfa;
+            border: 1px solid rgba(129,140,248,.2);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .15s;
+            margin-right: 4px;
+        }
+        .btn-edit:hover { background: rgba(129,140,248,.18); border-color: rgba(129,140,248,.5); }
+
+        /* ── 2컬럼 레이아웃 ── */
+        .content-layout {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+        .table-section {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* ── 상세 패널 ── */
+        .detail-panel {
+            width: 0;
+            overflow: hidden;
+            transition: width .3s ease, opacity .3s ease;
+            opacity: 0;
+            flex-shrink: 0;
+        }
+        .detail-panel.open {
+            width: 380px;
+            opacity: 1;
+        }
+        .detail-inner {
+            width: 380px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            position: sticky;
+            top: 20px;
+        }
+        .detail-header {
+            padding: 14px 18px;
+            background: var(--bg-card2);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .detail-header-title {
+            font-size: 0.82rem; font-weight: 700; color: var(--text-2);
+            flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .detail-header-actions { display: flex; gap: 6px; }
+        .btn-detail-mini {
+            border: 1px solid var(--border);
+            background: rgba(56,189,248,.08);
+            color: var(--text-2);
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+        .btn-detail-mini:hover { color: var(--accent); border-color: var(--border-h); }
+        .detail-key-name {
+            font-size: 0.78rem; color: var(--accent);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            padding: 10px 18px 0;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .detail-close {
+            background: none; border: none;
+            color: var(--text-3); font-size: 1rem;
+            cursor: pointer; transition: color .15s; flex-shrink: 0;
+        }
+        .detail-close:hover { color: var(--red); }
+
+        /* 탭 */
+        .detail-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            padding: 0 18px;
+            gap: 0;
+        }
+        .detail-tab {
+            padding: 9px 14px;
+            font-size: 0.75rem; font-weight: 700;
+            color: var(--text-3);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: color .15s, border-color .15s;
+            user-select: none;
+        }
+        .detail-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* 탭 콘텐츠 */
+        .detail-tab-content { display: none; }
+        .detail-tab-content.active { display: block; }
+
+        /* 리스트 뷰 */
+        .detail-list {
+            list-style: none;
+            padding: 10px 0;
+            max-height: 520px;
+            overflow-y: auto;
+        }
+        .detail-list-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 18px;
+            border-bottom: 1px solid rgba(99,179,255,.04);
+            transition: background .1s;
+            cursor: default;
+        }
+        .detail-list-item:last-child { border-bottom: none; }
+        .detail-list-item:hover { background: rgba(56,189,248,.04); }
+        .detail-list-idx {
+            min-width: 22px; height: 22px;
+            background: rgba(56,189,248,.1);
+            border: 1px solid rgba(56,189,248,.15);
+            border-radius: 5px;
+            font-size: 0.65rem; font-weight: 800;
+            color: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; margin-top: 1px;
+        }
+        .detail-list-body { flex: 1; min-width: 0; }
+        .detail-list-actions { display: flex; gap: 4px; margin-left: auto; }
+        .btn-item {
+            border: 1px solid var(--border);
+            background: rgba(99,179,255,.07);
+            color: var(--text-2);
+            border-radius: 6px;
+            padding: 2px 7px;
+            font-size: 0.68rem;
+            cursor: pointer;
+        }
+        .btn-item:hover { color: var(--accent); border-color: var(--border-h); }
+        .btn-item-del {
+            border-color: rgba(248,113,113,.35);
+            background: rgba(248,113,113,.08);
+            color: var(--red);
+        }
+        .btn-item-del:hover { background: rgba(248,113,113,.18); }
+        .detail-field-grid { margin-top: 4px; display: grid; gap: 4px; }
+        .detail-field-row {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 8px;
+            align-items: start;
+        }
+        .detail-field-k { color: var(--text-3); font-size: 0.7rem; }
+        .detail-field-v { color: var(--text-1); font-size: 0.77rem; word-break: break-all; }
+        .detail-list-key {
+            font-size: 0.72rem; font-weight: 700;
+            color: var(--text-3);
+            margin-bottom: 2px;
+        }
+        .detail-list-val {
+            font-size: 0.8rem; color: var(--text-1);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            word-break: break-all;
+            line-height: 1.45;
+        }
+
+        /* RAW 뷰 */
+        .detail-raw {
+            padding: 14px 18px;
+            max-height: 520px;
+            overflow-y: auto;
+        }
+        .detail-raw pre {
+            font-size: 0.78rem;
+            color: var(--text-2);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.6;
+        }
+
+        /* 빈 상태 */
+        .detail-empty {
+            padding: 40px 18px;
+            text-align: center;
+            color: var(--text-3);
+            font-size: 0.82rem;
+        }
+        .detail-empty-icon { font-size: 1.8rem; margin-bottom: 8px; opacity: .4; }
+
+        /* 메타 정보 */
+        .detail-meta {
+            display: flex; gap: 8px;
+            padding: 10px 18px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .detail-meta-item {
+            display: flex; align-items: center; gap: 4px;
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-size: 0.7rem; font-weight: 700;
+            background: rgba(99,179,255,.06);
+            border: 1px solid var(--border);
+            color: var(--text-3);
+        }
+        .detail-meta-item span { color: var(--text-2); }
+
+        /* 선택된 행 하이라이트 */
+        tbody tr.selected { background: rgba(56,189,248,.08) !important; }
+        tbody tr.selected .td-key { color: #7dd3fc; }
+    </style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="header">
+    <div class="header-logo">
+        <div class="header-logo-icon">🗄️</div>
+        <div>
+            <div class="header h1" style="font-size:1rem;font-weight:700;color:#e8f4ff;letter-spacing:-.02em;">Redis 대시보드</div>
+            <div class="header-sub">실시간 키 관리 · Spring Boot</div>
+        </div>
+    </div>
+    <div class="header-right">
+        <span class="badge-status"
+              th:classappend="${connected} ? 'ok' : 'fail'">
+            <span class="dot"></span>
+            <span th:text="${connected} ? 'CONNECTED' : 'DISCONNECTED'"></span>
+        </span>
+        <button class="btn-refresh" onclick="location.reload()">
+            <span class="icon">↻</span> 새로고침
+        </button>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- 요약 카드 -->
+    <div class="section-label">서버 현황</div>
+    <div class="stat-grid">
+        <div class="stat-card c-green">
+            <div class="stat-icon">📡</div>
+            <div class="stat-label">연결 상태</div>
+            <div class="stat-value" th:classappend="${connected} ? 'green' : 'red'"
+                 th:text="${pingResult}">-</div>
+        </div>
+        <div class="stat-card c-blue">
+            <div class="stat-icon">⚙️</div>
+            <div class="stat-label">Redis 버전</div>
+            <div class="stat-value blue" th:text="${redisVersion}">-</div>
+        </div>
+        <div class="stat-card c-purple">
+            <div class="stat-icon">🔑</div>
+            <div class="stat-label">전체 키 수</div>
+            <div class="stat-value purple" th:text="${dbSize}">0</div>
+        </div>
+        <div class="stat-card c-yellow">
+            <div class="stat-icon">💾</div>
+            <div class="stat-label">메모리 사용</div>
+            <div class="stat-value yellow" th:text="${usedMemory}">-</div>
+        </div>
+        <div class="stat-card c-orange">
+            <div class="stat-icon">🖥️</div>
+            <div class="stat-label">접속 클라이언트</div>
+            <div class="stat-value orange" th:text="${connectedClients}">-</div>
+        </div>
+        <div class="stat-card c-cyan">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-label">가동일수</div>
+            <div class="stat-value cyan" th:text="${uptimeInDays} + ' day'">-</div>
+        </div>
+    </div>
+
+    <!-- 툴바 (추가 버튼 포함) -->
+    <div class="toolbar-row">
+        <div class="search-wrap">
+            <span class="icon">🔍</span>
+            <input type="text" id="searchInput"
+                   aria-label="키 검색"
+                   placeholder="키 검색 (예: refreshToken:*)"
+                   oninput="filterTable()">
+        </div>
+        <select class="filter-select" id="typeFilter" aria-label="타입 필터" onchange="filterTable()">
+            <option value="">전체 타입</option>
+            <option value="string">string</option>
+            <option value="hash">hash</option>
+            <option value="list">list</option>
+            <option value="set">set</option>
+            <option value="zset">zset</option>
+        </select>
+        <button class="btn-add-key" onclick="openAddModal()">＋ 키 추가</button>
+    </div>
+
+    <!-- 2컬럼 레이아웃: 테이블 + 상세 패널 -->
+    <div class="content-layout">
+
+        <!-- 테이블 섹션 -->
+        <div class="table-section">
+            <div class="table-wrap">
+                <div class="table-header">
+                    <span class="table-header-icon">🔑</span>
+                    <span class="table-header-title">키 목록</span>
+                    <span class="table-header-count" id="rowCount"
+                          th:text="${keyList.size()} + '개'">0개</span>
+                </div>
+                <table id="keyTable">
+                    <thead>
+                    <tr>
+                        <th style="width:48px; text-align:center;">#</th>
+                        <th>KEY</th>
+                        <th>TYPE</th>
+                        <th>VALUE</th>
+                        <th>TTL</th>
+                        <th>액션</th>
+                    </tr>
+                    </thead>
+                    <tbody id="keyTableBody">
+                    <tr th:if="${#lists.isEmpty(keyList)}" class="empty-row">
+                        <td colspan="6">
+                            <div class="empty-icon">📭</div>
+                            저장된 키가 없습니다.
+                        </td>
+                    </tr>
+                    <tr th:each="item, stat : ${keyList}"
+                        th:data-key="${item.key}"
+                        th:data-type="${item.type}"
+                        th:data-ttl="${item.ttl}"
+                        onclick="selectRow(this, this.dataset.key)">
+                        <td class="td-index" th:text="${stat.index + 1}"></td>
+                        <td class="td-key" th:title="${item.key}" th:text="${item.key}"></td>
+                        <td>
+                            <span class="type-badge"
+                                  th:classappend="'type-' + ${item.type}"
+                                  th:text="${item.type}"></span>
+                        </td>
+                        <td class="td-value" th:title="${item.value}" th:text="${item.value}"></td>
+                        <td class="td-ttl"
+                            th:classappend="${item.ttl == '영구'} ? 'permanent'"
+                            th:text="${item.ttl}"></td>
+                        <td class="action-cell" onclick="event.stopPropagation()">
+                            <button class="btn-edit"
+                                    onclick="event.stopPropagation(); openEditModal(this.closest('tr').dataset.key)">✏️ 수정</button>
+                            <button class="btn-del"
+                                    onclick="event.stopPropagation(); deleteKey(this.closest('tr').dataset.key)">🗑 삭제</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="table-footer" id="tableFooter"
+                     th:text="'총 ' + ${keyList.size()} + '개 키'"></div>
+            </div>
+        </div>
+
+        <!-- 상세 패널 -->
+        <div class="detail-panel" id="detailPanel">
+            <div class="detail-inner">
+                <div class="detail-header">
+                    <span>📋</span>
+                    <span class="detail-header-title">Value 상세</span>
+                    <div class="detail-header-actions">
+                        <button class="btn-detail-mini" onclick="copyCurrentRaw()">복사</button>
+                        <button class="btn-detail-mini" onclick="refreshCurrentDetail()">새로고침</button>
+                    </div>
+                    <button class="detail-close" onclick="closeDetail()">✕</button>
+                </div>
+                <div class="detail-key-name" id="detailKeyName">-</div>
+
+                <!-- 탭 -->
+                <div class="detail-tabs">
+                    <div class="detail-tab active" onclick="switchTab('list')">리스트</div>
+                    <div class="detail-tab"         onclick="switchTab('raw')">RAW</div>
+                </div>
+
+                <!-- 리스트 탭 -->
+                <div class="detail-tab-content active" id="tabList">
+                    <ul class="detail-list" id="detailList"></ul>
+                </div>
+
+                <!-- RAW 탭 -->
+                <div class="detail-tab-content" id="tabRaw">
+                    <div class="detail-raw"><pre id="detailRaw"></pre></div>
+                </div>
+
+                <!-- 메타 -->
+                <div class="detail-meta" id="detailMeta"></div>
+            </div>
+        </div>
+
+    </div><!-- /.content-layout -->
+</div>
+
+<!-- ── 키 추가 모달 ── -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal">
+        <div class="modal-title">
+            ＋ 키 추가
+            <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="addKey">Key</label>
+            <input class="form-input" id="addKey" placeholder="예) refreshToken:user@email.com">
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="addValue">Value</label>
+            <textarea class="form-textarea" id="addValue" placeholder="저장할 값을 입력하세요"></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="addTtl">TTL (초)</label>
+            <input class="form-input" id="addTtl" type="number" min="0" placeholder="0 = 영구 저장">
+            <div class="form-hint">0 입력 시 만료 없이 영구 저장됩니다.</div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('addModal')">취소</button>
+            <button class="btn-submit" onclick="submitAdd()">저장</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── 키 수정 모달 ── -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <div class="modal-title">
+            ✏️ 키 수정
+            <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="editKey">Key</label>
+            <input class="form-input" id="editKey" readonly
+                   style="opacity:.55; cursor:not-allowed;">
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="editValue">Value</label>
+            <textarea class="form-textarea" id="editValue"></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="editTtl">TTL (초)</label>
+            <input class="form-input" id="editTtl" type="number" min="0" placeholder="0 = 영구 저장">
+            <div class="form-hint">0 입력 시 TTL이 제거되고 영구 저장됩니다.</div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('editModal')">취소</button>
+            <button class="btn-submit" onclick="submitEdit()">수정 저장</button>
+        </div>
+    </div>
+</div>
+
+<!-- 토스트 -->
+<div id="toast"></div>
+
+<script>
+    'use strict';
+
+    // ── 필터 ──
+    function filterTable() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const type   = document.getElementById('typeFilter').value;
+        const rows   = document.querySelectorAll('#keyTableBody tr[data-key]');
+        let visible  = 0;
+        rows.forEach(row => {
+            const keyMatch  = !search || (row.dataset.key  || '').toLowerCase().includes(search);
+            const typeMatch = !type   || (row.dataset.type || '') === type;
+            row.style.display = (keyMatch && typeMatch) ? '' : 'none';
+            if (keyMatch && typeMatch) visible++;
+        });
+        document.getElementById('rowCount').textContent    = visible + '개';
+        document.getElementById('tableFooter').textContent = '총 ' + visible + '개 키 표시 중';
+        reindexTable();
+    }
+
+    // ── 보이는 행 번호 재정렬 ──
+    function reindexTable() {
+        let idx = 1;
+        document.querySelectorAll('#keyTableBody tr[data-key]').forEach(row => {
+            const cell = row.querySelector('.td-index');
+            if (cell) cell.textContent = row.style.display === 'none' ? cell.textContent : idx++;
+        });
+    }
+
+    // ── 모달 열기/닫기 ──
+    function openModal(id)  { document.getElementById(id).classList.add('open');    }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    function openAddModal() {
+        document.getElementById('addKey').value   = '';
+        document.getElementById('addValue').value = '';
+        document.getElementById('addTtl').value   = '0';
+        openModal('addModal');
+    }
+
+    async function fetchKeyDetail(key) {
+        const res = await fetch('/redis/api/value?key=' + encodeURIComponent(key));
+        const data = await res.json();
+        if (data.status !== 'OK') throw new Error(data.error || '값 조회 실패');
+        return data;
+    }
+
+    function stringifyValue(value) {
+        if (value === null || value === undefined) return '';
+        return typeof value === 'string' ? value : JSON.stringify(value);
+    }
+
+    async function openEditModal(key) {
+        const row = document.querySelector('#keyTableBody tr[data-key="' + key + '"]');
+        if (!row) return;
+        const rawTtl = (row.dataset.ttl || '').replace('s','');
+        document.getElementById('editKey').value = key;
+        document.getElementById('editTtl').value = isNaN(rawTtl) ? '0' : rawTtl;
+
+        try {
+            const data = await fetchKeyDetail(key);
+            document.getElementById('editValue').value = stringifyValue(data.value);
+        } catch (e) {
+            showToast('❌ 값 조회 실패', true);
+            return;
+        }
+        openModal('editModal');
+    }
+
+    // ── 키 추가 ──
+    function submitAdd() {
+        const key   = document.getElementById('addKey').value.trim();
+        const value = document.getElementById('addValue').value;
+        const ttl   = parseInt(document.getElementById('addTtl').value) || 0;
+        if (!key) { showToast('❌ Key를 입력해주세요.', true); return; }
+
+        fetch('/redis/api/key', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key, value, ttl })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'OK') {
+                showToast('✅ 키 추가 완료: ' + key, false);
+                closeModal('addModal');
+                addRowToTable(key, 'string', value, ttl > 0 ? ttl + 's' : '영구');
+            } else {
+                showToast('❌ ' + (data.error || '추가 실패'), true);
+            }
+        })
+        .catch(() => showToast('❌ 서버 오류', true));
+    }
+
+    // ── 추가 후 테이블 행 삽입 ──
+    function addRowToTable(key, type, value, ttlStr) {
+        const tbody = document.getElementById('keyTableBody');
+        const emptyRow = tbody.querySelector('.empty-row');
+        if (emptyRow) emptyRow.remove();
+
+        const cnt = document.querySelectorAll('#keyTableBody tr[data-key]').length + 1;
+        const tr = document.createElement('tr');
+        tr.dataset.key = key;
+        tr.dataset.type = type;
+        tr.dataset.ttl = ttlStr;
+        tr.setAttribute('onclick', 'selectRow(this, this.dataset.key)');
+        tr.innerHTML = `
+            <td class="td-index">${cnt}</td>
+            <td class="td-key" title="${key}">${key}</td>
+            <td><span class="type-badge type-${type}">${type}</span></td>
+            <td class="td-value" title="${value}">${value}</td>
+            <td class="td-ttl ${ttlStr === '영구' ? 'permanent' : ''}">${ttlStr}</td>
+            <td class="action-cell" onclick="event.stopPropagation()">
+                <button class="btn-edit" onclick="event.stopPropagation(); openEditModal(this.closest('tr').dataset.key)">✏️ 수정</button>
+                <button class="btn-del" onclick="event.stopPropagation(); deleteKey(this.closest('tr').dataset.key)">🗑 삭제</button>
+            </td>`;
+        tbody.appendChild(tr);
+
+        const total = document.querySelectorAll('#keyTableBody tr[data-key]').length;
+        document.getElementById('rowCount').textContent = total + '개';
+        document.getElementById('tableFooter').textContent = '총 ' + total + '개 키';
+        reindexTable();
+    }
+
+    // ── 모달 바깥 클릭 시 닫기 ──
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', e => {
+            if (e.target === overlay) overlay.classList.remove('open');
+        });
+    });
+
+    // ── ESC 키로 모달 닫기 ──
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape')
+            document.querySelectorAll('.modal-overlay.open')
+                    .forEach(m => m.classList.remove('open'));
+    });
+
+    // ── 토스트 ──
+    function showToast(msg, isError) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className   = 'show' + (isError ? ' error' : '');
+        setTimeout(() => { t.className = ''; }, 3000);
+    }
+
+    // ── 행 선택 → 상세 패널 열기 ──
+    let selectedKey = null;
+    const detailState = {
+        key: null,
+        type: 'string',
+        ttl: '영구',
+        mode: 'single',      // array | object | lines | single
+        parsed: null,
+        raw: ''
+    };
+
+    async function selectRow(row, key) {
+        if (selectedKey === key) { closeDetail(); return; }
+
+        document.querySelectorAll('#keyTableBody tr.selected').forEach(r => r.classList.remove('selected'));
+        row.classList.add('selected');
+        selectedKey = key;
+
+        const ttl = row.dataset.ttl || '영구';
+        try {
+            const data = await fetchKeyDetail(key);
+            const value = stringifyValue(data.value);
+            renderDetail(key, value, data.type || row.dataset.type || 'string', ttl);
+            document.getElementById('detailPanel').classList.add('open');
+        } catch (e) {
+            showToast('❌ 상세 조회 실패', true);
+        }
+    }
+
+    function closeDetail() {
+        document.getElementById('detailPanel').classList.remove('open');
+        document.querySelectorAll('#keyTableBody tr.selected').forEach(r => r.classList.remove('selected'));
+        selectedKey = null;
+        detailState.key = null;
+    }
+
+    function setDetailState(key, value, type, ttl, mode, parsed) {
+        detailState.key = key;
+        detailState.type = type;
+        detailState.ttl = ttl;
+        detailState.mode = mode;
+        detailState.parsed = parsed;
+        detailState.raw = value;
+    }
+
+    function getTtlSeconds(ttlLabel) {
+        if (!ttlLabel || ttlLabel === '영구' || ttlLabel === '-') return 0;
+        const n = parseInt(String(ttlLabel).replace('s', ''), 10);
+        return Number.isNaN(n) ? 0 : n;
+    }
+
+    async function persistDetailRaw(newRaw) {
+        if (!detailState.key) return false;
+        if (detailState.type !== 'string') {
+            showToast('❌ string 타입 키에서만 항목 편집/삭제를 지원합니다.', true);
+            return false;
+        }
+
+        const ttl = getTtlSeconds(detailState.ttl);
+        const res = await fetch('/redis/api/key', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: detailState.key, value: newRaw, ttl })
+        });
+        const data = await res.json();
+        if (data.status !== 'OK') {
+            showToast('❌ 값 저장 실패', true);
+            return false;
+        }
+
+        // 메인 테이블 값도 동기화
+        const row = document.querySelector('#keyTableBody tr[data-key="' + detailState.key + '"]');
+        if (row) {
+            row.querySelector('.td-value').textContent = newRaw;
+            row.querySelector('.td-value').title = newRaw;
+        }
+        return true;
+    }
+
+    async function refreshCurrentDetail() {
+        if (!detailState.key) return;
+        try {
+            const data = await fetchKeyDetail(detailState.key);
+            renderDetail(detailState.key, stringifyValue(data.value), data.type || detailState.type, detailState.ttl);
+            showToast('✅ 상세 새로고침 완료', false);
+        } catch (e) {
+            showToast('❌ 새로고침 실패', true);
+        }
+    }
+
+    async function copyCurrentRaw() {
+        const raw = document.getElementById('detailRaw').textContent || '';
+        if (!raw) return;
+        try {
+            await navigator.clipboard.writeText(raw);
+            showToast('✅ RAW 복사 완료', false);
+        } catch (e) {
+            showToast('❌ 복사 실패', true);
+        }
+    }
+
+    async function deleteDetailItem(token) {
+        if (!detailState.key) return;
+
+        let nextRaw = detailState.raw;
+        if (detailState.mode === 'array') {
+            const arr = Array.isArray(detailState.parsed) ? [...detailState.parsed] : [];
+            const idx = Number(token);
+            if (Number.isNaN(idx) || idx < 0 || idx >= arr.length) return;
+            arr.splice(idx, 1);
+            nextRaw = JSON.stringify(arr, null, 2);
+        } else if (detailState.mode === 'object') {
+            const obj = (detailState.parsed && typeof detailState.parsed === 'object') ? { ...detailState.parsed } : {};
+            delete obj[token];
+            nextRaw = JSON.stringify(obj, null, 2);
+        } else if (detailState.mode === 'lines') {
+            const lines = Array.isArray(detailState.parsed) ? [...detailState.parsed] : [];
+            const idx = Number(token);
+            if (Number.isNaN(idx) || idx < 0 || idx >= lines.length) return;
+            lines.splice(idx, 1);
+            nextRaw = lines.join('\n');
+        } else {
+            nextRaw = '';
+        }
+
+        if (!(await persistDetailRaw(nextRaw))) return;
+        renderDetail(detailState.key, nextRaw, detailState.type, detailState.ttl);
+        showToast('✅ 항목 삭제 완료', false);
+    }
+
+    async function copyDetailItem(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            showToast('✅ 항목 복사 완료', false);
+        } catch (e) {
+            showToast('❌ 복사 실패', true);
+        }
+    }
+
+    // ── 상세 패널 렌더 ──
+    function renderDetail(key, value, type, ttl) {
+        document.getElementById('detailKeyName').textContent = key;
+
+        let pretty = value;
+        try { pretty = JSON.stringify(JSON.parse(value), null, 2); } catch (e) { /* 그대로 */ }
+        document.getElementById('detailRaw').textContent = pretty;
+
+        const listEl = document.getElementById('detailList');
+        listEl.innerHTML = '';
+
+        let parsed = null;
+        try { parsed = JSON.parse(value); } catch (e) { /* null */ }
+
+        let mode = 'single';
+        if (Array.isArray(parsed)) {
+            mode = 'array';
+            parsed.forEach((item, i) => listEl.appendChild(makeListItem(i + 1, item, null, String(i))));
+        } else if (parsed && typeof parsed === 'object') {
+            mode = 'object';
+            Object.entries(parsed).forEach(([k, v], i) => listEl.appendChild(makeListItem(i + 1, v, k, k)));
+        } else {
+            const lines = value.split('\n').filter(l => l.trim());
+            if (lines.length > 1) {
+                mode = 'lines';
+                lines.forEach((line, i) => listEl.appendChild(makeListItem(i + 1, line, null, String(i))));
+                parsed = lines;
+            } else {
+                listEl.appendChild(makeListItem(1, value, null, '0'));
+                parsed = value;
+            }
+        }
+
+        setDetailState(key, value, type, ttl, mode, parsed);
+
+        const cnt = Array.isArray(parsed)
+            ? parsed.length
+            : (parsed && typeof parsed === 'object') ? Object.keys(parsed).length : 1;
+
+        document.getElementById('detailMeta').innerHTML = `
+            <div class="detail-meta-item">타입 <span>${type}</span></div>
+            <div class="detail-meta-item">TTL <span>${ttl}</span></div>
+            <div class="detail-meta-item">항목 수 <span>${cnt}</span></div>
+            <div class="detail-meta-item">크기 <span>${new Blob([value]).size}B</span></div>`;
+
+        switchTab('list');
+    }
+
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function escAttr(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function makeListItem(idx, val, label, token) {
+        const li = document.createElement('li');
+        li.className = 'detail-list-item';
+
+        const rawText = (typeof val === 'object') ? JSON.stringify(val) : String(val ?? '');
+        const tokenEsc = escAttr(token);
+
+        let bodyHtml;
+        if (val && typeof val === 'object' && !Array.isArray(val)) {
+            const fields = Object.entries(val).map(([k, v]) =>
+                `<div class="detail-field-row"><div class="detail-field-k">${escHtml(k)}</div><div class="detail-field-v">${escHtml(String(v))}</div></div>`
+            ).join('');
+            bodyHtml = `<div class="detail-field-grid">${fields}</div>`;
+        } else {
+            bodyHtml = `<div class="detail-list-val">${escHtml(rawText)}</div>`;
+        }
+
+        li.innerHTML = `
+            <div class="detail-list-idx">${idx}</div>
+            <div class="detail-list-body">
+                ${label ? `<div class="detail-list-key">${escHtml(label)}</div>` : ''}
+                ${bodyHtml}
+            </div>
+            <div class="detail-list-actions">
+                <button class="btn-item" onclick="copyDetailItem('${escAttr(rawText)}')">복사</button>
+                <button class="btn-item btn-item-del" onclick="deleteDetailItem('${tokenEsc}')">삭제</button>
+            </div>`;
+        return li;
+    }
+
+    // ── 탭 전환 ──
+    function switchTab(tab) {
+        document.querySelectorAll('.detail-tab').forEach((t, i) => {
+            t.classList.toggle('active', (i === 0 && tab === 'list') || (i === 1 && tab === 'raw'));
+        });
+        document.getElementById('tabList').classList.toggle('active', tab === 'list');
+        document.getElementById('tabRaw').classList.toggle('active', tab === 'raw');
+    }
+
+    // ── 삭제 시 패널도 닫기 ──
+    function deleteKey(key) {
+        if (!confirm('🗑️ [' + key + '] 키를 삭제하시겠습니까?')) return;
+        fetch('/redis/api/key?key=' + encodeURIComponent(key), { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.deleted) {
+                    showToast('✅ 삭제 완료: ' + key, false);
+                    const row = document.querySelector('#keyTableBody tr[data-key="' + key + '"]');
+                    if (row) row.remove();
+                    if (selectedKey === key) closeDetail();
+                    const cnt = document.querySelectorAll('#keyTableBody tr[data-key]').length;
+                    document.getElementById('rowCount').textContent = cnt + '개';
+                    document.getElementById('tableFooter').textContent = '총 ' + cnt + '개 키';
+                    reindexTable();
+                } else {
+                    showToast('❌ 삭제 실패: 키가 존재하지 않습니다.', true);
+                }
+            })
+            .catch(() => showToast('❌ 서버 오류', true));
+    }
+
+    // ── 수정 후 패널도 갱신 ──
+    function submitEdit() {
+        const key = document.getElementById('editKey').value;
+        const value = document.getElementById('editValue').value;
+        const ttl = parseInt(document.getElementById('editTtl').value) || 0;
+
+        fetch('/redis/api/key', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key, value, ttl })
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'OK') {
+                    showToast('✅ 수정 완료: ' + key, false);
+                    closeModal('editModal');
+                    const row = document.querySelector('#keyTableBody tr[data-key="' + key + '"]');
+                    if (row) {
+                        const ttlStr = ttl > 0 ? ttl + 's' : '영구';
+                        row.dataset.ttl = ttlStr;
+                        row.querySelector('.td-value').textContent = value;
+                        row.querySelector('.td-value').title = value;
+                        const ttlCell = row.querySelector('.td-ttl');
+                        ttlCell.textContent = ttlStr;
+                        ttlCell.className = 'td-ttl' + (ttl === 0 ? ' permanent' : '');
+                        if (selectedKey === key) renderDetail(key, value, row.dataset.type, ttlStr);
+                    }
+                } else {
+                    showToast('❌ ' + (data.error || '수정 실패'), true);
+                }
+            })
+            .catch(() => showToast('❌ 서버 오류', true));
+    }
+
+    async function fetchEntries(pattern = '*') {
+        const res = await fetch('/redis/api/entries?pattern=' + encodeURIComponent(pattern));
+        const data = await res.json();
+        if (data.status !== 'OK') throw new Error(data.error || 'entries 조회 실패');
+        return data.entries || [];
+    }
+
+    function renderRowsFromEntries(entries) {
+        const tbody = document.getElementById('keyTableBody');
+        tbody.innerHTML = '';
+
+        if (!entries.length) {
+            const tr = document.createElement('tr');
+            tr.className = 'empty-row';
+            tr.innerHTML = '<td colspan="6"><div class="empty-icon">📭</div>저장된 키가 없습니다.</td>';
+            tbody.appendChild(tr);
+            document.getElementById('rowCount').textContent = '0개';
+            document.getElementById('tableFooter').textContent = '총 0개 키';
+            return;
+        }
+
+        entries.forEach((entry, i) => {
+            const key = entry.key || '';
+            const type = entry.type || 'unknown';
+            const value = entry.value || '';
+            const ttlStr = entry.ttl || '영구';
+
+            const tr = document.createElement('tr');
+            tr.dataset.key = key;
+            tr.dataset.type = type;
+            tr.dataset.ttl = ttlStr;
+            tr.setAttribute('onclick', 'selectRow(this, this.dataset.key)');
+
+            const safeValue = String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+
+            tr.innerHTML = `
+                <td class="td-index">${i + 1}</td>
+                <td class="td-key" title="${key}">${key}</td>
+                <td><span class="type-badge type-${type}">${type}</span></td>
+                <td class="td-value" title="${safeValue}">${safeValue}</td>
+                <td class="td-ttl ${ttlStr === '영구' ? 'permanent' : ''}">${ttlStr}</td>
+                <td class="action-cell" onclick="event.stopPropagation()">
+                    <button class="btn-edit" onclick="event.stopPropagation(); openEditModal(this.closest('tr').dataset.key)">✏️ 수정</button>
+                    <button class="btn-del" onclick="event.stopPropagation(); deleteKey(this.closest('tr').dataset.key)">🗑 삭제</button>
+                </td>`;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('rowCount').textContent = entries.length + '개';
+        document.getElementById('tableFooter').textContent = '총 ' + entries.length + '개 키';
+        reindexTable();
+    }
+
+    async function ensureRowsVisible() {
+        const rowCount = document.querySelectorAll('#keyTableBody tr[data-key]').length;
+        const badgeCountText = document.getElementById('rowCount').textContent || '0개';
+        const badgeCount = parseInt(badgeCountText, 10) || 0;
+
+        if (rowCount === 0 && badgeCount > 0) {
+            try {
+                const entries = await fetchEntries('*');
+                renderRowsFromEntries(entries);
+            } catch (e) {
+                console.error(e);
+                showToast('❌ 키 목록 재조회 실패', true);
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        ensureRowsVisible();
+    });
+
+</script>
+</body>
+</html>
