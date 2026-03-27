@@ -209,6 +209,9 @@
             padding-bottom: 12px;
             display: flex;
             justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
 
         .btn-join {
@@ -226,10 +229,20 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
         }
 
-        .btn-join:active {
-            transform: translateY(2px) scale(0.99);
-            box-shadow: 0 7px 14px rgba(10, 120, 103, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.45);
-            filter: saturate(0.95);
+        .btn-join:disabled {
+            cursor: not-allowed;
+            opacity: 0.72;
+            filter: saturate(0.75);
+        }
+
+        .api-status {
+            min-height: 1.1rem;
+            font-size: 0.82rem;
+            color: #e9f7ff;
+            text-align: center;
+            opacity: 0.95;
+            letter-spacing: -0.01em;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
         }
 
         .roulette-modal {
@@ -451,6 +464,7 @@
 
         <div class="join-wrap">
             <button id="joinButton" class="btn-join" type="button">1회 참여가능</button>
+            <p id="apiStatus" class="api-status" aria-live="polite"></p>
         </div>
 
         <section class="notice-card" aria-label="참여 유의사항">
@@ -477,48 +491,202 @@
     (function() {
         'use strict';
 
+        const API_CONFIG = {
+            loadItemsUrl: '/api/roulette/items',
+            spinUrl: '/api/roulette/spin'
+        };
+
         // 룰렛 항목 값
         const rouletteState = {
             items: [
-                { label: "10% 할인 쿠폰", desc: "결제 시 바로 적용됩니다.", color: "#7B72E8" },
-                { label: "무료 배송", desc: "배송비가 자동으로 면제됩니다.", color: "#31C6AB" },
-                { label: "5,000 포인트", desc: "포인트가 즉시 적립됩니다.", color: "#43A1EA" },
-                { label: "20% 할인 쿠폰", desc: "오늘만 가능한 추가 혜택!", color: "#E78A6D" },
-                { label: "1,000 포인트", desc: "다음 구매에 사용 가능해요.", color: "#E6C56F" },
-                { label: "꽝 없이 당첨", desc: "다음 기회에 더 큰 혜택!", color: "#DA5F66" }
+                { id: 'coupon10', label: '10% 할인 쿠폰', desc: '결제 시 바로 적용됩니다.', color: '#7B72E8' },
+                { id: 'shippingFree', label: '무료 배송', desc: '배송비가 자동으로 면제됩니다.', color: '#31C6AB' },
+                { id: 'point5000', label: '5,000 포인트', desc: '포인트가 즉시 적립됩니다.', color: '#43A1EA' },
+                { id: 'coupon20', label: '20% 할인 쿠폰', desc: '오늘만 가능한 추가 혜택!', color: '#E78A6D' },
+                { id: 'point1000', label: '1,000 포인트', desc: '다음 구매에 사용 가능해요.', color: '#E6C56F' },
+                { id: 'alwaysWin', label: '꽝 없이 당첨', desc: '다음 기회에 더 큰 혜택!', color: '#DA5F66' }
             ],
             spinning: false,
-            currentRotation: 0
+            currentRotation: -Math.PI / 2,
+            requestPending: false
         };
 
-        const canvas = document.getElementById("rouletteCanvas");
-        const ctx = canvas.getContext("2d");
+        const canvas = document.getElementById('rouletteCanvas');
+        const ctx = canvas.getContext('2d');
         const size = canvas.width;
         const radius = size / 2;
 
-        // 1칸의 각도(360도 / 항목 수)
-        const sliceAngle = (Math.PI * 2) / rouletteState.items.length;
+        const closeModal = document.getElementById('closeModal');
+        const resultModal = document.getElementById('resultModal');
+        const joinButton = document.getElementById('joinButton');
+        const apiStatus = document.getElementById('apiStatus');
+
         // 한 바퀴(360도)
         const fullRotation = Math.PI * 2;
         // 12시 방향 포인터 각도(3시 기준 -90도)
         const pointerAngle = -Math.PI / 2;
 
+        // 항목 수에 맞는 한 칸의 회전 각도를 계산합니다.
+        function getSliceAngle() {
+            return (Math.PI * 2) / rouletteState.items.length;
+        }
+
+        // 각도를 0~2PI 범위로 정규화합니다.
         function normalizeAngle(angle) {
             return ((angle % fullRotation) + fullRotation) % fullRotation;
         }
 
+        // 현재 회전값 기준으로 포인터가 가리키는 항목 인덱스를 구합니다.
         function getLandedIndex(rotation) {
             const relativeAngle = normalizeAngle(pointerAngle - rotation);
-            return Math.floor(relativeAngle / sliceAngle) % rouletteState.items.length;
+            return Math.floor(relativeAngle / getSliceAngle()) % rouletteState.items.length;
         }
 
-        let currentRotation = -Math.PI / 2;
+        // 하단 상태 영역에 API 진행/오류 메시지를 표시합니다.
+        function setApiStatus(message, isError) {
+            apiStatus.textContent = message || '';
+            apiStatus.style.color = isError ? '#ffe5e5' : '#e9f7ff';
+        }
 
-        function drawWheel(rotation = 0) {
+        // 참여 버튼의 로딩 상태와 문구를 제어합니다.
+        function setJoinButtonLoading(isLoading, label) {
+            rouletteState.requestPending = isLoading;
+            joinButton.disabled = isLoading || rouletteState.spinning;
+            joinButton.textContent = label || (isLoading ? '서버 통신중...' : '1회 참여가능');
+        }
+
+        // 페이지에 CSRF 메타 태그가 있으면 요청 헤더로 변환합니다.
+        function getCsrfHeaders() {
+            const tokenMeta = document.querySelector('meta[name="_csrf"]');
+            const headerMeta = document.querySelector('meta[name="_csrf_header"]');
+
+            if (!tokenMeta || !headerMeta) {
+                return {};
+            }
+
+            return {
+                [headerMeta.content]: tokenMeta.content
+            };
+        }
+
+        // 공통 fetch 래퍼로 JSON 요청/응답과 에러 처리를 수행합니다.
+        async function requestJson(url, options) {
+            const response = await fetch(url, {
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getCsrfHeaders(),
+                    ...(options && options.headers ? options.headers : {})
+                },
+                ...options
+            });
+
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                return response.json();
+            }
+
+            return null;
+        }
+
+        // 서버 응답 항목을 UI에서 쓰는 표준 형태로 정규화합니다.
+        function normalizeItems(payload) {
+            const rawItems = Array.isArray(payload) ? payload : (payload && Array.isArray(payload.items) ? payload.items : []);
+
+            return rawItems
+                .map((item, index) => {
+                    if (!item) {
+                        return null;
+                    }
+
+                    return {
+                        id: item.id || ('item-' + index),
+                        label: item.label || item.name || ('혜택 ' + (index + 1)),
+                        desc: item.desc || item.description || '당첨 내용을 확인해 주세요.',
+                        color: item.color || pickColor(index)
+                    };
+                })
+                .filter(Boolean);
+        }
+
+        // 항목 색상이 없을 때 인덱스 기반 기본 팔레트를 제공합니다.
+        function pickColor(index) {
+            const palette = ['#7B72E8', '#31C6AB', '#43A1EA', '#E78A6D', '#E6C56F', '#DA5F66', '#4F9BEE', '#6DCE75'];
+            return palette[index % palette.length];
+        }
+
+        // 서버에서 룰렛 항목 목록을 조회해 상태에 반영합니다.
+        async function loadItemsFromServer() {
+            try {
+                setApiStatus('룰렛 항목을 불러오는 중...');
+                const payload = await requestJson(API_CONFIG.loadItemsUrl, { method: 'GET' });
+                const remoteItems = normalizeItems(payload);
+
+                if (remoteItems.length > 1) {
+                    rouletteState.items = remoteItems;
+                    setApiStatus('서버 항목 로드 완료 (' + remoteItems.length + '개)');
+                } else {
+                    setApiStatus('기본 항목으로 진행합니다.');
+                }
+            } catch (error) {
+                setApiStatus('서버 연결 실패: 기본 항목으로 진행합니다.', true);
+                console.warn('[roulette] items load failed', error);
+            }
+        }
+
+        // 서버 스핀 응답을 인덱스 값으로 해석해 반환합니다.
+        function resolveTargetIndex(payload) {
+            if (!payload) {
+                return null;
+            }
+
+            if (Number.isInteger(payload.targetIndex)) {
+                return payload.targetIndex;
+            }
+
+            if (payload.itemId) {
+                const byId = rouletteState.items.findIndex((item) => item.id === payload.itemId);
+                if (byId >= 0) {
+                    return byId;
+                }
+            }
+
+            if (payload.itemLabel) {
+                const byLabel = rouletteState.items.findIndex((item) => item.label === payload.itemLabel);
+                if (byLabel >= 0) {
+                    return byLabel;
+                }
+            }
+
+            return null;
+        }
+
+        // 서버에 스핀 결과를 요청하고 목표 인덱스를 돌려줍니다.
+        async function requestSpinResult() {
+            const payload = await requestJson(API_CONFIG.spinUrl, {
+                method: 'POST',
+                body: JSON.stringify({
+                    itemCount: rouletteState.items.length,
+                    at: new Date().toISOString()
+                })
+            });
+
+            return resolveTargetIndex(payload);
+        }
+
+        // 현재 상태를 기반으로 룰렛 캔버스를 다시 그립니다.
+        function drawWheel(rotation) {
+            const safeRotation = typeof rotation === 'number' ? rotation : rouletteState.currentRotation;
+            const sliceAngle = getSliceAngle();
+
             ctx.clearRect(0, 0, size, size);
             ctx.save();
             ctx.translate(radius, radius);
-            ctx.rotate(rotation);
+            ctx.rotate(safeRotation);
 
             rouletteState.items.forEach((item, index) => {
                 const startAngle = index * sliceAngle;
@@ -533,102 +701,137 @@
 
                 ctx.save();
                 ctx.rotate(startAngle + sliceAngle / 2);
-                ctx.fillStyle = "#ffffff";
-                ctx.font = "600 16px -apple-system, BlinkMacSystemFont, sans-serif";
-                ctx.textAlign = "right";
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '600 16px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.textAlign = 'right';
                 ctx.fillText(item.label, radius - 30, 6);
                 ctx.restore();
             });
 
             ctx.beginPath();
             ctx.arc(0, 0, 46, 0, Math.PI * 2);
-            ctx.fillStyle = "#2B7EEA";
+            ctx.fillStyle = '#2B7EEA';
             ctx.fill();
             ctx.restore();
 
             ctx.save();
             ctx.translate(radius, radius);
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "700 20px -apple-system, BlinkMacSystemFont, sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText("시작", 0, 7);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '700 20px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('시작', 0, 7);
             ctx.restore();
         }
 
-        function spin(targetIndex = null) {
-            if (rouletteState.spinning) return;
-
-            rouletteState.spinning = true;
-
-            if (targetIndex === null) {
-                targetIndex = Math.floor(Math.random() * rouletteState.items.length);
+        // 목표 인덱스까지 감속 애니메이션으로 룰렛을 회전시킵니다.
+        function spin(targetIndex) {
+            if (rouletteState.spinning || rouletteState.items.length < 2) {
+                return;
             }
 
-            const targetCenterAngle = pointerAngle - ((targetIndex + 0.5) * sliceAngle);
-            const currentWrapped = normalizeAngle(currentRotation);
+            let safeTargetIndex = targetIndex;
+            if (!Number.isInteger(safeTargetIndex) || safeTargetIndex < 0 || safeTargetIndex >= rouletteState.items.length) {
+                safeTargetIndex = Math.floor(Math.random() * rouletteState.items.length);
+            }
+
+            rouletteState.spinning = true;
+            joinButton.disabled = true;
+
+            const sliceAngle = getSliceAngle();
+            const targetCenterAngle = pointerAngle - ((safeTargetIndex + 0.5) * sliceAngle);
+            const currentWrapped = normalizeAngle(rouletteState.currentRotation);
             const targetWrapped = normalizeAngle(targetCenterAngle);
             const delta = (targetWrapped - currentWrapped + fullRotation) % fullRotation;
-            const finalTargetAngle = currentRotation + (fullRotation * 3) + delta;
+            const finalTargetAngle = rouletteState.currentRotation + (fullRotation * 3) + delta;
 
             const duration = 4500;
             const startTime = performance.now();
-            const startRotation = currentRotation;
+            const startRotation = rouletteState.currentRotation;
 
             function animate(now) {
                 const elapsed = now - startTime;
                 const progress = Math.min(elapsed / duration, 1);
 
                 const eased = 1 - Math.pow(1 - progress, 4);
-                currentRotation = startRotation + (finalTargetAngle - startRotation) * eased;
+                rouletteState.currentRotation = startRotation + (finalTargetAngle - startRotation) * eased;
 
-                drawWheel(currentRotation);
+                drawWheel(rouletteState.currentRotation);
 
                 if (progress < 1) {
                     requestAnimationFrame(animate);
                 } else {
                     rouletteState.spinning = false;
-                    const landedIndex = getLandedIndex(currentRotation);
+                    joinButton.disabled = false;
+                    const landedIndex = getLandedIndex(rouletteState.currentRotation);
                     showResult(landedIndex);
                 }
             }
+
             requestAnimationFrame(animate);
         }
 
+        // 당첨 결과 모달에 항목 정보를 표시합니다.
         function showResult(index) {
             const item = rouletteState.items[index];
-            const modal = document.getElementById("resultModal");
-            const resultText = document.getElementById("resultText");
-            const resultDesc = document.getElementById("resultDesc");
+            const modal = document.getElementById('resultModal');
+            const resultText = document.getElementById('resultText');
+            const resultDesc = document.getElementById('resultDesc');
 
-            resultText.textContent = item.label;
-            resultDesc.textContent = item.desc;
-            modal.style.display = "flex";
-            modal.setAttribute("aria-hidden", "false");
+            if (!item) {
+                resultText.textContent = '당첨 결과';
+                resultDesc.textContent = '결과를 불러오지 못했습니다.';
+            } else {
+                resultText.textContent = item.label;
+                resultDesc.textContent = item.desc;
+            }
+
+            modal.style.display = 'flex';
+            modal.setAttribute('aria-hidden', 'false');
         }
 
-        drawWheel(currentRotation);
+        // 클릭 시 서버 스핀 결과를 받아 회전을 시작합니다.
+        async function handleSpinClick() {
+            if (rouletteState.spinning || rouletteState.requestPending) {
+                return;
+            }
 
-        const closeModal = document.getElementById("closeModal");
-        const resultModal = document.getElementById("resultModal");
-        const joinButton = document.getElementById("joinButton");
+            try {
+                setJoinButtonLoading(true);
+                const serverTargetIndex = await requestSpinResult();
+                setApiStatus('서버 결과를 반영해 룰렛을 시작합니다.');
+                spin(serverTargetIndex);
+            } catch (error) {
+                setApiStatus('서버 결과 조회 실패: 랜덤 결과로 진행합니다.', true);
+                console.warn('[roulette] spin request failed', error);
+                spin(null);
+            } finally {
+                setJoinButtonLoading(false, '1회 참여가능');
+            }
+        }
 
-        closeModal.addEventListener("click", () => {
-            resultModal.style.display = "none";
-            resultModal.setAttribute("aria-hidden", "true");
+        // 페이지 초기화 시 항목 로드 후 캔버스를 최초 렌더링합니다.
+        async function init() {
+            setJoinButtonLoading(true, '초기화 중...');
+            await loadItemsFromServer();
+            drawWheel(rouletteState.currentRotation);
+            setJoinButtonLoading(false, '1회 참여가능');
+        }
+
+        closeModal.addEventListener('click', () => {
+            resultModal.style.display = 'none';
+            resultModal.setAttribute('aria-hidden', 'true');
         });
 
-        resultModal.addEventListener("click", (e) => {
+        resultModal.addEventListener('click', (e) => {
             if (e.target === resultModal) {
-                resultModal.style.display = "none";
-                resultModal.setAttribute("aria-hidden", "true");
+                resultModal.style.display = 'none';
+                resultModal.setAttribute('aria-hidden', 'true');
             }
         });
 
-        joinButton.addEventListener("click", () => {
-            spin();
-        });
+        joinButton.addEventListener('click', handleSpinClick);
 
-        canvas.addEventListener("click", (event) => {
+        canvas.addEventListener('click', (event) => {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
@@ -636,12 +839,12 @@
             const y = (event.clientY - rect.top) * scaleY - radius;
             const distance = Math.sqrt(x * x + y * y);
 
-            if (distance <= 46 && !rouletteState.spinning) {
-                spin();
+            if (distance <= 46 && !rouletteState.spinning && !rouletteState.requestPending) {
+                handleSpinClick();
             }
         });
 
-        canvas.addEventListener("mousemove", (event) => {
+        canvas.addEventListener('mousemove', (event) => {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
@@ -649,8 +852,10 @@
             const y = (event.clientY - rect.top) * scaleY - radius;
             const distance = Math.sqrt(x * x + y * y);
 
-            canvas.style.cursor = (distance <= 46 && !rouletteState.spinning) ? "pointer" : "default";
+            canvas.style.cursor = (distance <= 46 && !rouletteState.spinning && !rouletteState.requestPending) ? 'pointer' : 'default';
         });
+
+        init();
     })();
 </script>
 
