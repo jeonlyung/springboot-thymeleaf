@@ -117,7 +117,7 @@ public class RedisHealthController {
         model.addAttribute("redisVersion", info.getProperty("redis_version", "N/A"));
         model.addAttribute("usedMemory", info.getProperty("used_memory_human", "N/A"));
         model.addAttribute("connectedClients", info.getProperty("connected_clients", "N/A"));
-        model.addAttribute("uptimeInDays", infoㅇㄴㅁㅇㄴㅁㅇㅁㄴㅇㄴㅁㅇㄴㅁetProperty("uptime_in_days", "N/A"));
+        model.addAttribute("uptimeInDays", info.getProperty("uptime_in_days", "N/A"));
         model.addAttribute("keyList", keyList);
         return "redis/dashboard";
     }
