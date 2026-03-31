@@ -4,8 +4,10 @@
 
 | 항목 | 내용 |
 |---|---|
-| Base URL | `/api/roulette` |
-| 컨트롤러 | `biz/roulette/web/RouletteApiController.java` |
+| Base URL (EVM) | `/api/v1/evm` — IF-CX-047, IF-CX-049 |
+| Base URL (Roulette) | `/api/roulette` — IF-CX-050, IF-CX-051, IF-CX-052 |
+| 컨트롤러 (EVM) | `biz/roulette/web/RouletteEvmApiController.java` |
+| 컨트롤러 (Roulette) | `biz/roulette/web/RouletteApiController.java` |
 | 서비스 구현체 | `biz/roulette/service/impl/RouletteServiceImpl.java` |
 | 현재 상태 | 외부 CXM 연동 전 — 스텁(stub) 응답 반환 |
 
@@ -17,8 +19,8 @@
 
 | IF | Method | 내부 경로 | 외부 CXM 경로 | 설명 |
 |---|---|---|---|---|
-| IF-CX-047 | POST | `/api/roulette/event-list` | `POST /api/v1/evm/ec-event-list` | 이벤트 정보 조회 |
-| IF-CX-049 | POST | `/api/roulette/prize-list` | `POST /api/v1/evm/ec-event-prize-list` | 이벤트 혜택 구성 정보 조회 |
+| IF-CX-047 | POST | `/api/v1/evm/ec-event-list` | `POST /api/v1/evm/ec-event-list` | 이벤트 정보 조회 |
+| IF-CX-049 | POST | `/api/v1/evm/ec-event-prize-list` | `POST /api/v1/evm/ec-event-prize-list` | 이벤트 혜택 구성 정보 조회 |
 | IF-CX-050 | GET  | `/api/roulette/raffle-info` | `GET /api/v1/evm/ec-event-raffle-info` | 응모권 횟수 조회 |
 | IF-CX-051 | POST | `/api/roulette/draw` | `POST /api/v1/evm/ec-event-draw` | 당첨자 선정 (룰렛 스핀) |
 | IF-CX-052 | POST | `/api/roulette/target-check` | `POST /api/v1/evm/ec-event-target-check` | 이벤트 신청대상 확인 |
