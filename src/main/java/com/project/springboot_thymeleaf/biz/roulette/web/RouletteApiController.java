@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 룰렛 이벤트 REST API 컨트롤러
  *
- * IF-CX-050  GET  /api/roulette/raffle-info   - 응모권 횟수 조회
- * IF-CX-051  POST /api/roulette/draw           - 당첨자 선정(스핀)
- * IF-CX-052  POST /api/roulette/target-check   - 이벤트 신청대상 확인
+ * IF-CX-047  POST /api/roulette/event-list      - 이벤트 정보 조회
+ * IF-CX-049  POST /api/roulette/prize-list       - 이벤트 혜택 구성 정보 조회
+ * IF-CX-050  GET  /api/roulette/raffle-info      - 응모권 횟수 조회
+ * IF-CX-051  POST /api/roulette/draw             - 당첨자 선정(스핀)
+ * IF-CX-052  POST /api/roulette/target-check     - 이벤트 신청대상 확인
  */
 @Slf4j
 @RestController
@@ -21,6 +23,26 @@ import org.springframework.web.bind.annotation.*;
 public class RouletteApiController {
 
     private final RouletteService rouletteService;
+
+    /**
+     * IF-CX-047 이벤트 정보 조회
+     * 프론트 → POST /api/roulette/event-list
+     */
+    @PostMapping("/event-list")
+    public ResponseEntity<RouletteEventListResDto> getEventList() {
+        return ResponseEntity.ok(rouletteService.getEventList());
+    }
+
+    /**
+     * IF-CX-049 이벤트 혜택 구성 정보 조회
+     * 프론트 → POST /api/roulette/prize-list
+     * Body: { "eventId": 1 }
+     */
+    @PostMapping("/prize-list")
+    public ResponseEntity<RouletteEventPrizeListResDto> getEventPrizeList(
+            @RequestBody RouletteEventPrizeListReqDto reqDto) {
+        return ResponseEntity.ok(rouletteService.getEventPrizeList(reqDto));
+    }
 
     /**
      * IF-CX-050 응모권 횟수 조회

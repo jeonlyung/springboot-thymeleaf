@@ -19,6 +19,81 @@ public class RouletteServiceImpl implements RouletteService {
     // private final WebClient cxmWebClient;
 
     /**
+     * IF-CX-047 이벤트 정보 조회
+     * 실제 연동 전까지 스텁 응답을 반환합니다.
+     */
+    @Override
+    public RouletteEventListResDto getEventList() {
+        log.info("[RouletteService] getEventList");
+
+        // TODO: 실제 CXM API 호출로 교체
+        // return cxmWebClient.post()
+        //     .uri("/api/v1/evm/ec-event-list")
+        //     .retrieve()
+        //     .bodyToMono(RouletteEventListResDto.class)
+        //     .block();
+
+        // 스텁: 진행 중인 이벤트 1건 응답
+        return RouletteEventListResDto.builder()
+                .resultCode(200)
+                .resultMsg("정상 처리되었습니다.")
+                .resultData(RouletteEventListResDto.ResultData.builder()
+                        .isSuccess(true)
+                        .errMsg(null)
+                        .ecEventList(List.of(
+                                RouletteEventListResDto.EcEvent.builder()
+                                        .eventId(1L)
+                                        .eventName("봄맞이 룰렛 이벤트")
+                                        .eventStartDate("20260301")
+                                        .eventEndDate("20260430")
+                                        .build()
+                        ))
+                        .build())
+                .build();
+    }
+
+    /**
+     * IF-CX-049 이벤트 혜택 구성 정보 조회
+     * 실제 연동 전까지 스텁 응답을 반환합니다.
+     */
+    @Override
+    public RouletteEventPrizeListResDto getEventPrizeList(RouletteEventPrizeListReqDto reqDto) {
+        log.info("[RouletteService] getEventPrizeList - eventId={}", reqDto.getEventId());
+
+        // TODO: 실제 CXM API 호출로 교체
+        // return cxmWebClient.post()
+        //     .uri("/api/v1/evm/ec-event-prize-list")
+        //     .bodyValue(reqDto)
+        //     .retrieve()
+        //     .bodyToMono(RouletteEventPrizeListResDto.class)
+        //     .block();
+
+        // 스텁: 경품 목록 6개 응답
+        return RouletteEventPrizeListResDto.builder()
+                .resultCode(200)
+                .resultMsg("정상 처리되었습니다.")
+                .resultData(RouletteEventPrizeListResDto.ResultData.builder()
+                        .isSuccess(true)
+                        .errMsg(null)
+                        .ecEventPrizeList(List.of(
+                                RouletteEventPrizeListResDto.EcEventPrize.builder()
+                                        .couponName("10% 할인 쿠폰").couponCode("DC10").winningRate(20).build(),
+                                RouletteEventPrizeListResDto.EcEventPrize.builder()
+                                        .couponName("무료 배송").couponCode("FREE_SHIP").winningRate(20).build(),
+                                RouletteEventPrizeListResDto.EcEventPrize.builder()
+                                        .couponName("5,000 포인트").couponCode("PT5000").winningRate(15).build(),
+                                RouletteEventPrizeListResDto.EcEventPrize.builder()
+                                        .couponName("20% 할인 쿠폰").couponCode("DC20").winningRate(10).build(),
+                                RouletteEventPrizeListResDto.EcEventPrize.builder()
+                                        .couponName("1,000 포인트").couponCode("PT1000").winningRate(15).build(),
+                                RouletteEventPrizeListResDto.EcEventPrize.builder()
+                                        .couponName("꽝").couponCode("NONE").winningRate(20).build()
+                        ))
+                        .build())
+                .build();
+    }
+
+    /**
      * IF-CX-050 응모권 횟수 조회
      * 실제 연동 전까지 스텁 응답을 반환합니다.
      */
