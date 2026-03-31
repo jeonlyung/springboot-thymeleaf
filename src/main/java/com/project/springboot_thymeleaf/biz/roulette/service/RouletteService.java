@@ -9,6 +9,12 @@ import com.project.springboot_thymeleaf.biz.roulette.dto.*;
 public interface RouletteService {
 
     /**
+     * 페이지 초기화 - acntNo / eventId 를 서버에서 반환
+     * GET /api/roulette/init
+     */
+    RoulettePageInitResDto getPageInit(String usrId);
+
+    /**
      * IF-CX-047 이벤트 정보 조회
      * POST /api/v1/evm/ec-event-list
      */

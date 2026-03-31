@@ -19,6 +19,25 @@ public class RouletteServiceImpl implements RouletteService {
     // private final WebClient cxmWebClient;
 
     /**
+     * 페이지 초기화 - acntNo / eventId 반환
+     * acntNo: 실제 CXM 연동 전, 서버 고정값 사용
+     *         연동 후에는 usrId 로 CXM DB 조회해서 반환
+     */
+    @Override
+    public RoulettePageInitResDto getPageInit(String usrId) {
+        log.info("[RouletteService] getPageInit - usrId={}", usrId);
+
+        // TODO: 실제 연동 시 usrId → acntNo 매핑 쿼리로 교체
+        // String acntNo = memberMapper.findAcntNoByUsrId(usrId);
+        String acntNo = "1234567890";   // 서버 고정 테스트값
+
+        return RoulettePageInitResDto.builder()
+                .acntNo(acntNo)
+                .eventId(1L)            // loadEventDefinitions() 에서 실제값으로 교체됨
+                .build();
+    }
+
+    /**
      * IF-CX-047 이벤트 정보 조회
      * 실제 연동 전까지 스텁 응답을 반환합니다.
      */
@@ -68,7 +87,7 @@ public class RouletteServiceImpl implements RouletteService {
         //     .bodyToMono(RouletteEventPrizeListResDto.class)
         //     .block();
 
-        // 스텁: 경품 목록 6개 응답
+        // 스텁: 경품 목록 7개 응답
         return RouletteEventPrizeListResDto.builder()
                 .resultCode(200)
                 .resultMsg("정상 처리되었습니다.")
@@ -77,17 +96,19 @@ public class RouletteServiceImpl implements RouletteService {
                         .errMsg(null)
                         .ecEventPrizeList(List.of(
                                 RouletteEventPrizeListResDto.EcEventPrize.builder()
-                                        .couponName("10% 할인 쿠폰").couponCode("DC10").winningRate(20).build(),
-                                RouletteEventPrizeListResDto.EcEventPrize.builder()
                                         .couponName("무료 배송").couponCode("FREE_SHIP").winningRate(20).build(),
                                 RouletteEventPrizeListResDto.EcEventPrize.builder()
-                                        .couponName("5,000 포인트").couponCode("PT5000").winningRate(15).build(),
+                                        .couponName("5,000 포인트").couponCode("PT5000").winningRate(20).build(),
+                                RouletteEventPrizeListResDto.EcEventPrize.builder()
+                                        .couponName("4,000 포인트").couponCode("PT4000").winningRate(15).build(),
+                                RouletteEventPrizeListResDto.EcEventPrize.builder()
+                                        .couponName("3,000 포인트").couponCode("PT3000").winningRate(15).build(),
                                 RouletteEventPrizeListResDto.EcEventPrize.builder()
                                         .couponName("20% 할인 쿠폰").couponCode("DC20").winningRate(10).build(),
                                 RouletteEventPrizeListResDto.EcEventPrize.builder()
-                                        .couponName("1,000 포인트").couponCode("PT1000").winningRate(15).build(),
+                                        .couponName("10% 할인 쿠폰").couponCode("DC10").winningRate(10).build(),
                                 RouletteEventPrizeListResDto.EcEventPrize.builder()
-                                        .couponName("꽝").couponCode("NONE").winningRate(20).build()
+                                        .couponName("꽝").couponCode("NONE").winningRate(10).build()
                         ))
                         .build())
                 .build();
@@ -140,8 +161,8 @@ public class RouletteServiceImpl implements RouletteService {
         //     .bodyToMono(RouletteDrawResDto.class)
         //     .block();
 
-        // 스텁: 랜덤 당첨 시뮬레이션
-        String[] coupons = { "10% 할인 쿠폰", "무료 배송", "5,000 포인트", "20% 할인 쿠폰", "1,000 포인트", "꽝" };
+        // 스텁: 랜덤 당첨 시뮬레이션 (경품 목록과 동일하게 유지)
+        String[] coupons = { "무료 배송", "5,000 포인트", "4,000 포인트", "3,000 포인트", "20% 할인 쿠폰", "10% 할인 쿠폰", "꽝" };
         int randomIdx = (int) (Math.random() * coupons.length);
         String picked = coupons[randomIdx];
         boolean isWin = !picked.equals("꽝");

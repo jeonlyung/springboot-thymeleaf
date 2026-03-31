@@ -18,17 +18,16 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", sans-serif;
-            background: #028bd7;
+            background: #0677bc;
             color: #ffffff;
         }
 
         :root {
-            --poster-bg-a: #0c9ce7;
-            --poster-bg-b: #047fd0;
-            --poster-highlight: #20f2c0;
-            --poster-accent: #ff6e3d;
-            --poster-text-soft: #d8efff;
-            --spring-mobile-bg: url('/images/roulette/roulette-event-v3.png?v=20260327-2');
+            --poster-bg-a: #6fe8ff;
+            --poster-bg-b: #0880b8;
+            --poster-highlight: #00eeff;
+            --poster-accent: #ff9f43;
+            --poster-text-soft: #fff4d0;
         }
 
         .roulette-page {
@@ -39,7 +38,7 @@
             padding: 12px;
             overflow: hidden;
             isolation: isolate;
-            background: #0a88cf;
+            background: #0677bc;
         }
 
         .roulette-page::before {
@@ -50,15 +49,17 @@
             z-index: 1;
             position: relative;
             width: min(100%, 430px);
-            min-height: calc(100vh - 24px);
+            min-height: 100vh;
             border-radius: 26px;
             padding: max(16px, env(safe-area-inset-top)) 18px max(20px, env(safe-area-inset-bottom)) 18px;
-            overflow: hidden;
-            background-color: #0a88cf;
-            background-image: var(--spring-mobile-bg);
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-color: #0880b8;
+            background-image: url('/images/roulette/roulette-event-8.png');
             background-position: center top;
-            background-size: 100% 100%;
+            background-size: cover;
             background-repeat: no-repeat;
+            background-attachment: scroll;
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 22px 45px rgba(0, 0, 0, 0.28);
             display: flex;
             flex-direction: column;
@@ -77,68 +78,71 @@
         .poster::before {
             width: 260px;
             height: 260px;
-            left: -120px;
-            top: 58%;
-            background: radial-gradient(circle, #67f8ff 0%, rgba(103, 248, 255, 0) 72%);
+            left: -110px;
+            top: 60%;
+            background: radial-gradient(circle, #a7f1ff 0%, rgba(167, 241, 255, 0) 72%);
         }
 
         .poster::after {
             width: 210px;
             height: 210px;
-            right: -90px;
-            top: 4%;
-            background: radial-gradient(circle, #74d8ff 0%, rgba(116, 216, 255, 0) 72%);
+            right: -84px;
+            top: 6%;
+            background: radial-gradient(circle, #ffe37b 0%, rgba(255, 227, 123, 0) 72%);
         }
 
         .hero {
-            z-index: 1;
+            z-index: 2;
             text-align: center;
             margin-top: 6px;
         }
 
         .hero-kicker {
-            color: #ffe089;
+            color: #ffff00;
             font-weight: 900;
             font-size: 1.9rem;
             line-height: 1.05;
             letter-spacing: -0.04em;
-            text-shadow: 0 2px 0 rgba(0, 0, 0, 0.08);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.40), 0 0 14px rgba(255,255,0,0.50);
         }
 
         .hero-sub {
             margin-top: 2px;
-            color: #eefbff;
+            color: #ffffff;
             font-weight: 900;
             font-size: 1.95rem;
             line-height: 1.08;
             letter-spacing: -0.05em;
-            text-shadow: 0 2px 0 rgba(0, 0, 0, 0.08);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.40), 0 0 8px rgba(0, 0, 0, 0.30);
         }
 
         .hero-title {
             margin-top: 2px;
             font-weight: 900;
-            font-size: 4rem;
-            line-height: 0.95;
+            font-size: 2.2rem;
+            line-height: 1.0;
             letter-spacing: -0.06em;
-            color: var(--poster-highlight);
-            text-shadow: 0 3px 0 rgba(0, 0, 0, 0.1);
+            color: #ffff00;
+            text-shadow: 0 3px 0 rgba(0, 0, 0, 0.40), 0 0 22px rgba(255,255,0,0.50);
+            word-break: keep-all;
+            overflow-wrap: break-word;
         }
 
         .hero-period {
             margin-top: 16px;
-            color: var(--poster-text-soft);
+            color: #ffffff;
             font-size: 2rem;
             font-weight: 800;
             letter-spacing: -0.03em;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.40), 0 0 8px rgba(0, 0, 0, 0.30);
         }
 
         .roulette-panel {
             position: relative;
-            z-index: 1;
+            z-index: 2;
             width: 100%;
-            padding-top: 5px;
+            padding-top: 0;
+            margin-top: 8px;
             display: flex;
             justify-content: center;
         }
@@ -150,7 +154,7 @@
             justify-content: center;
             width: 100%;
             max-width: 390px;
-            padding: 18px;
+            padding: 10px;
             border-radius: 50%;
             background: linear-gradient(180deg, #f7ffff 0%, #eaf6ff 100%);
             box-shadow: 0 16px 26px rgba(0, 53, 92, 0.35);
@@ -198,7 +202,7 @@
         }
 
         .join-wrap {
-            z-index: 1;
+            z-index: 2;
             width: 100%;
             margin-top: 24px;
             padding-top: 0;
@@ -210,17 +214,27 @@
             gap: 10px;
         }
 
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            width: min(100%, 260px);
+        }
+
         .btn-join {
             border: 1px solid rgba(255, 255, 255, 0.28);
             border-radius: 999px;
-            min-width: 186px;
-            padding: 14px 30px;
-            font-size: 1.8rem;
+            width: 100%;
+            min-width: 140px;
+            padding: 12px 24px;
+            font-size: 1.5rem;
             font-weight: 900;
             letter-spacing: -0.03em;
-            color: #075184;
-            background: linear-gradient(135deg, #9bff53 0%, #50f46e 45%, #28dfc9 100%);
-            box-shadow: 0 12px 24px rgba(10, 120, 103, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.62);
+            color: #ffffff;
+            background: linear-gradient(135deg, #ff6b9d 0%, #ffa366 45%, #ffc857 100%);
+            box-shadow: 0 12px 24px rgba(255, 107, 157, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.62);
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
         }
@@ -231,14 +245,36 @@
             filter: saturate(0.75);
         }
 
+        .btn-raffle {
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 999px;
+            width: 100%;
+            min-width: 140px;
+            padding: 12px 24px;
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            color: #ffffff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.62);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+
+        .btn-raffle:disabled {
+            cursor: not-allowed;
+            opacity: 0.72;
+            filter: saturate(0.75);
+        }
+
         .api-status {
             min-height: 1.1rem;
             font-size: 0.82rem;
-            color: #e9f7ff;
+            color: #ccf6ff;
             text-align: center;
             opacity: 0.95;
             letter-spacing: -0.01em;
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.22);
         }
 
         .roulette-modal {
@@ -300,12 +336,12 @@
 
         .notice-card {
             position: relative;
-            z-index: 1;
+            z-index: 2;
             width: min(100%, 360px);
             margin-top: 14px;
             padding: 16px 18px;
             border-radius: 18px;
-            background: rgba(7, 87, 145, 0.42);
+            background: rgba(2, 64, 111, 0.48);
             border: 1px solid rgba(255, 255, 255, 0.18);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 10px 24px rgba(0, 38, 71, 0.18);
             backdrop-filter: blur(10px);
@@ -314,16 +350,18 @@
         .notice-title {
             font-size: 1rem;
             font-weight: 900;
-            color: #f4fbff;
+            color: #fff9e0;
             letter-spacing: -0.03em;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.30);
         }
 
         .notice-list {
             margin-top: 10px;
             padding-left: 18px;
-            color: #dff4ff;
+            color: #fffaf0;
             font-size: 0.94rem;
             line-height: 1.6;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.20);
         }
 
         .notice-list li + li {
@@ -338,8 +376,8 @@
             .poster {
                 width: min(100%, 500px);
                 min-height: calc(100vh - 48px);
-                background-position: center, center top;
-                background-size: cover, 100% 100%;
+                background-position: center top;
+                background-size: 100% auto;
             }
         }
 
@@ -347,7 +385,7 @@
             .roulette-page {
                 min-height: 100svh;
                 padding: 0;
-                background: #0a88cf;
+                background: #0677bc;
             }
 
             .roulette-page::before {
@@ -359,9 +397,11 @@
                 border-radius: 0;
                 width: 100%;
                 padding: max(16px, env(safe-area-inset-top)) 14px max(20px, env(safe-area-inset-bottom)) 14px;
+                overflow-y: auto;
                 background-position: center top;
-                background-size: 100% 100%;
+                background-size: cover;
                 background-repeat: no-repeat;
+                background-attachment: scroll;
             }
 
             .notice-card {
@@ -374,8 +414,8 @@
 
         @media (max-width: 380px) {
             .roulette-page {
-                background-size: cover, auto 106%;
-                background-position: center, center top;
+                background-size: cover;
+                background-position: center top;
             }
 
             .hero-kicker,
@@ -384,7 +424,7 @@
             }
 
             .hero-title {
-                font-size: 3.2rem;
+                font-size: 1.9rem;
             }
 
             .hero-period {
@@ -423,8 +463,8 @@
 
         @media (max-width: 320px) {
             .roulette-page {
-                background-size: cover, auto 112%;
-                background-position: center, center top;
+                background-size: cover;
+                background-position: center top;
             }
 
             #rouletteCanvas {
@@ -438,7 +478,7 @@
             }
 
             .hero-title {
-                font-size: 2.8rem;
+                font-size: 1.7rem;
             }
         }
     </style>
@@ -456,12 +496,15 @@
         <section class="roulette-panel">
             <div class="roulette-stage">
                 <div class="roulette-pointer" aria-hidden="true"></div>
-                <canvas id="rouletteCanvas" width="420" height="420" aria-label="이벤트 룰렛"></canvas>
+                <canvas id="rouletteCanvas" width="344" height="344" aria-label="이벤트 룰렛"></canvas>
             </div>
         </section>
 
         <div class="join-wrap">
-            <button id="joinButton" class="btn-join" type="button">1회 참여가능</button>
+            <div class="button-container">
+                <button id="joinButton" class="btn-join" type="button">참여가능</button>
+                <button id="raffleButton" class="btn-raffle" type="button">응모권 참여</button>
+            </div>
             <p id="apiStatus" class="api-status" aria-live="polite"></p>
         </div>
 
@@ -534,10 +577,10 @@
         const API_CONFIG = {
             // API 활성화 여부 (false 시 스텁 모드로 동작)
             enabled: true,
-            // 이벤트 ID (운영 시 서버에서 주입 또는 URL 파라미터로 전달)
-            eventId: 1,
-            // 고객 계좌번호 (운영 시 세션/JWT에서 가져옴)
-            acntNo: '1234567890',
+            // 아래 두 값은 /api/roulette/init 으로 서버에서 주입됩니다 (JS 하드코딩 금지)
+            eventId: null,
+            acntNo: null,
+            initUrl: '/api/roulette/init',
             eventListUrl: '/api/v1/evm/ec-event-list',
             prizeListUrl: '/api/v1/evm/ec-event-prize-list',
             raffleInfoUrl: '/api/roulette/raffle-info',
@@ -545,29 +588,25 @@
             targetCheckUrl: '/api/roulette/target-check'
         };
 
-        // 룰렛 항목 값 (서버 응답에 쿠폰명이 포함되어 있어 이 목록과 매핑됩니다)
+        // 룰렛 항목 - 서버 IF-CX-049 응답으로 채워집니다 (초기 하드코딩 없음)
         const rouletteState = {
-            items: [
-                { id: 'coupon10', label: '10% 할인 쿠폰', desc: '결제 시 바로 적용됩니다.', color: '#7B72E8' },
-                { id: 'shippingFree', label: '무료 배송', desc: '배송비가 자동으로 면제됩니다.', color: '#31C6AB' },
-                { id: 'point5000', label: '5,000 포인트', desc: '포인트가 즉시 적립됩니다.', color: '#43A1EA' },
-                { id: 'coupon20', label: '20% 할인 쿠폰', desc: '오늘만 가능한 추가 혜택!', color: '#E78A6D' },
-                { id: 'point1000', label: '1,000 포인트', desc: '다음 구매에 사용 가능해요.', color: '#E6C56F' },
-                { id: 'alwaysWin', label: '꽝 없이 당첨', desc: '다음 기회에 더 큰 혜택!', color: '#DA5F66' }
-            ],
+            items: [],
             spinning: false,
             currentRotation: -Math.PI / 2,
-            requestPending: false
+            requestPending: false,
+            availableTicketCount: 0,
+            restoreStatusOnModalClose: false
         };
 
         const canvas = document.getElementById('rouletteCanvas');
         const ctx = canvas.getContext('2d');
-        const size = canvas.width;
+        const size = 344; // CSS와 일치
         const radius = size / 2;
 
         const closeModal = document.getElementById('closeModal');
         const resultModal = document.getElementById('resultModal');
         const joinButton = document.getElementById('joinButton');
+        const raffleButton = document.getElementById('raffleButton');
         const apiStatus = document.getElementById('apiStatus');
         const eventTitle = document.getElementById('eventTitle');
         const eventPeriod = document.getElementById('eventPeriod');
@@ -596,14 +635,83 @@
         // 하단 상태 영역에 API 진행/오류 메시지를 표시합니다.
         function setApiStatus(message, isError) {
             apiStatus.textContent = message || '';
-            apiStatus.style.color = isError ? '#ffe5e5' : '#e9f7ff';
+            apiStatus.style.color = isError ? '#ffe5e5' : '#f2fbff';
+        }
+
+        // 보유 응모권 수를 저장합니다.
+        function setAvailableTicketCount(ticketCount) {
+            rouletteState.availableTicketCount = Math.max(0, Number(ticketCount) || 0);
+            restoreJoinButtonLabel();
+        }
+
+        // 참여 버튼 문구를 현재 보유 응모권 수 기준으로 복원합니다.
+        function restoreJoinButtonLabel() {
+            if (rouletteState.availableTicketCount > 0) {
+                joinButton.textContent = rouletteState.availableTicketCount + '회 참여가능';
+            } else if (!joinButton.disabled) {
+                joinButton.textContent = '참여가능';
+            }
+        }
+
+        // 항목 인덱스에 맞는 색상을 팔레트에서 반환합니다.
+        function pickColor(index) {
+            const palette = ['#7B72E8', '#31C6AB', '#43A1EA', '#E78A6D', '#E6C56F', '#DA5F66', '#5B8CEE', '#F06595'];
+            return palette[index % palette.length];
+        }
+
+        // 쿠폰명으로 룰렛 항목 인덱스를 찾습니다. 없으면 null을 반환합니다.
+        function findItemIndexByCouponName(couponName) {
+            if (!couponName) { return null; }
+            const lower = couponName.trim().toLowerCase();
+            const idx = rouletteState.items.findIndex(function(item) {
+                return item.label.trim().toLowerCase() === lower;
+            });
+            return idx >= 0 ? idx : null;
         }
 
         // 참여 버튼의 로딩 상태와 문구를 제어합니다.
         function setJoinButtonLoading(isLoading, label) {
             rouletteState.requestPending = isLoading;
             joinButton.disabled = isLoading || rouletteState.spinning;
-            joinButton.textContent = label || (isLoading ? '서버 통신중...' : '1회 참여가능');
+            if (isLoading) {
+                joinButton.textContent = label || '서버 통신중...';
+                return;
+            }
+            if (label) {
+                joinButton.textContent = label;
+                return;
+            }
+            restoreJoinButtonLabel();
+        }
+
+        // 공통 안내/결과 모달을 엽니다.
+        function openModal(badgeText, titleText, descText) {
+            const modalBadge = document.querySelector('.modal-badge');
+            const resultText = document.getElementById('resultText');
+            const resultDesc = document.getElementById('resultDesc');
+
+            modalBadge.textContent = badgeText || '안내';
+            if (titleText) {
+                resultText.textContent = titleText;
+                resultText.style.display = 'block';
+            } else {
+                resultText.textContent = '';
+                resultText.style.display = 'none';
+            }
+            resultDesc.textContent = descText || '내용을 확인해 주세요.';
+            resultModal.style.display = 'flex';
+            resultModal.setAttribute('aria-hidden', 'false');
+        }
+
+        // 공통 모달을 닫습니다.
+        function closeResultModal() {
+            resultModal.style.display = 'none';
+            resultModal.setAttribute('aria-hidden', 'true');
+            if (rouletteState.restoreStatusOnModalClose) {
+                setApiStatus('');
+                restoreJoinButtonLabel();
+            }
+            rouletteState.restoreStatusOnModalClose = false;
         }
 
         // CSRF 메타 태그가 있으면 요청 헤더로 변환합니다.
@@ -738,9 +846,10 @@
         }
 
         // 쿠폰명이 콤마로 내려올 수 있어 룰렛 표시용 문자열 배열로 정규화합니다.
+        // 단, "5,000" 처럼 콤마 뒤에 숫자가 오는 천단위 구분자는 분리하지 않습니다.
         function parseCouponNames(value) {
             return String(value || '')
-                .split(',')
+                .split(/,(?!\d)/)   // 콤마 뒤가 숫자(천단위)면 분리 안 함
                 .map(function(name) { return name.trim(); })
                 .filter(function(name) { return name.length > 0; });
         }
@@ -818,16 +927,24 @@
                     setApiStatus('이벤트 참여 대상이 아닙니다.', true);
                     joinButton.disabled = true;
                     joinButton.textContent = '참여 불가';
+                    raffleButton.disabled = true;
+                    raffleButton.textContent = '참여 불가';
                     return;
                 }
                 if (result.raffleTicketCount <= 0) {
                     setApiStatus('응모권이 없습니다.', true);
                     joinButton.disabled = true;
                     joinButton.textContent = '응모권 소진';
+                    raffleButton.disabled = true;
+                    raffleButton.textContent = '응모권 소진';
                     return;
                 }
-                setApiStatus('응모권 ' + result.raffleTicketCount + '장 보유중 · 참여 가능');
+                setAvailableTicketCount(result.raffleTicketCount);
+                setApiStatus('');
                 joinButton.disabled = false;
+                restoreJoinButtonLabel();
+                raffleButton.disabled = false;
+                raffleButton.textContent = '응모권 참여';
             } catch (err) {
                 setApiStatus('이벤트 확인 실패: 기본 모드로 진행합니다.', true);
                 console.warn('[roulette] loadRaffleStatus failed', err);
@@ -837,12 +954,34 @@
         // 현재 상태를 기반으로 룰렛 캔버스를 다시 그립니다.
         function drawWheel(rotation) {
             const safeRotation = typeof rotation === 'number' ? rotation : rouletteState.currentRotation;
-            const sliceAngle = getSliceAngle();
 
             ctx.clearRect(0, 0, size, size);
+
+            // 항목이 없으면 로딩 상태를 표시합니다.
+            if (rouletteState.items.length === 0) {
+                ctx.save();
+                ctx.translate(radius, radius);
+                ctx.beginPath();
+                ctx.arc(0, 0, radius - 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#cce8f4';
+                ctx.fill();
+                ctx.fillStyle = '#2B7EEA';
+                ctx.font = '700 16px -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('로딩 중...', 0, 7);
+                ctx.restore();
+                return;
+            }
+
+            const sliceAngle = getSliceAngle();
             ctx.save();
             ctx.translate(radius, radius);
             ctx.rotate(safeRotation);
+
+            // 라벨 길이 기준으로 방사형 텍스트 폰트 크기 계산
+            // 7개 항목 기준 최적화 (폰트: 9~13px, 위치: radius-30)
+            const maxLabelLen = Math.max(...rouletteState.items.map(function(i) { return i.label.length; }));
+            const fontSize = Math.max(14, Math.min(13, Math.floor(104 / Math.max(maxLabelLen, 4))));
 
             rouletteState.items.forEach((item, index) => {
                 const startAngle = index * sliceAngle;
@@ -857,26 +996,69 @@
 
                 ctx.save();
                 ctx.rotate(startAngle + sliceAngle / 2);
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '600 16px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.shadowColor = 'rgba(0, 30, 50, 0.60)';
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 1;
+                ctx.fillStyle = '#fff9e0';
+                ctx.font = '700 ' + fontSize + 'px -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif';
                 ctx.textAlign = 'right';
-                ctx.fillText(item.label, radius - 30, 6);
+                ctx.fillText(item.label, radius - 30, Math.floor(fontSize / 2.4));
                 ctx.restore();
             });
 
+            const hubGrad = ctx.createRadialGradient(radius, radius, 6, radius, radius, 46);
+            hubGrad.addColorStop(0, '#ffe37b');
+            hubGrad.addColorStop(0.55, '#ffc107');
+            hubGrad.addColorStop(1, '#e65100');
+
             ctx.beginPath();
             ctx.arc(0, 0, 46, 0, Math.PI * 2);
-            ctx.fillStyle = '#2B7EEA';
-            ctx.fill();
             ctx.restore();
 
             ctx.save();
             ctx.translate(radius, radius);
+            ctx.beginPath();
+            ctx.arc(0, 0, 46, 0, Math.PI * 2);
+            ctx.fillStyle = hubGrad;
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(radius, radius);
+            ctx.shadowColor = 'rgba(0,0,0,0.35)';
+            ctx.shadowBlur = 3;
             ctx.fillStyle = '#ffffff';
-            ctx.font = '700 20px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.font = '800 20px -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('시작', 0, 7);
             ctx.restore();
+        }
+
+        // GET /api/roulette/init - 서버에서 acntNo / eventId 를 가져옵니다.
+        async function initPageConfig() {
+            if (!API_CONFIG.enabled) {
+                API_CONFIG.acntNo = '0000000000';
+                API_CONFIG.eventId = 1;
+                return;
+            }
+            try {
+                setApiStatus('사용자 정보 확인 중...');
+                const res = await requestJson(API_CONFIG.initUrl, { method: 'GET' });
+                if (res && res.acntNo) {
+                    API_CONFIG.acntNo  = res.acntNo;
+                }
+                if (res && res.eventId) {
+                    API_CONFIG.eventId = res.eventId;
+                }
+            } catch (err) {
+                setApiStatus('초기화 실패: 기본값으로 진행합니다.', true);
+                console.warn('[roulette] initPageConfig failed', err);
+                // 서버 장애 시 fallback (절대 JS 하드코딩 노출 금지 — 빈값 유지)
+            }
         }
 
         // 목표 인덱스까지 감속 애니메이션으로 룰렛을 회전시킵니다.
@@ -929,30 +1111,18 @@
         // 당첨 결과 모달에 당첨 여부 및 쿠폰명을 표시합니다.
         function showResult(index, drawResult) {
             const item = rouletteState.items[index];
-            const modal = document.getElementById('resultModal');
-            const resultText = document.getElementById('resultText');
-            const resultDesc = document.getElementById('resultDesc');
-            const modalBadge = document.querySelector('.modal-badge');
 
             const isWin = drawResult && drawResult.isWinning === '1';
             const couponName = drawResult && drawResult.winningCouponName;
+            rouletteState.restoreStatusOnModalClose = true;
 
             if (isWin && couponName) {
-                modalBadge.textContent = '🎉 축하합니다!';
-                resultText.textContent = couponName;
-                resultDesc.textContent = item ? item.desc : '당첨 쿠폰이 발급되었습니다.';
+                openModal('🎉 축하합니다!', couponName, item ? item.desc : '당첨 쿠폰이 발급되었습니다.');
             } else if (!isWin) {
-                modalBadge.textContent = '아쉽게도...';
-                resultText.textContent = '꽝!';
-                resultDesc.textContent = '다음 기회에 더 큰 혜택이 기다립니다!';
+                openModal('아쉽게도...', '꽝!', '다음 기회에 더 큰 혜택이 기다립니다!');
             } else {
-                modalBadge.textContent = '결과 확인';
-                resultText.textContent = item ? item.label : '당첨 결과';
-                resultDesc.textContent = item ? item.desc : '당첨 내용을 확인해 주세요.';
+                openModal('결과 확인', item ? item.label : '당첨 결과', item ? item.desc : '당첨 내용을 확인해 주세요.');
             }
-
-            modal.style.display = 'flex';
-            modal.setAttribute('aria-hidden', 'false');
         }
 
         // 버튼 클릭 시 IF-CX-051 호출 후 결과에 맞는 항목으로 룰렛을 회전시킵니다.
@@ -975,34 +1145,75 @@
                 console.warn('[roulette] handleSpinClick failed', error);
                 spin(null, null);
             } finally {
-                setJoinButtonLoading(false, '1회 참여가능');
+                setJoinButtonLoading(false);
             }
         }
 
         // 페이지 초기화 시 대상/응모권 확인 후 캔버스를 최초 렌더링합니다.
         async function init() {
             setJoinButtonLoading(true, '초기화 중...');
-            await loadEventDefinitions();
-            drawWheel(rouletteState.currentRotation);
-            await loadRaffleStatus();
+            raffleButton.disabled = true;
+            raffleButton.textContent = '초기화 중...';
+            drawWheel(rouletteState.currentRotation);       // 로딩 상태 즉시 표시
+            await initPageConfig();                         // 1. 서버에서 acntNo / eventId 주입
+            await loadEventDefinitions();                   // 2. 이벤트 목록 / 경품 항목 서버에서 가져옴
+            drawWheel(rouletteState.currentRotation);       // 3. 경품 항목이 반영된 휠 렌더링
+            await loadRaffleStatus();                       // 4. 대상 여부 / 응모권 수 확인
             if (!joinButton.disabled) {
-                setJoinButtonLoading(false, '1회 참여가능');
+                setJoinButtonLoading(false);
             }
         }
 
-        closeModal.addEventListener('click', () => {
-            resultModal.style.display = 'none';
-            resultModal.setAttribute('aria-hidden', 'true');
-        });
+        closeModal.addEventListener('click', closeResultModal);
 
         resultModal.addEventListener('click', (e) => {
             if (e.target === resultModal) {
-                resultModal.style.display = 'none';
-                resultModal.setAttribute('aria-hidden', 'true');
+                closeResultModal();
             }
         });
 
         joinButton.addEventListener('click', handleSpinClick);
+
+        // 응모권 참여 버튼 - 이벤트 신청대상 확인 API 호출
+        raffleButton.addEventListener('click', async () => {
+            if (raffleButton.disabled || rouletteState.requestPending) {
+                return;
+            }
+
+            try {
+                raffleButton.disabled = true;
+                raffleButton.textContent = '확인 중...';
+                setApiStatus('응모권 신청을 처리 중입니다...');
+
+                const result = await checkTargetAndGetTicket();
+
+                if (!result.isTarget) {
+                    setApiStatus('이벤트 참여 대상이 아닙니다.', true);
+                    raffleButton.disabled = true;
+                    raffleButton.textContent = '참여 불가';
+                    return;
+                }
+
+                if (result.raffleTicketCount <= 0) {
+                    setApiStatus('응모권이 없습니다.', true);
+                    raffleButton.disabled = true;
+                    raffleButton.textContent = '응모권 소진';
+                    return;
+                }
+
+                setAvailableTicketCount(result.raffleTicketCount);
+                setApiStatus('');
+                raffleButton.disabled = false;
+                raffleButton.textContent = '응모권 참여 ✓';
+                rouletteState.restoreStatusOnModalClose = false;
+                openModal('응모권 획득', '', '룰렛판에서 "시작" 버튼을 눌러주세요.');
+            } catch (error) {
+                setApiStatus('응모권 확인 실패: ' + (error.message || ''), true);
+                console.warn('[roulette] raffleButton click failed', error);
+                raffleButton.disabled = false;
+                raffleButton.textContent = '응모권 참여';
+            }
+        });
 
         canvas.addEventListener('click', (event) => {
             const rect = canvas.getBoundingClientRect();

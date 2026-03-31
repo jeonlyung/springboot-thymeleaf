@@ -1,20 +1,23 @@
 package com.project.springboot_thymeleaf.biz.roulette.web;
 
+import com.project.springboot_thymeleaf.biz.login.dto.CustomOAuth2User;
 import com.project.springboot_thymeleaf.biz.roulette.dto.*;
 import com.project.springboot_thymeleaf.biz.roulette.service.RouletteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * 룰렛 이벤트 REST API 컨트롤러
  *
- * IF-CX-047  POST /api/roulette/event-list      - 이벤트 정보 조회
- * IF-CX-049  POST /api/roulette/prize-list       - 이벤트 혜택 구성 정보 조회
- * IF-CX-050  GET  /api/roulette/raffle-info      - 응모권 횟수 조회
- * IF-CX-051  POST /api/roulette/draw             - 당첨자 선정(스핀)
- * IF-CX-052  POST /api/roulette/target-check     - 이벤트 신청대상 확인
+ * (init) GET  /api/roulette/init           - 페이지 초기화 (acntNo, eventId 서버 반환)
+ * IF-CX-050   GET  /api/roulette/raffle-info - 응모권 횟수 조회
+ * IF-CX-051   POST /api/roulette/draw        - 당첨자 선정(스핀)
+ * IF-CX-052   POST /api/roulette/target-check - 이벤트 신청대상 확인
+ *
+ * IF-CX-047 / IF-CX-049 는 RouletteEvmApiController (/api/v1/evm) 에서 처리합니다.
  */
 @Slf4j
 @RestController
@@ -25,23 +28,17 @@ public class RouletteApiController {
     private final RouletteService rouletteService;
 
     /**
-     * IF-CX-047 이벤트 정보 조회
-     * 프론트 → POST /api/roulette/event-list
+     * 페이지 초기화 - acntNo / eventId 를 서버에서 반환
+     * 프론트 → GET /api/roulette/init
      */
-    @PostMapping("/event-list")
-    public ResponseEntity<RouletteEventListResDto> getEventList() {
-        return ResponseEntity.ok(rouletteService.getEventList());
-    }
-
-    /**
-     * IF-CX-049 이벤트 혜택 구성 정보 조회
-     * 프론트 → POST /api/roulette/prize-list
-     * Body: { "eventId": 1 }
-     */
-    @PostMapping("/prize-list")
-    public ResponseEntity<RouletteEventPrizeListResDto> getEventPrizeList(
-            @RequestBody RouletteEventPrizeListReqDto reqDto) {
-        return ResponseEntity.ok(rouletteService.getEventPrizeList(reqDto));
+    @GetMapping("/init")
+    public ResponseEntity<RoulettePageInitResDto> getPageInit(
+            @AuthenticationPrincipal Object principal) {
+        String usrId = "";
+        if (principal instanceof CustomOAuth2User oauthUser) {
+            usrId = oauthUser.getEmail();
+        }
+        return ResponseEntity.ok(rouletteService.getPageInit(usrId));
     }
 
     /**
