@@ -4,7 +4,7 @@ import lombok.*;
 
 /**
  * 룰렛 페이지 초기화 응답 DTO
- * GET /api/roulette/init
+ * POST /api/roulette/init
  *
  * 프론트엔드 API_CONFIG 의 acntNo / eventId 초기값을 서버에서 주입합니다.
  * - acntNo : 현재 로그인 사용자의 전자카드고객번호 (실제 연동 전 서버 stub 반환)

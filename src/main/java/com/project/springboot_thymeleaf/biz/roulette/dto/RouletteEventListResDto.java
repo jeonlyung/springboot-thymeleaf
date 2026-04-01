@@ -62,6 +62,9 @@ public class RouletteEventListResDto {
 
         /** 이벤트 종료일 (yyyyMMdd) */
         private String eventEndDate;
+
+        /** 유의사항 HTML (예: <ul><li>...</li></ul>) */
+        private String dispContents;
     }
 }
 

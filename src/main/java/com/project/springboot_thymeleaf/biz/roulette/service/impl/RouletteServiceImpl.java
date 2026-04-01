@@ -65,6 +65,11 @@ public class RouletteServiceImpl implements RouletteService {
                                         .eventName("봄맞이 룰렛 이벤트")
                                         .eventStartDate("20260301")
                                         .eventEndDate("20260430")
+                                        .dispContents("<ul>"
+                                                + "<li>본 이벤트는 계정당 1일 1회만 참여할 수 있습니다.</li>"
+                                                + "<li>당첨 혜택은 참여 즉시 지급되며, 일부 쿠폰은 사용 기한이 적용됩니다.</li>"
+                                                + "<li>비정상적인 참여가 확인될 경우 당첨이 취소될 수 있습니다.</li>"
+                                                + "</ul>")
                                         .build()
                         ))
                         .build())

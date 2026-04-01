@@ -21,7 +21,7 @@
 |---|---|---|---|---|
 | IF-CX-047 | POST | `/api/v1/evm/ec-event-list` | `POST /api/v1/evm/ec-event-list` | 이벤트 정보 조회 |
 | IF-CX-049 | POST | `/api/v1/evm/ec-event-prize-list` | `POST /api/v1/evm/ec-event-prize-list` | 이벤트 혜택 구성 정보 조회 |
-| IF-CX-050 | GET  | `/api/roulette/raffle-info` | `GET /api/v1/evm/ec-event-raffle-info` | 응모권 횟수 조회 |
+| IF-CX-050 | POST | `/api/roulette/raffle-info` | `POST /api/v1/evm/ec-event-raffle-info` | 응모권 횟수 조회 |
 | IF-CX-051 | POST | `/api/roulette/draw` | `POST /api/v1/evm/ec-event-draw` | 당첨자 선정 (룰렛 스핀) |
 | IF-CX-052 | POST | `/api/roulette/target-check` | `POST /api/v1/evm/ec-event-target-check` | 이벤트 신청대상 확인 |
 
@@ -101,17 +101,19 @@ curl -X POST 'http://localhost:8080/api/roulette/prize-list' \
 
 ### [IF-CX-050] 응모권 횟수 조회
 
-- **Method/Path**: `GET /api/roulette/raffle-info`
-- **Query Parameters**
+- **Method/Path**: `POST /api/roulette/raffle-info`
+- **Request Body**
 
-| 파라미터 | 타입 | 필수 | 설명 |
+| 필드 | 타입 | 필수 | 설명 |
 |---|---|---|---|
 | `eventId` | Long | ✅ | 이벤트 아이디 |
 | `acntNo` | String(10) | ✅ | 전자카드 고객번호 |
 
 **예시 요청**
 ```bash
-curl -X GET 'http://localhost:8080/api/roulette/raffle-info?eventId=1&acntNo=1234567890'
+curl -X POST 'http://localhost:8080/api/roulette/raffle-info' \
+  -H 'Content-Type: application/json' \
+  -d '{ "eventId": 1, "acntNo": "1234567890" }'
 ```
 
 **예시 응답**

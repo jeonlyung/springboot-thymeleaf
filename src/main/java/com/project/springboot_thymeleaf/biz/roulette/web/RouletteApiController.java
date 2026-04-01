@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 룰렛 이벤트 REST API 컨트롤러
  *
- * (init) GET  /api/roulette/init           - 페이지 초기화 (acntNo, eventId 서버 반환)
- * IF-CX-050   GET  /api/roulette/raffle-info - 응모권 횟수 조회
+ * (init) POST /api/roulette/init            - 페이지 초기화 (acntNo, eventId 서버 반환)
+ * IF-CX-050   POST /api/roulette/raffle-info - 응모권 횟수 조회
  * IF-CX-051   POST /api/roulette/draw        - 당첨자 선정(스핀)
  * IF-CX-052   POST /api/roulette/target-check - 이벤트 신청대상 확인
  *
@@ -29,9 +29,9 @@ public class RouletteApiController {
 
     /**
      * 페이지 초기화 - acntNo / eventId 를 서버에서 반환
-     * 프론트 → GET /api/roulette/init
+     * 프론트 → POST /api/roulette/init
      */
-    @GetMapping("/init")
+    @PostMapping("/init")
     public ResponseEntity<RoulettePageInitResDto> getPageInit(
             @AuthenticationPrincipal Object principal) {
         String usrId = "";
@@ -43,18 +43,11 @@ public class RouletteApiController {
 
     /**
      * IF-CX-050 응모권 횟수 조회
-     * 프론트 → GET /api/roulette/raffle-info?eventId={id}&acntNo={no}
+     * 프론트 → POST /api/roulette/raffle-info
+     * Body: { "eventId": 1, "acntNo": "1234567890" }
      */
-    @GetMapping("/raffle-info")
-    public ResponseEntity<RouletteRaffleInfoResDto> getRaffleInfo(
-            @RequestParam Long eventId,
-            @RequestParam String acntNo) {
-
-        RouletteRaffleInfoReqDto reqDto = RouletteRaffleInfoReqDto.builder()
-                .eventId(eventId)
-                .acntNo(acntNo)
-                .build();
-
+    @PostMapping("/raffle-info")
+    public ResponseEntity<RouletteRaffleInfoResDto> getRaffleInfo(@RequestBody RouletteRaffleInfoReqDto reqDto) {
         return ResponseEntity.ok(rouletteService.getRaffleInfo(reqDto));
     }
 

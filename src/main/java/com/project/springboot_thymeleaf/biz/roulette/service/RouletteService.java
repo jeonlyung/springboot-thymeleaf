@@ -10,7 +10,7 @@ public interface RouletteService {
 
     /**
      * 페이지 초기화 - acntNo / eventId 를 서버에서 반환
-     * GET /api/roulette/init
+     * POST /api/roulette/init
      */
     RoulettePageInitResDto getPageInit(String usrId);
 
@@ -28,7 +28,7 @@ public interface RouletteService {
 
     /**
      * IF-CX-050 응모권 횟수 조회
-     * GET /api/v1/evm/ec-event-raffle-info
+     * POST /api/roulette/raffle-info
      */
     RouletteRaffleInfoResDto getRaffleInfo(RouletteRaffleInfoReqDto reqDto);
 

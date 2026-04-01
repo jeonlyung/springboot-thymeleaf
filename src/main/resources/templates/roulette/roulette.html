@@ -5,31 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>이벤트 룰렛</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            width: 100%;
-            min-height: 100%;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", sans-serif;
-            background: #0677bc;
-            color: #ffffff;
-        }
-
+        /* ── 공통 변수 ── */
         :root {
-            --poster-bg-a: #6fe8ff;
-            --poster-bg-b: #0880b8;
-            --poster-highlight: #00eeff;
-            --poster-accent: #ff9f43;
-            --poster-text-soft: #fff4d0;
+            --btn-border:     1px solid rgba(255, 255, 255, 0.28);
+            --btn-inset:      inset 0 1px 0 rgba(255, 255, 255, 0.62);
+            --btn-radius:     999px;
+            --btn-transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            --shadow-text:    0 2px 10px rgba(0, 0, 0, 0.40), 0 0 8px rgba(0, 0, 0, 0.30);
         }
 
+        /* ── 리셋 ── */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; min-height: 100%; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", sans-serif; background: #0677bc; color: #fff; }
+
+        /* ── 레이아웃 ── */
         .roulette-page {
             position: relative;
             min-height: 100vh;
@@ -41,10 +31,6 @@
             background: #0677bc;
         }
 
-        .roulette-page::before {
-            content: none;
-        }
-
         .poster {
             z-index: 1;
             position: relative;
@@ -52,100 +38,42 @@
             min-height: 100vh;
             border-radius: 26px;
             padding: max(16px, env(safe-area-inset-top)) 18px max(20px, env(safe-area-inset-bottom)) 18px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            background-color: #0880b8;
-            background-image: url('/images/roulette/roulette-event-8.png');
-            background-position: center top;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: scroll;
+            overflow: hidden auto;
+            background: #0880b8 url('/images/roulette/roulette-event.png') center top / cover no-repeat scroll;
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 22px 45px rgba(0, 0, 0, 0.28);
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        .poster::before,
-        .poster::after {
+        /* poster 장식 원 - 공통 */
+        .poster::before, .poster::after {
             content: "";
             position: absolute;
             pointer-events: none;
             border-radius: 50%;
             opacity: 0.35;
         }
+        .poster::before { width: 260px; height: 260px; left: -110px; top: 60%;  background: radial-gradient(circle, #a7f1ff 0%, rgba(167, 241, 255, 0) 72%); }
+        .poster::after  { width: 210px; height: 210px; right: -84px; top: 6%;   background: radial-gradient(circle, #ffe37b 0%, rgba(255, 227, 123, 0) 72%); }
 
-        .poster::before {
-            width: 260px;
-            height: 260px;
-            left: -110px;
-            top: 60%;
-            background: radial-gradient(circle, #a7f1ff 0%, rgba(167, 241, 255, 0) 72%);
-        }
+        /* ── 히어로 텍스트 ── */
+        .hero { z-index: 2; text-align: center; margin-top: 6px; }
 
-        .poster::after {
-            width: 210px;
-            height: 210px;
-            right: -84px;
-            top: 6%;
-            background: radial-gradient(circle, #ffe37b 0%, rgba(255, 227, 123, 0) 72%);
-        }
+        /* 공통: 노란색 계열 */
+        .hero-kicker, .hero-title { color: #ffff00; font-weight: 900; }
+        /* 공통: 흰색 + 어두운 그림자 */
+        .hero-sub, .hero-period   { color: #ffffff; text-shadow: var(--shadow-text); }
 
-        .hero {
-            z-index: 2;
-            text-align: center;
-            margin-top: 6px;
-        }
+        .hero-kicker { font-size: 1.9rem;  line-height: 1.05; letter-spacing: -0.04em; text-shadow: 0 2px 10px rgba(0,0,0,.40), 0 0 14px rgba(255,255,0,.50); }
+        .hero-sub    { margin-top: 2px;    font-weight: 900; font-size: 1.95rem; line-height: 1.08; letter-spacing: -0.05em; }
+        .hero-title  { margin-top: 2px;    font-size: 2.2rem; line-height: 1.0; letter-spacing: -0.06em; text-shadow: 0 3px 0 rgba(0,0,0,.40), 0 0 22px rgba(255,255,0,.50); word-break: keep-all; overflow-wrap: break-word; }
+        .hero-period { margin-top: 16px;   font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; }
 
-        .hero-kicker {
-            color: #ffff00;
-            font-weight: 900;
-            font-size: 1.9rem;
-            line-height: 1.05;
-            letter-spacing: -0.04em;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.40), 0 0 14px rgba(255,255,0,0.50);
-        }
+        /* ── 룰렛 ── */
+        .roulette-panel, .join-wrap { z-index: 2; width: 100%; }
 
-        .hero-sub {
-            margin-top: 2px;
-            color: #ffffff;
-            font-weight: 900;
-            font-size: 1.95rem;
-            line-height: 1.08;
-            letter-spacing: -0.05em;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.40), 0 0 8px rgba(0, 0, 0, 0.30);
-        }
-
-        .hero-title {
-            margin-top: 2px;
-            font-weight: 900;
-            font-size: 2.2rem;
-            line-height: 1.0;
-            letter-spacing: -0.06em;
-            color: #ffff00;
-            text-shadow: 0 3px 0 rgba(0, 0, 0, 0.40), 0 0 22px rgba(255,255,0,0.50);
-            word-break: keep-all;
-            overflow-wrap: break-word;
-        }
-
-        .hero-period {
-            margin-top: 16px;
-            color: #ffffff;
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.40), 0 0 8px rgba(0, 0, 0, 0.30);
-        }
-
-        .roulette-panel {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            padding-top: 0;
-            margin-top: 8px;
-            display: flex;
-            justify-content: center;
-        }
+        .roulette-panel { position: relative; margin-top: 27px; display: flex; justify-content: center; }
 
         .roulette-stage {
             position: relative;
@@ -160,326 +88,126 @@
             box-shadow: 0 16px 26px rgba(0, 53, 92, 0.35);
         }
 
-        .roulette-pointer {
-            position: absolute;
-            top: -22px;
-            left: 50%;
-            width: 34px;
-            height: 34px;
-            transform: translateX(-50%);
-            z-index: 5;
-            filter: drop-shadow(0 8px 10px rgba(255, 110, 61, 0.32));
-        }
+        /* 포인터 - 공통 pseudo */
+        .roulette-pointer { position: absolute; top: -22px; left: 50%; width: 34px; height: 34px; transform: translateX(-50%); z-index: 5; filter: drop-shadow(0 8px 10px rgba(255, 110, 61, 0.32)); }
+        .roulette-pointer::before, .roulette-pointer::after { content: ""; position: absolute; }
+        .roulette-pointer::before { inset: 0; background: linear-gradient(180deg, #ff6f4a 0%, #ff4f2e 100%); border-radius: 55% 55% 55% 0; transform: rotate(-45deg); transform-origin: center; }
+        .roulette-pointer::after  { top: 10px; left: 50%; width: 14px; height: 14px; background: #fffdf7; border-radius: 50%; transform: translateX(-50%); box-shadow: 0 1px 3px rgba(0,0,0,.10); }
 
-        .roulette-pointer::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, #ff6f4a 0%, #ff4f2e 100%);
-            border-radius: 55% 55% 55% 0;
-            transform: rotate(-45deg);
-            transform-origin: center;
-        }
+        #rouletteCanvas { width: 344px; height: 344px; border-radius: 50%; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
 
-        .roulette-pointer::after {
-            content: "";
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            width: 14px;
-            height: 14px;
-            background: #fffdf7;
-            border-radius: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10);
-        }
+        /* ── 버튼 영역 ── */
+        .join-wrap       { margin-top: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+        .button-container { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: min(100%, 260px); }
 
-        #rouletteCanvas {
-            width: 344px;
-            height: 344px;
-            border-radius: 50%;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .join-wrap {
-            z-index: 2;
-            width: 100%;
-            margin-top: 24px;
-            padding-top: 0;
-            padding-bottom: 12px;
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .button-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            justify-content: center;
-            width: min(100%, 260px);
-        }
-
-        .btn-join {
-            border: 1px solid rgba(255, 255, 255, 0.28);
-            border-radius: 999px;
+        /* 버튼 공통 */
+        .btn-join, .btn-raffle {
+            border: var(--btn-border);
+            border-radius: var(--btn-radius);
             width: 100%;
             min-width: 140px;
             padding: 12px 24px;
             font-size: 1.5rem;
             font-weight: 900;
             letter-spacing: -0.03em;
-            color: #ffffff;
-            background: linear-gradient(135deg, #ff6b9d 0%, #ffa366 45%, #ffc857 100%);
-            box-shadow: 0 12px 24px rgba(255, 107, 157, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.62);
+            color: #fff;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            transition: var(--btn-transition);
         }
+        .btn-join   { background: linear-gradient(135deg, #ff6b9d 0%, #ffa366 45%, #ffc857 100%); box-shadow: 0 12px 24px rgba(255,107,157,.40), var(--btn-inset); }
+        .btn-raffle { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);              box-shadow: 0 12px 24px rgba(102,126,234,.40), var(--btn-inset); }
+        .btn-join:disabled,
+        .btn-raffle:disabled { cursor: not-allowed; opacity: 0.72; filter: saturate(0.75); }
 
-        .btn-join:disabled {
-            cursor: not-allowed;
-            opacity: 0.72;
-            filter: saturate(0.75);
-        }
+        /* ── 모달 ── */
+        .roulette-modal { position: fixed; inset: 0; background: rgba(15,15,24,.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; padding: 24px; z-index: 999; }
+        .modal-content  { background: #fff; border-radius: 16px; padding: 24px 20px; text-align: center; max-width: 280px; width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,.3); }
+        .modal-content h2 { color: #3d3d57; font-size: 1.3rem; margin: 8px 0; }
+        .modal-badge    { display: inline-block; background: linear-gradient(135deg, rgba(255,122,89,.2) 0%, rgba(255,122,89,.1) 100%); color: #ff7a59; padding: 6px 12px; border-radius: var(--btn-radius); font-weight: 700; font-size: 0.85rem; }
+        .modal-desc     { color: #60607a; margin: 8px 0 16px; font-size: 0.9rem; }
+        .btn-close      { width: 100%; padding: 12px 16px; font-size: 0.95rem; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; background: linear-gradient(135deg, #5b46f6 0%, #7c5dfa 100%); color: #fff; box-shadow: 0 6px 20px rgba(91,70,246,.4); }
 
-        .btn-raffle {
-            border: 1px solid rgba(255, 255, 255, 0.28);
-            border-radius: 999px;
-            width: 100%;
-            min-width: 140px;
-            padding: 12px 24px;
-            font-size: 1.5rem;
-            font-weight: 900;
-            letter-spacing: -0.03em;
-            color: #ffffff;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.62);
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
-        }
+        /* ── 유의사항 ── */
+        .notice-card  { position: relative; z-index: 2; width: min(100%, 360px); margin-top: 20px; padding: 16px 18px; border-radius: 18px; background: rgba(2,64,111,.48); border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 10px 24px rgba(0,38,71,.18); backdrop-filter: blur(10px); }
+        .notice-title { font-size: 1rem; font-weight: 900; color: #fff9e0; letter-spacing: -0.03em; text-shadow: 0 1px 4px rgba(0,0,0,.30); }
+        .notice-list  { margin-top: 10px; color: #fffaf0; font-size: 0.94rem; line-height: 1.6; text-shadow: 0 1px 3px rgba(0,0,0,.20); }
+        .notice-list ul { margin: 0; padding-left: 18px; }
+        .notice-list li + li { margin-top: 6px; }
 
-        .btn-raffle:disabled {
-            cursor: not-allowed;
-            opacity: 0.72;
-            filter: saturate(0.75);
-        }
-
-        .api-status {
-            min-height: 1.1rem;
-            font-size: 0.82rem;
-            color: #ccf6ff;
-            text-align: center;
-            opacity: 0.95;
-            letter-spacing: -0.01em;
-            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.22);
-        }
-
-        .roulette-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 15, 24, 0.7);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            z-index: 999;
-        }
-
-        .modal-content {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 24px 20px;
-            text-align: center;
-            max-width: 280px;
-            width: 90%;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-        }
-
-        .modal-content h2 {
-            color: #3d3d57;
-            font-size: 1.3rem;
-            margin: 8px 0;
-        }
-
-        .modal-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, rgba(255, 122, 89, 0.2) 0%, rgba(255, 122, 89, 0.1) 100%);
-            color: #ff7a59;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-
-        .modal-desc {
-            color: #60607a;
-            margin: 8px 0 16px;
-            font-size: 0.9rem;
-        }
-
-        .btn-close {
-            width: 100%;
-            padding: 12px 16px;
-            font-size: 0.95rem;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            font-weight: 700;
-            background: linear-gradient(135deg, #5b46f6 0%, #7c5dfa 100%);
-            color: #ffffff;
-            box-shadow: 0 6px 20px rgba(91, 70, 246, 0.4);
-        }
-
-        .notice-card {
-            position: relative;
-            z-index: 2;
-            width: min(100%, 360px);
-            margin-top: 14px;
-            padding: 16px 18px;
-            border-radius: 18px;
-            background: rgba(2, 64, 111, 0.48);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 10px 24px rgba(0, 38, 71, 0.18);
-            backdrop-filter: blur(10px);
-        }
-
-        .notice-title {
-            font-size: 1rem;
-            font-weight: 900;
-            color: #fff9e0;
-            letter-spacing: -0.03em;
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.30);
-        }
-
-        .notice-list {
-            margin-top: 10px;
-            padding-left: 18px;
-            color: #fffaf0;
-            font-size: 0.94rem;
-            line-height: 1.6;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.20);
-        }
-
-        .notice-list li + li {
-            margin-top: 6px;
-        }
-
+        /* ── 미디어쿼리: 태블릿 768~1180px ── */
         @media (min-width: 768px) and (max-width: 1180px) {
-            .roulette-page {
-                padding: 24px;
-            }
-
-            .poster {
-                width: min(100%, 500px);
-                min-height: calc(100vh - 48px);
-                background-position: center top;
-                background-size: 100% auto;
-            }
+            .roulette-page { padding: 24px; }
+            .poster        { width: min(100%, 500px); }
         }
 
+        /* ── 미디어쿼리: 모바일 ~430px ── */
         @media (max-width: 430px) {
-            .roulette-page {
-                min-height: 100svh;
-                padding: 0;
-                background: #0677bc;
-            }
-
-            .roulette-page::before {
-                content: none;
-            }
-
-            .poster {
-                min-height: 100svh;
-                border-radius: 0;
-                width: 100%;
-                padding: max(16px, env(safe-area-inset-top)) 14px max(20px, env(safe-area-inset-bottom)) 14px;
-                overflow-y: auto;
-                background-position: center top;
-                background-size: cover;
-                background-repeat: no-repeat;
-                background-attachment: scroll;
-            }
-
-            .notice-card {
-                width: 100%;
-                margin-top: 12px;
-                padding: 15px 16px;
-                border-radius: 16px;
-            }
+            .roulette-page { min-height: 100svh; padding: 0; }
+            .poster        { min-height: 100svh; border-radius: 0; width: 100%; padding: max(16px, env(safe-area-inset-top)) 14px max(20px, env(safe-area-inset-bottom)) 14px; }
+            .notice-card   { width: 100%; padding: 15px 16px; border-radius: 16px; }
         }
 
+        /* ── 미디어쿼리: 소형 모바일 ~380px ── */
         @media (max-width: 380px) {
-            .roulette-page {
-                background-size: cover;
-                background-position: center top;
-            }
-
-            .hero-kicker,
-            .hero-sub {
-                font-size: 1.6rem;
-            }
-
-            .hero-title {
-                font-size: 1.9rem;
-            }
-
-            .hero-period {
-                font-size: 1.45rem;
-            }
-
-            .roulette-panel {
-                margin-top: 20px;
-            }
-
-            .roulette-stage {
-                max-width: 330px;
-                padding: 16px;
-            }
-
-            #rouletteCanvas {
-                width: 292px;
-                height: 292px;
-            }
-
-            .btn-join {
-                font-size: 1.56rem;
-                min-width: 164px;
-                padding: 12px 24px;
-            }
-
-            .notice-title {
-                font-size: 0.96rem;
-            }
-
-            .notice-list {
-                font-size: 0.88rem;
-                line-height: 1.55;
-            }
+            .hero-kicker, .hero-sub { font-size: 1.6rem; }
+            .hero-title   { font-size: 1.9rem; }
+            .hero-period  { font-size: 1.45rem; }
+            .roulette-panel { margin-top: 27px; }
+            .roulette-stage { max-width: 330px; padding: 16px; }
+            #rouletteCanvas { width: 292px; height: 292px; }
+            .btn-join     { font-size: 1.56rem; }
+            .notice-title { font-size: 0.96rem; }
+            .notice-list  { font-size: 0.88rem; line-height: 1.55; }
         }
 
+        /* ── 미디어쿼리: 초소형 모바일 ~320px ── */
         @media (max-width: 320px) {
-            .roulette-page {
-                background-size: cover;
-                background-position: center top;
-            }
+            #rouletteCanvas { width: 260px; height: 260px; }
+            .roulette-stage { max-width: 290px; padding: 14px; }
+            .hero-title     { font-size: 1.7rem; }
+        }
 
-            #rouletteCanvas {
-                width: 260px;
-                height: 260px;
-            }
+        /* ── 미디어쿼리: 랩탑/데스크탑 431px+ ── */
+        @media (min-width: 431px) {
+            .roulette-page { height: 100dvh; }
+            .poster        { min-height: 0; }
+        }
 
-            .roulette-stage {
-                max-width: 290px;
-                padding: 14px;
-            }
+        /* 높이 900px 이하 (MacBook 13" 등) */
+        @media (min-width: 431px) and (max-height: 900px) {
+            .hero            { margin-top: 4px; }
+            .hero-kicker     { font-size: 1.55rem; }
+            .hero-sub        { font-size: 1.6rem; }
+            .hero-title      { font-size: 1.85rem; }
+            .hero-period     { font-size: 1.5rem; margin-top: 10px; }
+            .roulette-panel  { margin-top: 16px; }
+            .roulette-stage  { max-width: 320px; padding: 8px; }
+            #rouletteCanvas  { width: 278px; height: 278px; }
+            .join-wrap       { margin-top: 14px; gap: 8px; }
+            .btn-join,
+            .btn-raffle      { font-size: 1.3rem; padding: 10px 22px; }
+            .notice-card     { margin-top: 12px; padding: 12px 16px; }
+            .notice-title    { font-size: 0.92rem; }
+            .notice-list     { font-size: 0.85rem; }
+        }
 
-            .hero-title {
-                font-size: 1.7rem;
-            }
+        /* 높이 768px 이하 (1366×768 Windows 등) */
+        @media (min-width: 431px) and (max-height: 768px) {
+            .hero            { margin-top: 2px; }
+            .hero-kicker     { font-size: 1.3rem; }
+            .hero-sub        { font-size: 1.35rem; }
+            .hero-title      { font-size: 1.55rem; }
+            .hero-period     { font-size: 1.25rem; margin-top: 5px; }
+            .roulette-panel  { margin-top: 10px; }
+            .roulette-stage  { max-width: 286px; padding: 7px; }
+            #rouletteCanvas  { width: 238px; height: 238px; }
+            .join-wrap       { margin-top: 10px; gap: 6px; }
+            .btn-join,
+            .btn-raffle      { font-size: 1.1rem; padding: 9px 18px; }
+
+            .notice-card     { margin-top: 8px; padding: 10px 14px; }
+            .notice-title    { font-size: 0.88rem; }
+            .notice-list     { font-size: 0.82rem; line-height: 1.45; }
         }
     </style>
 </head>
@@ -505,16 +233,17 @@
                 <button id="joinButton" class="btn-join" type="button">참여가능</button>
                 <button id="raffleButton" class="btn-raffle" type="button">응모권 참여</button>
             </div>
-            <p id="apiStatus" class="api-status" aria-live="polite"></p>
         </div>
 
         <section class="notice-card" aria-label="참여 유의사항">
             <h2 class="notice-title">참여 유의사항</h2>
-            <ul class="notice-list">
-                <li>본 이벤트는 계정당 1일 1회만 참여할 수 있습니다.</li>
-                <li>당첨 혜택은 참여 즉시 지급되며, 일부 쿠폰은 사용 기한이 적용됩니다.</li>
-                <li>비정상적인 참여가 확인될 경우 당첨이 취소될 수 있습니다.</li>
-            </ul>
+            <div id="noticeContents" class="notice-list">
+                <ul>
+                    <li>본 이벤트는 계정당 1일 1회만 참여할 수 있습니다.</li>
+                    <li>당첨 혜택은 참여 즉시 지급되며, 일부 쿠폰은 사용 기한이 적용됩니다.</li>
+                    <li>비정상적인 참여가 확인될 경우 당첨이 취소될 수 있습니다.</li>
+                </ul>
+            </div>
         </section>
     </main>
 
@@ -551,7 +280,8 @@
          *       ecEventPrizeList: [{ couponName, ... }] } }
          *
          * [IF-CX-050] 응모권 횟수 조회
-         *   GET /api/roulette/raffle-info?eventId={eventId}&acntNo={acntNo}
+         *   POST /api/roulette/raffle-info
+         *   Request:  { eventId, acntNo }
          *   Response: { resultCode, resultMsg,
          *     resultData: { isSuccess, errMsg,
          *       ecEventRaffleInfo: [{ raffleTicketCount }] } }
@@ -607,6 +337,7 @@
         const resultModal = document.getElementById('resultModal');
         const joinButton = document.getElementById('joinButton');
         const raffleButton = document.getElementById('raffleButton');
+        const noticeContents = document.getElementById('noticeContents');
         const apiStatus = document.getElementById('apiStatus');
         const eventTitle = document.getElementById('eventTitle');
         const eventPeriod = document.getElementById('eventPeriod');
@@ -634,6 +365,7 @@
 
         // 하단 상태 영역에 API 진행/오류 메시지를 표시합니다.
         function setApiStatus(message, isError) {
+            if (!apiStatus) { return; }
             apiStatus.textContent = message || '';
             apiStatus.style.color = isError ? '#ffe5e5' : '#f2fbff';
         }
@@ -641,6 +373,9 @@
         // 보유 응모권 수를 저장합니다.
         function setAvailableTicketCount(ticketCount) {
             rouletteState.availableTicketCount = Math.max(0, Number(ticketCount) || 0);
+            if (!rouletteState.requestPending && !rouletteState.spinning) {
+                joinButton.disabled = rouletteState.availableTicketCount <= 0;
+            }
             restoreJoinButtonLabel();
         }
 
@@ -648,8 +383,8 @@
         function restoreJoinButtonLabel() {
             if (rouletteState.availableTicketCount > 0) {
                 joinButton.textContent = rouletteState.availableTicketCount + '회 참여가능';
-            } else if (!joinButton.disabled) {
-                joinButton.textContent = '참여가능';
+            } else {
+                joinButton.textContent = '응모권 소진';
             }
         }
 
@@ -672,11 +407,12 @@
         // 참여 버튼의 로딩 상태와 문구를 제어합니다.
         function setJoinButtonLoading(isLoading, label) {
             rouletteState.requestPending = isLoading;
-            joinButton.disabled = isLoading || rouletteState.spinning;
             if (isLoading) {
+                joinButton.disabled = true;
                 joinButton.textContent = label || '서버 통신중...';
                 return;
             }
+            joinButton.disabled = rouletteState.spinning || rouletteState.availableTicketCount <= 0;
             if (label) {
                 joinButton.textContent = label;
                 return;
@@ -753,10 +489,10 @@
             if (!isTarget) { return { isTarget: false, raffleTicketCount: 0 }; }
 
             // 응모권 조회 (IF-CX-050)
-            const raffleRes = await requestJson(
-                API_CONFIG.raffleInfoUrl + '?eventId=' + API_CONFIG.eventId + '&acntNo=' + API_CONFIG.acntNo,
-                { method: 'GET' }
-            );
+            const raffleRes = await requestJson(API_CONFIG.raffleInfoUrl, {
+                method: 'POST',
+                body: JSON.stringify({ eventId: API_CONFIG.eventId, acntNo: API_CONFIG.acntNo })
+            });
             const raffleData = raffleRes && raffleRes.resultData && raffleRes.resultData.ecEventRaffleInfo;
             const count = raffleData && raffleData[0] ? raffleData[0].raffleTicketCount : 0;
             return { isTarget: true, raffleTicketCount: count };
@@ -845,6 +581,14 @@
             }
         }
 
+        // 이벤트의 유의사항 HTML(dispContents)을 카드 영역에 반영합니다.
+        function applyNoticeContents(dispContents) {
+            if (!noticeContents) { return; }
+            const html = typeof dispContents === 'string' ? dispContents.trim() : '';
+            if (!html) { return; } // 값이 없으면 템플릿 기본 안내문 유지
+            noticeContents.innerHTML = html;
+        }
+
         // 쿠폰명이 콤마로 내려올 수 있어 룰렛 표시용 문자열 배열로 정규화합니다.
         // 단, "5,000" 처럼 콤마 뒤에 숫자가 오는 천단위 구분자는 분리하지 않습니다.
         function parseCouponNames(value) {
@@ -881,6 +625,7 @@
                     API_CONFIG.eventId = selectedEventId;
                 }
                 applyEventMeta(selectedEvent);
+                applyNoticeContents(selectedEvent && selectedEvent.dispContents);
 
                 setApiStatus('이벤트 항목 조회 중...');
                 const prizeRes = await requestJson(API_CONFIG.prizeListUrl, {
@@ -1000,7 +745,7 @@
                 ctx.shadowBlur = 4;
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 1;
-                ctx.fillStyle = '#fff9e0';
+                ctx.fillStyle = '#ffffff';
                 ctx.font = '700 ' + fontSize + 'px -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif';
                 ctx.textAlign = 'right';
                 ctx.fillText(item.label, radius - 30, Math.floor(fontSize / 2.4));
@@ -1038,7 +783,7 @@
             ctx.restore();
         }
 
-        // GET /api/roulette/init - 서버에서 acntNo / eventId 를 가져옵니다.
+        // POST /api/roulette/init - 서버에서 acntNo / eventId 를 가져옵니다.
         async function initPageConfig() {
             if (!API_CONFIG.enabled) {
                 API_CONFIG.acntNo = '0000000000';
@@ -1047,7 +792,10 @@
             }
             try {
                 setApiStatus('사용자 정보 확인 중...');
-                const res = await requestJson(API_CONFIG.initUrl, { method: 'GET' });
+                const res = await requestJson(API_CONFIG.initUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({})
+                });
                 if (res && res.acntNo) {
                     API_CONFIG.acntNo  = res.acntNo;
                 }
@@ -1130,11 +878,18 @@
             if (rouletteState.spinning || rouletteState.requestPending) {
                 return;
             }
+            if (rouletteState.availableTicketCount <= 0) {
+                setApiStatus('응모권이 없습니다.', true);
+                joinButton.disabled = true;
+                restoreJoinButtonLabel();
+                return;
+            }
 
             try {
                 setJoinButtonLoading(true, '서버 통신중...');
                 setApiStatus('추첨 중...');
                 const drawResult = await requestDrawResult();
+                setAvailableTicketCount(rouletteState.availableTicketCount - 1);
                 const targetIndex = findItemIndexByCouponName(
                     drawResult.isWinning === '1' ? drawResult.winningCouponName : null
                 );
