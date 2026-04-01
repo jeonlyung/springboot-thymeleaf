@@ -5,39 +5,185 @@
         lang="ko">
 <head>
     <title>댕댕이월드 - 메인</title>
+    <style>
+        /* ── 히어로 섹션 ── */
+        .hero-section {
+            max-width: 1200px;
+            margin: 2.5rem auto 0;
+            padding: 2.5rem 2rem;
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .hero-text {
+            flex: 1 1 50%;
+        }
+
+        .hero-text h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #2C3E50;
+            line-height: 1.35;
+            margin: 0 0 1rem;
+        }
+
+        .hero-text h1 .highlight {
+            color: #FF8C42;
+        }
+
+        .hero-text p {
+            color: #5A6C7D;
+            font-size: 1.05rem;
+            margin: 0 0 1.5rem;
+        }
+
+        .hero-image {
+            flex: 1 1 50%;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .hero-image img {
+            width: 340px;
+            height: 340px;
+            object-fit: cover;
+            border-radius: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.15);
+        }
+
+        /* ── 피드 섹션 ── */
+        .feed-section {
+            max-width: 1200px;
+            margin: 3rem auto 5rem;
+            padding: 0 2rem;
+        }
+
+        .feed-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2C3E50;
+            margin-bottom: 1.5rem;
+        }
+
+        .feed-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feed-card {
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+            transition: transform .25s, box-shadow .25s;
+        }
+
+        .feed-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.14);
+        }
+
+        .feed-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .feed-card-body {
+            padding: 1.2rem 1.4rem 1.4rem;
+        }
+
+        .feed-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #3b82f6;
+            background: #dbeafe;
+            padding: 0.2rem 0.65rem;
+            border-radius: 999px;
+        }
+
+        .feed-card-body h3 {
+            margin: 0.6rem 0 0;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #2C3E50;
+        }
+
+        /* ── 반응형 ── */
+        @media (max-width: 768px) {
+            .hero-section {
+                flex-direction: column;
+                text-align: center;
+            }
+            .hero-image {
+                justify-content: center;
+            }
+            .hero-image img {
+                width: 100%;
+                height: 240px;
+            }
+            .hero-text h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
 </head>
 <body>
 <div layout:fragment="content">
 
-    <header class="max-w-6xl mx-auto mt-10 p-8 bg-white rounded-3xl shadow-sm flex items-center justify-between">
-        <div class="w-1/2">
-            <h1 class="text-4xl font-extrabold text-gray-800 leading-tight">
-                우리 집 강아지의 <br> <span class="text-orange-500">특별한 일상</span>을 공유하세요
+    <!-- 히어로 섹션 -->
+    <section class="hero-section">
+        <div class="hero-text">
+            <h1>
+                우리 집 강아지의 <br>
+                <span class="highlight">특별한 일상</span>을 공유하세요
             </h1>
-            <p class="mt-4 text-gray-500">전국 댕댕이 집사들과 소통하는 가장 따뜻한 공간</p>
-            <button class="mt-6 bg-orange-400 text-white font-bold py-3 px-8 rounded-2xl hover:bg-orange-500 transition">
-                글쓰기 시작
-            </button>
+            <p>전국 댕댕이 집사들과 소통하는 가장 따뜻한 공간</p>
+            <a href="/board/write" class="btn btn-primary">✏️ 글쓰기 시작</a>
         </div>
-        <div class="w-1/2 flex justify-end">
+        <div class="hero-image">
             <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=500&q=80"
-                 class="rounded-3xl shadow-lg w-80 h-80 object-cover" alt="Happy Dog">
+                 alt="Happy Dog">
         </div>
-    </header>
+    </section>
 
-    <main class="max-w-6xl mx-auto mt-12 mb-20">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">🔥 지금 뜨는 댕댕이 소식</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-white rounded-2xl overflow-hidden shadow-sm">
+    <!-- 피드 섹션 -->
+    <section class="feed-section">
+        <h2>🔥 지금 뜨는 댕댕이 소식</h2>
+        <div class="feed-grid">
+            <div class="feed-card">
                 <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80"
-                     class="w-full h-48 object-cover" alt="귀여운 강아지">
-                <div class="p-5">
-                    <span class="text-xs font-bold text-blue-500 bg-blue-100 px-2 py-1 rounded">질문/답변</span>
-                    <h3 class="font-bold text-lg mt-2 text-gray-800">강아지 사료 추천 좀 해주세요!</h3>
+                     alt="귀여운 강아지">
+                <div class="feed-card-body">
+                    <span class="feed-badge">질문/답변</span>
+                    <h3>강아지 사료 추천 좀 해주세요!</h3>
+                </div>
+            </div>
+            <div class="feed-card">
+                <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=400&q=80"
+                     alt="강아지 산책">
+                <div class="feed-card-body">
+                    <span class="feed-badge">일상/공유</span>
+                    <h3>오늘 첫 산책 성공했어요 🐾</h3>
+                </div>
+            </div>
+            <div class="feed-card">
+                <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=400&q=80"
+                     alt="달리는 강아지">
+                <div class="feed-card-body">
+                    <span class="feed-badge">건강/케어</span>
+                    <h3>우리 댕댕이 건강검진 후기</h3>
                 </div>
             </div>
         </div>
-    </main>
+    </section>
 
 </div>
 </body>

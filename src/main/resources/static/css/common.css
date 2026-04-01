@@ -1,28 +1,115 @@
-/* 기본 여백 제거 및 폰트 설정 */
-body {
+/* 메인/로그인 공통 반응형 베이스 */
+:root {
+    --primary-color: #FF8C42;
+    --primary-dark: #e68900;
+    --danger-color: #f44336;
+    --dark-gray: #2C3E50;
+    --medium-gray: #5A6C7D;
+    --light-gray: #E8EEF2;
+    --white: #FFFFFF;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
     margin: 0;
     padding: 0;
-    font-family: 'Pretendard', sans-serif; /* 요즘 가장 트렌디한 폰트 */
-    line-height: 1.6;
+    min-height: 100%;
 }
 
-/* 타임리프 레이아웃용 공통 컨테이너 */
+body {
+    font-family: 'Noto Sans KR', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    line-height: 1.6;
+    color: var(--dark-gray);
+}
+
 .container {
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 2rem;
 }
 
-/* 버튼 공통 스타일 (바닐라 JS와 함께 쓸 것) */
 .btn {
-    padding: 10px 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
     border: none;
-    border-radius: 5px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.95rem;
     cursor: pointer;
-    background-color: #007bff;
-    color: white;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: var(--transition);
 }
 
-.btn:hover {
-    background-color: #0056b3;
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #FFB347 100%);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-danger {
+    background: var(--danger-color);
+    color: var(--white);
+}
+
+.input-group {
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--medium-gray);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.75rem 0.875rem;
+    border: 1px solid #ddd;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    background: #fff;
+}
+
+/* 모바일 공통 규칙 */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .btn {
+        padding: 0.65rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 430px) {
+    .container {
+        padding: 0.875rem;
+    }
+
+    .btn {
+        width: 100%;
+        min-height: 44px;
+    }
 }

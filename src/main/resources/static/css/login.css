@@ -7,10 +7,12 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    min-height: 100dvh;
     margin: 0;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     position: relative;
+    padding: 16px;
 }
 
 /* 댕댕이 발바닥 배경 애니메이션 (유지) */
@@ -40,7 +42,7 @@ body::before {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     text-align: center;
     max-width: 400px;
-    width: 90%;
+    width: min(100%, 400px);
     position: relative;
     z-index: 1;
 }
@@ -58,36 +60,9 @@ body::before {
     margin-bottom: 15px;
 }
 
-.input-group {
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-.input-group label {
-    display: block;
-    margin-bottom: 8px;
-    color: #555;
-    font-weight: 700;
-}
-
-.input-group input {
-    width: calc(100% - 22px);
-    padding: 12px 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 1em;
-}
-
 .login-button {
     width: 100%;
-    padding: 12px;
-    background-color: #ff9800;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.1em;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    font-size: 1.05em;
     font-weight: 700;
 }
 
@@ -172,4 +147,66 @@ body::before {
 
 .find-links a:hover {
     color: #ff9800;
+}
+
+@media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+        padding: 20px 14px;
+    }
+
+    .login-container {
+        padding: 28px 20px;
+        border-radius: 16px;
+    }
+
+    .login-container h1 {
+        font-size: 1.9rem;
+        margin-bottom: 18px;
+    }
+
+    .social-login-circles {
+        gap: 14px;
+    }
+}
+
+@media (max-width: 430px) {
+    body {
+        padding: 12px;
+    }
+
+    .login-container {
+        padding: 22px 16px;
+        width: 100%;
+    }
+
+    .login-container h1 {
+        font-size: 1.65rem;
+    }
+
+    .login-container p {
+        font-size: 0.92rem;
+    }
+
+    .social-login-divider {
+        margin: 28px 0 16px;
+    }
+
+    .social-login-circles {
+        gap: 10px;
+    }
+
+    .circle-btn {
+        width: 44px;
+        height: 44px;
+    }
+
+    .find-links {
+        margin-top: 18px;
+        font-size: 0.8rem;
+    }
+
+    .find-links a {
+        margin: 0 6px;
+    }
 }

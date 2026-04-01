@@ -54,8 +54,8 @@
             border-radius: 50%;
             opacity: 0.35;
         }
-        .poster::before { width: 260px; height: 260px; left: -110px; top: 60%;  background: radial-gradient(circle, #a7f1ff 0%, rgba(167, 241, 255, 0) 72%); }
-        .poster::after  { width: 210px; height: 210px; right: -84px; top: 6%;   background: radial-gradient(circle, #ffe37b 0%, rgba(255, 227, 123, 0) 72%); }
+        .poster::before { width: 260px; height: 260px; left: -110px; top: 60%;  background: radial-gradient(circle, #a7f1ff 0%, rgba(167,241,255,0) 72%); }
+        .poster::after  { width: 210px; height: 210px; right: -84px; top: 6%;   background: radial-gradient(circle, #ffe37b 0%, rgba(255,227,123,0) 72%); }
 
         /* ── 히어로 텍스트 ── */
         .hero { z-index: 2; text-align: center; margin-top: 6px; }
@@ -80,21 +80,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100%;
-            max-width: 390px;
-            padding: 10px;
+            width: fit-content;
+            max-width: 410px;
+            aspect-ratio: 1 / 1;
+            padding: 4px;
             border-radius: 50%;
             background: linear-gradient(180deg, #f7ffff 0%, #eaf6ff 100%);
             box-shadow: 0 16px 26px rgba(0, 53, 92, 0.35);
         }
 
-        /* 포인터 - 공통 pseudo */
+        /* 포인터 - 공통 */
         .roulette-pointer { position: absolute; top: -22px; left: 50%; width: 34px; height: 34px; transform: translateX(-50%); z-index: 5; filter: drop-shadow(0 8px 10px rgba(255, 110, 61, 0.32)); }
         .roulette-pointer::before, .roulette-pointer::after { content: ""; position: absolute; }
         .roulette-pointer::before { inset: 0; background: linear-gradient(180deg, #ff6f4a 0%, #ff4f2e 100%); border-radius: 55% 55% 55% 0; transform: rotate(-45deg); transform-origin: center; }
         .roulette-pointer::after  { top: 10px; left: 50%; width: 14px; height: 14px; background: #fffdf7; border-radius: 50%; transform: translateX(-50%); box-shadow: 0 1px 3px rgba(0,0,0,.10); }
 
-        #rouletteCanvas { width: 344px; height: 344px; border-radius: 50%; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+        #rouletteCanvas { width: 384px; height: 384px; border-radius: 50%; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
 
         /* ── 버튼 영역 ── */
         .join-wrap       { margin-top: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
@@ -153,8 +154,8 @@
             .hero-title   { font-size: 1.9rem; }
             .hero-period  { font-size: 1.45rem; }
             .roulette-panel { margin-top: 27px; }
-            .roulette-stage { max-width: 330px; padding: 16px; }
-            #rouletteCanvas { width: 292px; height: 292px; }
+            .roulette-stage { max-width: 350px; padding: 8px; }
+            #rouletteCanvas { width: 334px; height: 334px; }
             .btn-join     { font-size: 1.56rem; }
             .notice-title { font-size: 0.96rem; }
             .notice-list  { font-size: 0.88rem; line-height: 1.55; }
@@ -162,8 +163,8 @@
 
         /* ── 미디어쿼리: 초소형 모바일 ~320px ── */
         @media (max-width: 320px) {
-            #rouletteCanvas { width: 260px; height: 260px; }
-            .roulette-stage { max-width: 290px; padding: 14px; }
+            #rouletteCanvas { width: 280px; height: 280px; }
+            .roulette-stage { max-width: 292px; padding: 6px; }
             .hero-title     { font-size: 1.7rem; }
         }
 
@@ -181,8 +182,8 @@
             .hero-title      { font-size: 1.85rem; }
             .hero-period     { font-size: 1.5rem; margin-top: 10px; }
             .roulette-panel  { margin-top: 16px; }
-            .roulette-stage  { max-width: 320px; padding: 8px; }
-            #rouletteCanvas  { width: 278px; height: 278px; }
+            .roulette-stage  { max-width: 346px; padding: 6px; }
+            #rouletteCanvas  { width: 304px; height: 304px; }
             .join-wrap       { margin-top: 14px; gap: 8px; }
             .btn-join,
             .btn-raffle      { font-size: 1.3rem; padding: 10px 22px; }
@@ -199,8 +200,8 @@
             .hero-title      { font-size: 1.55rem; }
             .hero-period     { font-size: 1.25rem; margin-top: 5px; }
             .roulette-panel  { margin-top: 10px; }
-            .roulette-stage  { max-width: 286px; padding: 7px; }
-            #rouletteCanvas  { width: 238px; height: 238px; }
+            .roulette-stage  { max-width: 306px; padding: 6px; }
+            #rouletteCanvas  { width: 264px; height: 264px; }
             .join-wrap       { margin-top: 10px; gap: 6px; }
             .btn-join,
             .btn-raffle      { font-size: 1.1rem; padding: 9px 18px; }
@@ -224,7 +225,7 @@
         <section class="roulette-panel">
             <div class="roulette-stage">
                 <div class="roulette-pointer" aria-hidden="true"></div>
-                <canvas id="rouletteCanvas" width="344" height="344" aria-label="이벤트 룰렛"></canvas>
+                <canvas id="rouletteCanvas" width="384" height="384" aria-label="이벤트 룰렛"></canvas>
             </div>
         </section>
 
@@ -261,53 +262,18 @@
     (function() {
         'use strict';
 
-        /*
-         * =====================================================================
-         * 인터페이스 설계서 기반 API 규격
-         * =====================================================================
-         *
-         * [IF-CX-047] 이벤트 정보 조회
-         *   POST /api/v1/evm/ec-event-list
-         *   Response: { resultCode, resultMsg,
-         *     resultData: { isSuccess, errMsg,
-         *       ecEventList: [{ eventId, eventName, eventStartDate, eventEndDate, ... }] } }
-         *
-         * [IF-CX-049] 이벤트 혜택 구성 정보 조회
-         *   POST /api/v1/evm/ec-event-prize-list
-         *   Request:  { eventId }
-         *   Response: { resultCode, resultMsg,
-         *     resultData: { isSuccess, errMsg,
-         *       ecEventPrizeList: [{ couponName, ... }] } }
-         *
-         * [IF-CX-050] 응모권 횟수 조회
-         *   POST /api/roulette/raffle-info
-         *   Request:  { eventId, acntNo }
-         *   Response: { resultCode, resultMsg,
-         *     resultData: { isSuccess, errMsg,
-         *       ecEventRaffleInfo: [{ raffleTicketCount }] } }
-         *
-         * [IF-CX-051] 당첨자 선정 (스핀)
-         *   POST /api/roulette/draw
-         *   Request:  { eventId, acntNo }
-         *   Response: { resultCode, resultMsg,
-         *     resultData: { isSuccess, errMsg,
-         *       ecEventDraw: [{ isWinning, winningCouponName }] } }
-         *   isWinning: "1" = 당첨, "0" = 꽝
-         *
-         * [IF-CX-052] 이벤트 신청대상 확인
-         *   POST /api/roulette/target-check
-         *   Request:  { eventId, acntNo }
-         *   Response: { resultCode, resultMsg,
-         *     resultData: { isSuccess, errMsg,
-         *       ecEventTargetCheck: [{ isTarget, targetCouponName }] } }
-         *   isTarget: "1" = 대상, "0" = 미대상
-         * =====================================================================
+        /* API 규격 (인터페이스 설계서 기반)
+         * [IF-CX-047] 이벤트 정보 조회      POST /api/v1/evm/ec-event-list
+         * [IF-CX-049] 이벤트 혜택 항목 조회 POST /api/v1/evm/ec-event-prize-list
+         * [IF-CX-050] 응모권 횟수 조회       POST /api/roulette/raffle-info
+         * [IF-CX-051] 당첨자 선정 (스핀)     POST /api/roulette/draw        (isWinning: "1"=당첨, "0"=꽝)
+         * [IF-CX-052] 신청대상 확인           POST /api/roulette/target-check (isTarget: "1"=대상, "0"=미대상)
          */
 
         const API_CONFIG = {
-            // API 활성화 여부 (false 시 스텁 모드로 동작)
+            // API 활성화 여부 (false = 스텁 모드)
             enabled: true,
-            // 아래 두 값은 /api/roulette/init 으로 서버에서 주입됩니다 (JS 하드코딩 금지)
+            // 서버에서 주입 (JS 하드코딩 금지)
             eventId: null,
             acntNo: null,
             initUrl: '/api/roulette/init',
@@ -318,7 +284,7 @@
             targetCheckUrl: '/api/roulette/target-check'
         };
 
-        // 룰렛 항목 - 서버 IF-CX-049 응답으로 채워집니다 (초기 하드코딩 없음)
+        // 룰렛 항목 (IF-CX-049 응답으로 채워짐)
         const rouletteState = {
             items: [],
             spinning: false,
@@ -330,7 +296,7 @@
 
         const canvas = document.getElementById('rouletteCanvas');
         const ctx = canvas.getContext('2d');
-        const size = 344; // CSS와 일치
+        const size = canvas.width; // 렌더링 기준 동기화
         const radius = size / 2;
 
         const closeModal = document.getElementById('closeModal');
@@ -344,33 +310,33 @@
 
         // 한 바퀴(360도)
         const fullRotation = Math.PI * 2;
-        // 12시 방향 포인터 각도(3시 기준 -90도)
+        // 포인터 각도 (12시 방향)
         const pointerAngle = -Math.PI / 2;
 
-        // 항목 수에 맞는 한 칸의 회전 각도를 계산합니다.
+        // 한 칸의 회전 각도 계산
         function getSliceAngle() {
             return (Math.PI * 2) / rouletteState.items.length;
         }
 
-        // 각도를 0~2PI 범위로 정규화합니다.
+        // 각도 0~2PI 정규화
         function normalizeAngle(angle) {
             return ((angle % fullRotation) + fullRotation) % fullRotation;
         }
 
-        // 현재 회전값 기준으로 포인터가 가리키는 항목 인덱스를 구합니다.
+        // 포인터가 가리키는 항목 인덱스 반환
         function getLandedIndex(rotation) {
             const relativeAngle = normalizeAngle(pointerAngle - rotation);
             return Math.floor(relativeAngle / getSliceAngle()) % rouletteState.items.length;
         }
 
-        // 하단 상태 영역에 API 진행/오류 메시지를 표시합니다.
+        // API 상태 메시지 표시
         function setApiStatus(message, isError) {
             if (!apiStatus) { return; }
             apiStatus.textContent = message || '';
             apiStatus.style.color = isError ? '#ffe5e5' : '#f2fbff';
         }
 
-        // 보유 응모권 수를 저장합니다.
+        // 응모권 수 저장
         function setAvailableTicketCount(ticketCount) {
             rouletteState.availableTicketCount = Math.max(0, Number(ticketCount) || 0);
             if (!rouletteState.requestPending && !rouletteState.spinning) {
@@ -379,7 +345,7 @@
             restoreJoinButtonLabel();
         }
 
-        // 참여 버튼 문구를 현재 보유 응모권 수 기준으로 복원합니다.
+        // 참여 버튼 문구 복원
         function restoreJoinButtonLabel() {
             if (rouletteState.availableTicketCount > 0) {
                 joinButton.textContent = rouletteState.availableTicketCount + '회 참여가능';
@@ -388,13 +354,13 @@
             }
         }
 
-        // 항목 인덱스에 맞는 색상을 팔레트에서 반환합니다.
+        // 팔레트 색상 반환
         function pickColor(index) {
             const palette = ['#7B72E8', '#31C6AB', '#43A1EA', '#E78A6D', '#E6C56F', '#DA5F66', '#5B8CEE', '#F06595'];
             return palette[index % palette.length];
         }
 
-        // 쿠폰명으로 룰렛 항목 인덱스를 찾습니다. 없으면 null을 반환합니다.
+        // 쿠폰명으로 항목 인덱스 탐색
         function findItemIndexByCouponName(couponName) {
             if (!couponName) { return null; }
             const lower = couponName.trim().toLowerCase();
@@ -404,7 +370,7 @@
             return idx >= 0 ? idx : null;
         }
 
-        // 참여 버튼의 로딩 상태와 문구를 제어합니다.
+        // 참여 버튼 로딩 상태/문구 제어
         function setJoinButtonLoading(isLoading, label) {
             rouletteState.requestPending = isLoading;
             if (isLoading) {
@@ -420,7 +386,7 @@
             restoreJoinButtonLabel();
         }
 
-        // 공통 안내/결과 모달을 엽니다.
+        // 안내/결과 모달 열기
         function openModal(badgeText, titleText, descText) {
             const modalBadge = document.querySelector('.modal-badge');
             const resultText = document.getElementById('resultText');
@@ -439,7 +405,7 @@
             resultModal.setAttribute('aria-hidden', 'false');
         }
 
-        // 공통 모달을 닫습니다.
+        // 모달 닫기
         function closeResultModal() {
             resultModal.style.display = 'none';
             resultModal.setAttribute('aria-hidden', 'true');
@@ -450,7 +416,7 @@
             rouletteState.restoreStatusOnModalClose = false;
         }
 
-        // CSRF 메타 태그가 있으면 요청 헤더로 변환합니다.
+        // CSRF 요청 헤더 변환
         function getCsrfHeaders() {
             const tokenMeta = document.querySelector('meta[name="_csrf"]');
             const headerMeta = document.querySelector('meta[name="_csrf_header"]');
@@ -458,7 +424,7 @@
             return { [headerMeta.content]: tokenMeta.content };
         }
 
-        // 공통 fetch 래퍼 - JSON 요청/응답 처리
+        // fetch 공통 래퍼 (JSON)
         async function requestJson(url, options) {
             const response = await fetch(url, {
                 credentials: 'same-origin',
@@ -474,7 +440,7 @@
             return ct.includes('application/json') ? response.json() : null;
         }
 
-        // IF-CX-052 이벤트 신청대상 확인: "0" 미대상, "1" 대상
+        // IF-CX-052 신청대상 확인
         async function checkTargetAndGetTicket() {
             if (!API_CONFIG.enabled) {
                 return { isTarget: true, raffleTicketCount: 3 };
@@ -498,7 +464,7 @@
             return { isTarget: true, raffleTicketCount: count };
         }
 
-        // IF-CX-051 당첨자 선정: isWinning "1"=당첨 "0"=꽝
+        // IF-CX-051 당첨자 선정
         async function requestDrawResult() {
             if (!API_CONFIG.enabled) {
                 // 스텁: 랜덤 당첨 시뮬레이션
@@ -517,12 +483,12 @@
             return draw && draw[0] ? draw[0] : { isWinning: '0', winningCouponName: null };
         }
 
-        // API 배열 응답을 안전하게 읽기 위한 헬퍼입니다.
+        // API 배열 응답 헬퍼
         function ensureArray(value) {
             return Array.isArray(value) ? value : [];
         }
 
-        // resultData.isSuccess 표기가 boolean/string 어느 쪽이든 성공 여부를 판정합니다.
+        // isSuccess 성공 여부 판정
         function isApiSuccess(res) {
             const success = res && res.resultData ? res.resultData.isSuccess : false;
             return success === true || success === 'true' || success === '1';
@@ -596,6 +562,43 @@
                 .split(/,(?!\d)/)   // 콤마 뒤가 숫자(천단위)면 분리 안 함
                 .map(function(name) { return name.trim(); })
                 .filter(function(name) { return name.length > 0; });
+        }
+
+        // 라벨이 길면 최대 2줄로 분리합니다.
+        function splitLabelToTwoLines(label, maxCharsPerLine) {
+            const text = String(label || '').trim();
+            if (!text) { return ['']; }
+            if (text.length <= maxCharsPerLine) { return [text]; }
+
+            const words = text.split(/\s+/).filter(Boolean);
+            if (words.length >= 2) {
+                // 마지막 단어가 짧으면(예: 쿠폰/포인트) 마지막 줄로 분리해 가독성을 높입니다.
+                const lastWord = words[words.length - 1];
+                if (words.length >= 3 && lastWord.length <= 3) {
+                    return [words.slice(0, -1).join(' '), lastWord];
+                }
+
+                const targetLen = Math.ceil(text.length / 2);
+                let bestIndex = 1;
+                let bestGap = Infinity;
+
+                for (let i = 1; i < words.length; i++) {
+                    const left = words.slice(0, i).join(' ');
+                    const gap = Math.abs(targetLen - left.length);
+                    if (gap < bestGap) {
+                        bestGap = gap;
+                        bestIndex = i;
+                    }
+                }
+
+                return [
+                    words.slice(0, bestIndex).join(' '),
+                    words.slice(bestIndex).join(' ')
+                ];
+            }
+
+            const splitIndex = Math.ceil(text.length / 2);
+            return [text.slice(0, splitIndex), text.slice(splitIndex)];
         }
 
         // IF-CX-047/049를 순차 호출해 eventId와 룰렛 항목을 동기화합니다.
@@ -719,14 +722,15 @@
             }
 
             const sliceAngle = getSliceAngle();
+            const wheelOuterRadius = radius - 6;
+            const hubRadius = 46;
+            const segmentCenterRadius = (wheelOuterRadius + hubRadius) / 2;
             ctx.save();
             ctx.translate(radius, radius);
             ctx.rotate(safeRotation);
 
-            // 라벨 길이 기준으로 방사형 텍스트 폰트 크기 계산
-            // 7개 항목 기준 최적화 (폰트: 9~13px, 위치: radius-30)
             const maxLabelLen = Math.max(...rouletteState.items.map(function(i) { return i.label.length; }));
-            const fontSize = Math.max(14, Math.min(13, Math.floor(104 / Math.max(maxLabelLen, 4))));
+            const fontSize = Math.max(16, Math.min(16, Math.floor(104 / Math.max(maxLabelLen, 4))));
 
             rouletteState.items.forEach((item, index) => {
                 const startAngle = index * sliceAngle;
@@ -734,21 +738,36 @@
 
                 ctx.beginPath();
                 ctx.moveTo(0, 0);
-                ctx.arc(0, 0, radius - 6, startAngle, endAngle);
+                ctx.arc(0, 0, wheelOuterRadius, startAngle, endAngle);
                 ctx.closePath();
                 ctx.fillStyle = item.color;
                 ctx.fill();
 
                 ctx.save();
-                ctx.rotate(startAngle + sliceAngle / 2);
+                const midAngle = startAngle + sliceAngle / 2;
+                const textRadius = segmentCenterRadius;
+                const textX = Math.cos(midAngle) * textRadius;
+                const textY = Math.sin(midAngle) * textRadius;
+                ctx.translate(textX, textY);
+                // 조각 중심각의 접선 방향으로 텍스트를 맞춰 이미지처럼 각도감을 유지
+                ctx.rotate(midAngle + Math.PI / 2);
                 ctx.shadowColor = 'rgba(0, 30, 50, 0.60)';
                 ctx.shadowBlur = 4;
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 1;
                 ctx.fillStyle = '#ffffff';
-                ctx.font = '700 ' + fontSize + 'px -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif';
-                ctx.textAlign = 'right';
-                ctx.fillText(item.label, radius - 30, Math.floor(fontSize / 2.4));
+                ctx.font = '700 ' + (fontSize + 1) + 'px -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const labelLines = splitLabelToTwoLines(item.label, 8);
+
+                if (labelLines.length === 1) {
+                    ctx.fillText(labelLines[0], 0, 0);
+                } else {
+                    const lineGap = fontSize + 2;
+                    ctx.fillText(labelLines[0], 0, -lineGap / 2);
+                    ctx.fillText(labelLines[1], 0, lineGap / 2);
+                }
                 ctx.restore();
             });
 
