@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.project.springboot_thymeleaf.biz.roulette.mapper.RouletteMapper">
+
+    <select id="selectCurrentEvent" resultType="RouletteEventDbDto">
+        SELECT /* selectCurrentEvent */
+               EVENT_ID
+             , EVENT_NM                              AS eventName
+             , DATE_FORMAT(EVENT_STRT_DT, '%Y%m%d') AS eventStartDate
+             , DATE_FORMAT(EVENT_END_DT, '%Y%m%d')  AS eventEndDate
+             , DISP_CNTS                             AS dispContents
+          FROM TB_RLT_EVENT_M
+         WHERE USE_YN = 'Y'
+           AND DATE_FORMAT(EVENT_STRT_DT, '%Y%m%d') &lt;= #{todayYmd}
+           AND #{todayYmd} &lt;= DATE_FORMAT(EVENT_END_DT, '%Y%m%d')
+         ORDER BY EVENT_ID DESC
+         LIMIT 1
+    </select>
+
+    <select id="selectLatestEvent" resultType="RouletteEventDbDto">
+        SELECT /* selectLatestEvent */
+               EVENT_ID
+             , EVENT_NM                              AS eventName
+             , DATE_FORMAT(EVENT_STRT_DT, '%Y%m%d') AS eventStartDate
+             , DATE_FORMAT(EVENT_END_DT, '%Y%m%d')  AS eventEndDate
+             , DISP_CNTS                             AS dispContents
+          FROM TB_RLT_EVENT_M
+         WHERE USE_YN = 'Y'
+         ORDER BY EVENT_ID DESC
+         LIMIT 1
+    </select>
+
+    <select id="selectEventList" resultType="RouletteEventDbDto">
+        SELECT /* selectEventList */
+               EVENT_ID
+             , EVENT_NM                              AS eventName
+             , DATE_FORMAT(EVENT_STRT_DT, '%Y%m%d') AS eventStartDate
+             , DATE_FORMAT(EVENT_END_DT, '%Y%m%d')  AS eventEndDate
+             , DISP_CNTS                             AS dispContents
+          FROM TB_RLT_EVENT_M
+         WHERE USE_YN = 'Y'
+         ORDER BY EVENT_ID DESC
+    </select>
+
+    <select id="selectPrizeListByEventId" resultType="RoulettePrizeDbDto">
+        SELECT /* selectPrizeListByEventId */
+               PRIZE_ID
+             , EVENT_ID
+             , COUPON_NM      AS couponName
+             , COUPON_CD      AS couponCode
+             , WINNING_RATE   AS winningRate
+             , WIN_PRIZE_YN   AS winningPrizeYn
+          FROM TB_RLT_EVENT_PRIZE_M
+         WHERE EVENT_ID = #{eventId}
+           AND USE_YN = 'Y'
+         ORDER BY SORT_ORD ASC, PRIZE_ID ASC
+    </select>
+
+    <select id="selectAcntNoByUsrIdAndEventId" resultType="string">
+        SELECT /* selectAcntNoByUsrIdAndEventId */
+               ACNT_NO
+          FROM TB_RLT_EVENT_TARGET_F
+         WHERE EVENT_ID = #{eventId}
+           AND USR_ID = #{usrId}
+           AND USE_YN = 'Y'
+         LIMIT 1
+    </select>
+
+    <select id="selectAnyAcntNoByUsrId" resultType="string">
+        SELECT /* selectAnyAcntNoByUsrId */
+               ACNT_NO
+          FROM TB_RLT_EVENT_TARGET_F
+         WHERE USR_ID = #{usrId}
+           AND USE_YN = 'Y'
+         ORDER BY TARGET_ID DESC
+         LIMIT 1
+    </select>
+
+    <select id="selectTargetYn" resultType="string">
+        SELECT /* selectTargetYn */
+               IS_TARGET_YN
+          FROM TB_RLT_EVENT_TARGET_F
+         WHERE EVENT_ID = #{eventId}
+           AND ACNT_NO = #{acntNo}
+           AND USE_YN = 'Y'
+         LIMIT 1
+    </select>
+
+    <insert id="upsertDefaultTarget">
+        INSERT /* upsertDefaultTarget */
+          INTO TB_RLT_EVENT_TARGET_F (
+               EVENT_ID
+             , ACNT_NO
+             , USR_ID
+             , IS_TARGET_YN
+             , TARGET_COUPON_NM
+             , USE_YN
+             , FST_REG_DTM
+             , FST_REG_ID
+             , LST_CHG_DTM
+             , LST_CHG_ID
+               )
+        VALUES (
+               #{eventId}
+             , #{acntNo}
+             , NULL
+             , 'Y'
+             , NULL
+             , 'Y'
+             , NOW()
+             , 'SYSTEM'
+             , NOW()
+             , 'SYSTEM'
+               )
+        ON DUPLICATE KEY UPDATE
+               IS_TARGET_YN = 'Y'
+             , USE_YN       = 'Y'
+             , LST_CHG_DTM  = NOW()
+             , LST_CHG_ID   = 'SYSTEM'
+    </insert>
+
+    <select id="selectTargetCouponName" resultType="string">
+        SELECT /* selectTargetCouponName */
+               TARGET_COUPON_NM
+          FROM TB_RLT_EVENT_TARGET_F
+         WHERE EVENT_ID = #{eventId}
+           AND ACNT_NO = #{acntNo}
+           AND USE_YN = 'Y'
+         LIMIT 1
+    </select>
+
+    <select id="selectRaffleTicketCount" resultType="int">
+        SELECT /* selectRaffleTicketCount */
+               RAFFLE_TICKET_CNT
+          FROM TB_RLT_RAFFLE_BAL_F
+         WHERE EVENT_ID = #{eventId}
+           AND ACNT_NO = #{acntNo}
+           AND USE_YN = 'Y'
+         LIMIT 1
+    </select>
+
+    <insert id="upsertDefaultRaffleBalance">
+        INSERT /* upsertDefaultRaffleBalance */
+          INTO TB_RLT_RAFFLE_BAL_F (
+               EVENT_ID
+             , ACNT_NO
+             , RAFFLE_TICKET_CNT
+             , USE_YN
+             , FST_REG_DTM
+             , FST_REG_ID
+             , LST_CHG_DTM
+             , LST_CHG_ID
+               )
+        VALUES (
+               #{eventId}
+             , #{acntNo}
+             , 3
+             , 'Y'
+             , NOW()
+             , 'SYSTEM'
+             , NOW()
+             , 'SYSTEM'
+               )
+        ON DUPLICATE KEY UPDATE
+               RAFFLE_TICKET_CNT = CASE
+                                        WHEN RAFFLE_TICKET_CNT &lt; 3 THEN 3
+                                        ELSE RAFFLE_TICKET_CNT
+                                   END
+             , USE_YN            = 'Y'
+             , LST_CHG_DTM       = NOW()
+             , LST_CHG_ID        = 'SYSTEM'
+    </insert>
+
+    <update id="incrementRaffleTicketCount">
+        UPDATE /* incrementRaffleTicketCount */
+               TB_RLT_RAFFLE_BAL_F
+           SET RAFFLE_TICKET_CNT = RAFFLE_TICKET_CNT + 1
+             , LST_CHG_DTM       = NOW()
+             , LST_CHG_ID        = 'SYSTEM'
+         WHERE EVENT_ID          = #{eventId}
+           AND ACNT_NO           = #{acntNo}
+           AND USE_YN            = 'Y'
+    </update>
+
+    <update id="decrementRaffleTicketCount">
+        UPDATE /* decrementRaffleTicketCount */
+               TB_RLT_RAFFLE_BAL_F
+           SET RAFFLE_TICKET_CNT = RAFFLE_TICKET_CNT - 1
+             , LST_CHG_DTM       = NOW()
+             , LST_CHG_ID        = 'SYSTEM'
+         WHERE EVENT_ID          = #{eventId}
+           AND ACNT_NO           = #{acntNo}
+           AND USE_YN            = 'Y'
+           AND RAFFLE_TICKET_CNT &gt; 0
+    </update>
+
+    <insert id="insertDrawHistory">
+        INSERT /* insertDrawHistory */
+          INTO TB_RLT_DRAW_H (
+               EVENT_ID
+             , ACNT_NO
+             , DRAW_RSLT_CD
+             , WINNING_COUPON_NM
+             , WINNING_COUPON_CD
+             , DRAW_DTM
+             , USE_YN
+             , FST_REG_DTM
+             , FST_REG_ID
+             , LST_CHG_DTM
+             , LST_CHG_ID
+               )
+        VALUES (
+               #{eventId}
+             , #{acntNo}
+             , #{drawResultCode}
+             , #{winningCouponName}
+             , #{winningCouponCode}
+             , NOW()
+             , 'Y'
+             , NOW()
+             , #{regId}
+             , NOW()
+             , #{regId}
+               )
+    </insert>
+</mapper>
+
