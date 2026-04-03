@@ -42,3 +42,4 @@ out/
 /readmeFiles/*
 /fix-jwt-import.sh
 
+/dump.rdb
