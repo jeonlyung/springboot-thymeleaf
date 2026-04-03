@@ -1,11 +1,19 @@
 package com.project.springboot_thymeleaf.biz.roulette.service.impl;
 
 import com.project.springboot_thymeleaf.biz.roulette.dto.*;
+import com.project.springboot_thymeleaf.biz.roulette.mapper.RouletteMapper;
 import com.project.springboot_thymeleaf.biz.roulette.service.RouletteService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 
 /**
  * 룰렛 이벤트 서비스 구현체
@@ -13,10 +21,13 @@ import java.util.List;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class RouletteServiceImpl implements RouletteService {
 
-    // TODO: 실제 CXM API 연동 시 WebClient 빈 주입 및 호출 코드로 교체
-    // private final WebClient cxmWebClient;
+    private static final DateTimeFormatter YYYYMMDD = DateTimeFormatter.BASIC_ISO_DATE;
+
+    private final RouletteMapper rouletteMapper;
+    private final Random random = new Random();
 
     /**
      * 페이지 초기화 - acntNo / eventId 반환
@@ -27,13 +38,24 @@ public class RouletteServiceImpl implements RouletteService {
     public RoulettePageInitResDto getPageInit(String usrId) {
         log.info("[RouletteService] getPageInit - usrId={}", usrId);
 
-        // TODO: 실제 연동 시 usrId → acntNo 매핑 쿼리로 교체
-        // String acntNo = memberMapper.findAcntNoByUsrId(usrId);
-        String acntNo = "1234567890";   // 서버 고정 테스트값
+        RouletteEventDbDto currentEvent = findCurrentEvent();
+        Long eventId = currentEvent != null ? currentEvent.getEventId() : null;
+
+        String acntNo = null;
+        if (eventId != null && usrId != null && !usrId.isBlank()) {
+            acntNo = rouletteMapper.selectAcntNoByUsrIdAndEventId(usrId, eventId);
+        }
+        if ((acntNo == null || acntNo.isBlank()) && usrId != null && !usrId.isBlank()) {
+            acntNo = rouletteMapper.selectAnyAcntNoByUsrId(usrId);
+        }
+        if (acntNo == null || acntNo.isBlank()) {
+            // 대상 데이터 미매핑 환경에서도 룰렛을 테스트할 수 있도록 기본 고객번호를 사용합니다.
+            acntNo = "1234567890";
+        }
 
         return RoulettePageInitResDto.builder()
-                .acntNo(acntNo)
-                .eventId(1L)            // loadEventDefinitions() 에서 실제값으로 교체됨
+                .acntNo(acntNo != null ? acntNo : "")
+                .eventId(eventId)
                 .build();
     }
 
@@ -45,33 +67,26 @@ public class RouletteServiceImpl implements RouletteService {
     public RouletteEventListResDto getEventList() {
         log.info("[RouletteService] getEventList");
 
-        // TODO: 실제 CXM API 호출로 교체
-        // return cxmWebClient.post()
-        //     .uri("/api/v1/evm/ec-event-list")
-        //     .retrieve()
-        //     .bodyToMono(RouletteEventListResDto.class)
-        //     .block();
+        List<RouletteEventDbDto> eventRows = rouletteMapper.selectEventList();
+        List<RouletteEventListResDto.EcEvent> eventList = new ArrayList<>();
 
-        // 스텁: 진행 중인 이벤트 1건 응답
+        for (RouletteEventDbDto row : eventRows) {
+            eventList.add(RouletteEventListResDto.EcEvent.builder()
+                    .eventId(row.getEventId())
+                    .eventName(row.getEventName())
+                    .eventStartDate(row.getEventStartDate())
+                    .eventEndDate(row.getEventEndDate())
+                    .dispContents(row.getDispContents())
+                    .build());
+        }
+
         return RouletteEventListResDto.builder()
                 .resultCode(200)
                 .resultMsg("정상 처리되었습니다.")
                 .resultData(RouletteEventListResDto.ResultData.builder()
                         .isSuccess(true)
                         .errMsg(null)
-                        .ecEventList(List.of(
-                                RouletteEventListResDto.EcEvent.builder()
-                                        .eventId(1L)
-                                        .eventName("봄맞이 룰렛 이벤트")
-                                        .eventStartDate("20260301")
-                                        .eventEndDate("20260430")
-                                        .dispContents("<ul>"
-                                                + "<li>본 이벤트는 계정당 1일 1회만 참여할 수 있습니다.</li>"
-                                                + "<li>당첨 혜택은 참여 즉시 지급되며, 일부 쿠폰은 사용 기한이 적용됩니다.</li>"
-                                                + "<li>비정상적인 참여가 확인될 경우 당첨이 취소될 수 있습니다.</li>"
-                                                + "</ul>")
-                                        .build()
-                        ))
+                        .ecEventList(eventList)
                         .build())
                 .build();
     }
@@ -84,37 +99,24 @@ public class RouletteServiceImpl implements RouletteService {
     public RouletteEventPrizeListResDto getEventPrizeList(RouletteEventPrizeListReqDto reqDto) {
         log.info("[RouletteService] getEventPrizeList - eventId={}", reqDto.getEventId());
 
-        // TODO: 실제 CXM API 호출로 교체
-        // return cxmWebClient.post()
-        //     .uri("/api/v1/evm/ec-event-prize-list")
-        //     .bodyValue(reqDto)
-        //     .retrieve()
-        //     .bodyToMono(RouletteEventPrizeListResDto.class)
-        //     .block();
+        List<RoulettePrizeDbDto> prizeRows = rouletteMapper.selectPrizeListByEventId(reqDto.getEventId());
+        List<RouletteEventPrizeListResDto.EcEventPrize> prizeList = new ArrayList<>();
 
-        // 스텁: 경품 목록 7개 응답
+        for (RoulettePrizeDbDto row : prizeRows) {
+            prizeList.add(RouletteEventPrizeListResDto.EcEventPrize.builder()
+                    .couponName(row.getCouponName())
+                    .couponCode(row.getCouponCode())
+                    .winningRate(row.getWinningRate())
+                    .build());
+        }
+
         return RouletteEventPrizeListResDto.builder()
                 .resultCode(200)
                 .resultMsg("정상 처리되었습니다.")
                 .resultData(RouletteEventPrizeListResDto.ResultData.builder()
                         .isSuccess(true)
                         .errMsg(null)
-                        .ecEventPrizeList(List.of(
-                                RouletteEventPrizeListResDto.EcEventPrize.builder()
-                                        .couponName("무료 배송").couponCode("FREE_SHIP").winningRate(20).build(),
-                                RouletteEventPrizeListResDto.EcEventPrize.builder()
-                                        .couponName("5,000 포인트").couponCode("PT5000").winningRate(20).build(),
-                                RouletteEventPrizeListResDto.EcEventPrize.builder()
-                                        .couponName("4,000 포인트").couponCode("PT4000").winningRate(15).build(),
-                                RouletteEventPrizeListResDto.EcEventPrize.builder()
-                                        .couponName("3,000 포인트").couponCode("PT3000").winningRate(15).build(),
-                                RouletteEventPrizeListResDto.EcEventPrize.builder()
-                                        .couponName("20% 할인 쿠폰").couponCode("DC20").winningRate(10).build(),
-                                RouletteEventPrizeListResDto.EcEventPrize.builder()
-                                        .couponName("10% 할인 쿠폰").couponCode("DC10").winningRate(10).build(),
-                                RouletteEventPrizeListResDto.EcEventPrize.builder()
-                                        .couponName("꽝").couponCode("NONE").winningRate(10).build()
-                        ))
+                        .ecEventPrizeList(prizeList)
                         .build())
                 .build();
     }
@@ -127,14 +129,10 @@ public class RouletteServiceImpl implements RouletteService {
     public RouletteRaffleInfoResDto getRaffleInfo(RouletteRaffleInfoReqDto reqDto) {
         log.info("[RouletteService] getRaffleInfo - eventId={}, acntNo={}", reqDto.getEventId(), reqDto.getAcntNo());
 
-        // TODO: 실제 CXM API 호출로 교체
-        // return cxmWebClient.get()
-        //     .uri("/api/v1/evm/ec-event-raffle-info")
-        //     .retrieve()
-        //     .bodyToMono(RouletteRaffleInfoResDto.class)
-        //     .block();
+        ensureDefaultTargetAndBalance(reqDto.getEventId(), reqDto.getAcntNo());
+        Integer ticketCount = rouletteMapper.selectRaffleTicketCount(reqDto.getEventId(), reqDto.getAcntNo());
+        int safeTicketCount = Math.max(ticketCount != null ? ticketCount : 0, 0);
 
-        // 스텁: 응모권 3장 보유 응답
         return RouletteRaffleInfoResDto.builder()
                 .resultCode(200)
                 .resultMsg("정상 처리되었습니다.")
@@ -143,7 +141,33 @@ public class RouletteServiceImpl implements RouletteService {
                         .errMsg(null)
                         .ecEventRaffleInfo(List.of(
                                 RouletteRaffleInfoResDto.EcEventRaffleInfo.builder()
-                                        .raffleTicketCount(3)
+                                        .raffleTicketCount(safeTicketCount)
+                                        .build()
+                        ))
+                        .build())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public RouletteRaffleInfoResDto joinRaffle(RouletteRaffleInfoReqDto reqDto) {
+        log.info("[RouletteService] joinRaffle - eventId={}, acntNo={}", reqDto.getEventId(), reqDto.getAcntNo());
+
+        ensureDefaultTargetAndBalance(reqDto.getEventId(), reqDto.getAcntNo());
+        rouletteMapper.incrementRaffleTicketCount(reqDto.getEventId(), reqDto.getAcntNo());
+
+        Integer ticketCount = rouletteMapper.selectRaffleTicketCount(reqDto.getEventId(), reqDto.getAcntNo());
+        int safeTicketCount = Math.max(ticketCount != null ? ticketCount : 0, 0);
+
+        return RouletteRaffleInfoResDto.builder()
+                .resultCode(200)
+                .resultMsg("정상 처리되었습니다.")
+                .resultData(RouletteRaffleInfoResDto.ResultData.builder()
+                        .isSuccess(true)
+                        .errMsg(null)
+                        .ecEventRaffleInfo(List.of(
+                                RouletteRaffleInfoResDto.EcEventRaffleInfo.builder()
+                                        .raffleTicketCount(safeTicketCount)
                                         .build()
                         ))
                         .build())
@@ -155,22 +179,45 @@ public class RouletteServiceImpl implements RouletteService {
      * 실제 연동 전까지 랜덤 스텁 응답을 반환합니다.
      */
     @Override
+    @Transactional
     public RouletteDrawResDto drawEvent(RouletteDrawReqDto reqDto) {
         log.info("[RouletteService] drawEvent - eventId={}, acntNo={}", reqDto.getEventId(), reqDto.getAcntNo());
 
-        // TODO: 실제 CXM API 호출로 교체
-        // return cxmWebClient.post()
-        //     .uri("/api/v1/evm/ec-event-draw")
-        //     .bodyValue(reqDto)
-        //     .retrieve()
-        //     .bodyToMono(RouletteDrawResDto.class)
-        //     .block();
+        Long eventId = reqDto.getEventId();
+        String acntNo = reqDto.getAcntNo();
 
-        // 스텁: 랜덤 당첨 시뮬레이션 (경품 목록과 동일하게 유지)
-        String[] coupons = { "무료 배송", "5,000 포인트", "4,000 포인트", "3,000 포인트", "20% 할인 쿠폰", "10% 할인 쿠폰", "꽝" };
-        int randomIdx = (int) (Math.random() * coupons.length);
-        String picked = coupons[randomIdx];
-        boolean isWin = !picked.equals("꽝");
+        ensureDefaultTargetAndBalance(eventId, acntNo);
+        String targetYn = rouletteMapper.selectTargetYn(eventId, acntNo);
+        if (!"Y".equalsIgnoreCase(targetYn)) {
+            return buildDrawFailure("참여 대상이 아닙니다.");
+        }
+
+        Integer currentTicket = rouletteMapper.selectRaffleTicketCount(eventId, acntNo);
+        if (currentTicket == null || currentTicket <= 0) {
+            return buildDrawFailure("응모권이 없습니다.");
+        }
+
+        List<RoulettePrizeDbDto> prizeRows = rouletteMapper.selectPrizeListByEventId(eventId);
+        if (prizeRows.isEmpty()) {
+            return buildDrawFailure("경품 구성이 없습니다.");
+        }
+
+        RoulettePrizeDbDto pickedPrize = pickPrizeByWeight(prizeRows);
+        boolean isWin = "Y".equalsIgnoreCase(pickedPrize.getWinningPrizeYn());
+
+        int affected = rouletteMapper.decrementRaffleTicketCount(eventId, acntNo);
+        if (affected <= 0) {
+            return buildDrawFailure("응모권 차감에 실패했습니다.");
+        }
+
+        rouletteMapper.insertDrawHistory(RouletteDrawHistoryDbDto.builder()
+                .eventId(eventId)
+                .acntNo(acntNo)
+                .drawResultCode(isWin ? "1" : "0")
+                .winningCouponName(isWin ? pickedPrize.getCouponName() : null)
+                .winningCouponCode(isWin ? pickedPrize.getCouponCode() : null)
+                .regId("SYSTEM")
+                .build());
 
         return RouletteDrawResDto.builder()
                 .resultCode(200)
@@ -181,7 +228,7 @@ public class RouletteServiceImpl implements RouletteService {
                         .ecEventDraw(List.of(
                                 RouletteDrawResDto.EcEventDraw.builder()
                                         .isWinning(isWin ? "1" : "0")
-                                        .winningCouponName(isWin ? picked : null)
+                                        .winningCouponName(isWin ? pickedPrize.getCouponName() : null)
                                         .build()
                         ))
                         .build())
@@ -196,15 +243,13 @@ public class RouletteServiceImpl implements RouletteService {
     public RouletteTargetCheckResDto checkEventTarget(RouletteTargetCheckReqDto reqDto) {
         log.info("[RouletteService] checkEventTarget - eventId={}, acntNo={}", reqDto.getEventId(), reqDto.getAcntNo());
 
-        // TODO: 실제 CXM API 호출로 교체
-        // return cxmWebClient.post()
-        //     .uri("/api/v1/evm/ec-event-target-check")
-        //     .bodyValue(reqDto)
-        //     .retrieve()
-        //     .bodyToMono(RouletteTargetCheckResDto.class)
-        //     .block();
+        ensureDefaultTargetAndBalance(reqDto.getEventId(), reqDto.getAcntNo());
+        String targetYn = rouletteMapper.selectTargetYn(reqDto.getEventId(), reqDto.getAcntNo());
+        boolean isTarget = "Y".equalsIgnoreCase(targetYn);
+        String targetCouponName = isTarget
+                ? rouletteMapper.selectTargetCouponName(reqDto.getEventId(), reqDto.getAcntNo())
+                : null;
 
-        // 스텁: 대상자(isTarget=1) 응답
         return RouletteTargetCheckResDto.builder()
                 .resultCode(200)
                 .resultMsg("정상 처리되었습니다.")
@@ -213,12 +258,66 @@ public class RouletteServiceImpl implements RouletteService {
                         .errMsg(null)
                         .ecEventTargetCheck(List.of(
                                 RouletteTargetCheckResDto.EcEventTargetCheck.builder()
-                                        .isTarget("1")
-                                        .targetCouponName(null)
+                                        .isTarget(isTarget ? "1" : "0")
+                                        .targetCouponName(targetCouponName)
                                         .build()
                         ))
                         .build())
                 .build();
+    }
+
+    private RouletteEventDbDto findCurrentEvent() {
+        String todayYmd = LocalDate.now().format(YYYYMMDD);
+        RouletteEventDbDto currentEvent = rouletteMapper.selectCurrentEvent(todayYmd);
+        return currentEvent != null ? currentEvent : rouletteMapper.selectLatestEvent();
+    }
+
+    private RouletteDrawResDto buildDrawFailure(String errMsg) {
+        return RouletteDrawResDto.builder()
+                .resultCode(200)
+                .resultMsg("정상 처리되었습니다.")
+                .resultData(RouletteDrawResDto.ResultData.builder()
+                        .isSuccess(false)
+                        .errMsg(errMsg)
+                        .ecEventDraw(List.of(
+                                RouletteDrawResDto.EcEventDraw.builder()
+                                        .isWinning("0")
+                                        .winningCouponName(null)
+                                        .build()
+                        ))
+                        .build())
+                .build();
+    }
+
+    private RoulettePrizeDbDto pickPrizeByWeight(List<RoulettePrizeDbDto> prizeRows) {
+        int totalWeight = prizeRows.stream()
+                .map(RoulettePrizeDbDto::getWinningRate)
+                .filter(Objects::nonNull)
+                .mapToInt(rate -> Math.max(rate, 0))
+                .sum();
+
+        if (totalWeight <= 0) {
+            return prizeRows.get(random.nextInt(prizeRows.size()));
+        }
+
+        int point = random.nextInt(totalWeight) + 1;
+        int cumulative = 0;
+        for (RoulettePrizeDbDto row : prizeRows) {
+            cumulative += Math.max(row.getWinningRate() != null ? row.getWinningRate() : 0, 0);
+            if (point <= cumulative) {
+                return row;
+            }
+        }
+
+        return prizeRows.get(prizeRows.size() - 1);
+    }
+
+    private void ensureDefaultTargetAndBalance(Long eventId, String acntNo) {
+        if (eventId == null || acntNo == null || acntNo.isBlank()) {
+            return;
+        }
+        rouletteMapper.upsertDefaultTarget(eventId, acntNo);
+        rouletteMapper.upsertDefaultRaffleBalance(eventId, acntNo);
     }
 }
 

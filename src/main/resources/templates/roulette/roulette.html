@@ -280,6 +280,7 @@
             eventListUrl: '/api/v1/evm/ec-event-list',
             prizeListUrl: '/api/v1/evm/ec-event-prize-list',
             raffleInfoUrl: '/api/roulette/raffle-info',
+            raffleJoinUrl: '/api/roulette/raffle-join',
             drawUrl: '/api/roulette/draw',
             targetCheckUrl: '/api/roulette/target-check'
         };
@@ -462,6 +463,23 @@
             const raffleData = raffleRes && raffleRes.resultData && raffleRes.resultData.ecEventRaffleInfo;
             const count = raffleData && raffleData[0] ? raffleData[0].raffleTicketCount : 0;
             return { isTarget: true, raffleTicketCount: count };
+        }
+
+        // 응모권 참여(+1)
+        async function requestRaffleJoin() {
+            if (!API_CONFIG.enabled) {
+                return { raffleTicketCount: rouletteState.availableTicketCount + 1 };
+            }
+            const joinRes = await requestJson(API_CONFIG.raffleJoinUrl, {
+                method: 'POST',
+                body: JSON.stringify({ eventId: API_CONFIG.eventId, acntNo: API_CONFIG.acntNo })
+            });
+            if (!isApiSuccess(joinRes)) {
+                throw new Error(joinRes && joinRes.resultData ? joinRes.resultData.errMsg : '응모권 참여 실패');
+            }
+            const raffleData = joinRes && joinRes.resultData && joinRes.resultData.ecEventRaffleInfo;
+            const count = raffleData && raffleData[0] ? raffleData[0].raffleTicketCount : 0;
+            return { raffleTicketCount: count };
         }
 
         // IF-CX-051 당첨자 선정
@@ -948,7 +966,7 @@
 
         joinButton.addEventListener('click', handleSpinClick);
 
-        // 응모권 참여 버튼 - 이벤트 신청대상 확인 API 호출
+        // 응모권 참여 버튼 - 응모권 +1 API 호출
         raffleButton.addEventListener('click', async () => {
             if (raffleButton.disabled || rouletteState.requestPending) {
                 return;
@@ -957,24 +975,9 @@
             try {
                 raffleButton.disabled = true;
                 raffleButton.textContent = '확인 중...';
-                setApiStatus('응모권 신청을 처리 중입니다...');
+                setApiStatus('응모권을 추가하는 중입니다...');
 
-                const result = await checkTargetAndGetTicket();
-
-                if (!result.isTarget) {
-                    setApiStatus('이벤트 참여 대상이 아닙니다.', true);
-                    raffleButton.disabled = true;
-                    raffleButton.textContent = '참여 불가';
-                    return;
-                }
-
-                if (result.raffleTicketCount <= 0) {
-                    setApiStatus('응모권이 없습니다.', true);
-                    raffleButton.disabled = true;
-                    raffleButton.textContent = '응모권 소진';
-                    return;
-                }
-
+                const result = await requestRaffleJoin();
                 setAvailableTicketCount(result.raffleTicketCount);
                 setApiStatus('');
                 raffleButton.disabled = false;

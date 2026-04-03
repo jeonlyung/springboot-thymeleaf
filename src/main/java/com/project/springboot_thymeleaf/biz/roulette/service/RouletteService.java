@@ -33,6 +33,12 @@ public interface RouletteService {
     RouletteRaffleInfoResDto getRaffleInfo(RouletteRaffleInfoReqDto reqDto);
 
     /**
+     * 응모권 참여(+1) 처리 후 최신 응모권 횟수 조회
+     * POST /api/roulette/raffle-join
+     */
+    RouletteRaffleInfoResDto joinRaffle(RouletteRaffleInfoReqDto reqDto);
+
+    /**
      * IF-CX-051 당첨자 선정 (룰렛 스핀)
      * POST /api/v1/evm/ec-event-draw
      */

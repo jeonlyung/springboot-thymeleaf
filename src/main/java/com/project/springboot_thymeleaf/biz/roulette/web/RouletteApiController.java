@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
  *
  * (init) POST /api/roulette/init            - 페이지 초기화 (acntNo, eventId 서버 반환)
  * IF-CX-050   POST /api/roulette/raffle-info - 응모권 횟수 조회
+ * (custom)    POST /api/roulette/raffle-join - 응모권 참여(+1)
  * IF-CX-051   POST /api/roulette/draw        - 당첨자 선정(스핀)
  * IF-CX-052   POST /api/roulette/target-check - 이벤트 신청대상 확인
  *
@@ -49,6 +50,16 @@ public class RouletteApiController {
     @PostMapping("/raffle-info")
     public ResponseEntity<RouletteRaffleInfoResDto> getRaffleInfo(@RequestBody RouletteRaffleInfoReqDto reqDto) {
         return ResponseEntity.ok(rouletteService.getRaffleInfo(reqDto));
+    }
+
+    /**
+     * 응모권 참여(+1)
+     * 프론트 → POST /api/roulette/raffle-join
+     * Body: { "eventId": 1, "acntNo": "1234567890" }
+     */
+    @PostMapping("/raffle-join")
+    public ResponseEntity<RouletteRaffleInfoResDto> joinRaffle(@RequestBody RouletteRaffleInfoReqDto reqDto) {
+        return ResponseEntity.ok(rouletteService.joinRaffle(reqDto));
     }
 
     /**
