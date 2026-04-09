@@ -91,7 +91,10 @@
 
         /* 포인터 - 공통 */
         .roulette-pointer { position: absolute; top: -22px; left: 50%; width: 34px; height: 34px; transform: translateX(-50%); z-index: 5; filter: drop-shadow(0 8px 10px rgba(255, 110, 61, 0.32)); }
+        .roulette-pointer { position: absolute; top: -22px; left: 50%; width: 34px; height: 34px; transform: translateX(-50%); z-index: 5; filter: drop-shadow(0 8px 10px rgba(255, 110, 61, 0.32)); }
         .roulette-pointer::before, .roulette-pointer::after { content: ""; position: absolute; }
+        .roulette-pointer::before { inset: 0; background: linear-gradient(180deg, #ff6f4a 0%, #ff4f2e 100%); border-radius: 55% 55% 55% 0; transform: rotate(-45deg); transform-origin: center; }
+        .roulette-pointer::after  { top: 10px; left: 50%; width: 14px; height: 14px; background: #fffdf7; border-radius: 50%; transform: translateX(-50%); box-shadow: 0 1px 3px rgba(0,0,0,.10); }
         .roulette-pointer::before { inset: 0; background: linear-gradient(180deg, #ff6f4a 0%, #ff4f2e 100%); border-radius: 55% 55% 55% 0; transform: rotate(-45deg); transform-origin: center; }
         .roulette-pointer::after  { top: 10px; left: 50%; width: 14px; height: 14px; background: #fffdf7; border-radius: 50%; transform: translateX(-50%); box-shadow: 0 1px 3px rgba(0,0,0,.10); }
 
@@ -264,26 +267,32 @@
 
         /* API 규격 (인터페이스 설계서 기반)
          * [IF-CX-047] 이벤트 정보 조회      POST /api/v1/evm/ec-event-list
-         * [IF-CX-049] 이벤트 혜택 항목 조회 POST /api/v1/evm/ec-event-prize-list
-         * [IF-CX-050] 응모권 횟수 조회       POST /api/roulette/raffle-info
-         * [IF-CX-051] 당첨자 선정 (스핀)     POST /api/roulette/draw        (isWinning: "1"=당첨, "0"=꽝)
-         * [IF-CX-052] 신청대상 확인           POST /api/roulette/target-check (isTarget: "1"=대상, "0"=미대상)
+         * [IF-CX-049] 이벤트 혜택 항목 조회  POST /api/v1/evm/ec-event-prize-list
+         * [IF-CX-050] 응모권 횟수 조회      POST /api/v1/roulette/raffle-info
+         * [IF-CX-051] 당첨자 선정 (스핀)    POST /api/v1/roulette/draw          (isWinning: "1"=당첨, "0"=꽝)
+         * [IF-CX-052] 신청대상 확인        POST /api/v1/roulette/target-check  (isTarget: "1"=대상, "0"=미대상)
          */
 
         const API_CONFIG = {
             // API 활성화 여부 (false = 스텁 모드)
             enabled: true,
-            // 서버에서 주입 (JS 하드코딩 금지)
-            eventId: null,
-            acntNo: null,
-            initUrl: '/api/roulette/init',
+            eventId: 1,
+            acntNo: '0080304343',
             eventListUrl: '/api/v1/evm/ec-event-list',
             prizeListUrl: '/api/v1/evm/ec-event-prize-list',
-            raffleInfoUrl: '/api/roulette/raffle-info',
-            raffleJoinUrl: '/api/roulette/raffle-join',
-            drawUrl: '/api/roulette/draw',
-            targetCheckUrl: '/api/roulette/target-check'
+            raffleInfoUrl: '/api/v1/roulette/raffle-info',
+            drawUrl: '/api/v1/roulette/draw',
+            targetCheckUrl: '/api/v1/roulette/target-check'
         };
+
+        // init 단계에서 이미 내려준 값(windowx.ROULETTE_INIT)을 우선 사용합니다.
+        const INIT_PAYLOAD = window.ROULETTE_INIT || {};
+        if (INIT_PAYLOAD.eventId !== undefined && INIT_PAYLOAD.eventId !== null) {
+            API_CONFIG.eventId = Number(INIT_PAYLOAD.eventId);
+        }
+        if (INIT_PAYLOAD.acntNo) {
+            API_CONFIG.acntNo = String(INIT_PAYLOAD.acntNo);
+        }
 
         // 룰렛 항목 (IF-CX-049 응답으로 채워짐)
         const rouletteState = {
@@ -292,7 +301,8 @@
             currentRotation: -Math.PI / 2,
             requestPending: false,
             availableTicketCount: 0,
-            restoreStatusOnModalClose: false
+            restoreStatusOnModalClose: false,
+            raffleJoinClickedOnce: false
         };
 
         const canvas = document.getElementById('rouletteCanvas');
@@ -305,7 +315,6 @@
         const joinButton = document.getElementById('joinButton');
         const raffleButton = document.getElementById('raffleButton');
         const noticeContents = document.getElementById('noticeContents');
-        const apiStatus = document.getElementById('apiStatus');
         const eventTitle = document.getElementById('eventTitle');
         const eventPeriod = document.getElementById('eventPeriod');
 
@@ -328,13 +337,6 @@
         function getLandedIndex(rotation) {
             const relativeAngle = normalizeAngle(pointerAngle - rotation);
             return Math.floor(relativeAngle / getSliceAngle()) % rouletteState.items.length;
-        }
-
-        // API 상태 메시지 표시
-        function setApiStatus(message, isError) {
-            if (!apiStatus) { return; }
-            apiStatus.textContent = message || '';
-            apiStatus.style.color = isError ? '#ffe5e5' : '#f2fbff';
         }
 
         // 응모권 수 저장
@@ -376,7 +378,7 @@
             rouletteState.requestPending = isLoading;
             if (isLoading) {
                 joinButton.disabled = true;
-                joinButton.textContent = label || '서버 통신중...';
+                //joinButton.textContent = label || '서버 통신중...';
                 return;
             }
             joinButton.disabled = rouletteState.spinning || rouletteState.availableTicketCount <= 0;
@@ -411,7 +413,6 @@
             resultModal.style.display = 'none';
             resultModal.setAttribute('aria-hidden', 'true');
             if (rouletteState.restoreStatusOnModalClose) {
-                setApiStatus('');
                 restoreJoinButtonLabel();
             }
             rouletteState.restoreStatusOnModalClose = false;
@@ -441,45 +442,40 @@
             return ct.includes('application/json') ? response.json() : null;
         }
 
-        // IF-CX-052 신청대상 확인
-        async function checkTargetAndGetTicket() {
-            if (!API_CONFIG.enabled) {
-                return { isTarget: true, raffleTicketCount: 3 };
-            }
-            // 대상 확인 (IF-CX-052)
-            const targetRes = await requestJson(API_CONFIG.targetCheckUrl, {
-                method: 'POST',
-                body: JSON.stringify({ eventId: API_CONFIG.eventId, acntNo: API_CONFIG.acntNo })
-            });
-            const targetData = targetRes && targetRes.resultData && targetRes.resultData.ecEventTargetCheck;
-            const isTarget = targetData && targetData[0] && targetData[0].isTarget === '1';
-            if (!isTarget) { return { isTarget: false, raffleTicketCount: 0 }; }
+        // 모든 인터페이스 공통 요청 바디
+        function getBaseRequestBody() {
+            return {
+                eventId: API_CONFIG.eventId,
+                acntNo: API_CONFIG.acntNo
+            };
+        }
 
-            // 응모권 조회 (IF-CX-050)
+        // IF-CX-050 응모권 횟수 조회
+        async function requestRaffleInfo() {
+            if (!API_CONFIG.enabled) {
+                return { raffleTicketCount: rouletteState.availableTicketCount };
+            }
             const raffleRes = await requestJson(API_CONFIG.raffleInfoUrl, {
                 method: 'POST',
-                body: JSON.stringify({ eventId: API_CONFIG.eventId, acntNo: API_CONFIG.acntNo })
+                body: JSON.stringify(getBaseRequestBody())
             });
             const raffleData = raffleRes && raffleRes.resultData && raffleRes.resultData.ecEventRaffleInfo;
             const count = raffleData && raffleData[0] ? raffleData[0].raffleTicketCount : 0;
-            return { isTarget: true, raffleTicketCount: count };
+            return { raffleTicketCount: count };
         }
 
-        // 응모권 참여(+1)
-        async function requestRaffleJoin() {
+        // IF-CX-052 신청대상 확인
+        async function requestTargetCheck() {
             if (!API_CONFIG.enabled) {
-                return { raffleTicketCount: rouletteState.availableTicketCount + 1 };
+                return { isTarget: true };
             }
-            const joinRes = await requestJson(API_CONFIG.raffleJoinUrl, {
+            const targetRes = await requestJson(API_CONFIG.targetCheckUrl, {
                 method: 'POST',
-                body: JSON.stringify({ eventId: API_CONFIG.eventId, acntNo: API_CONFIG.acntNo })
+                body: JSON.stringify(getBaseRequestBody())
             });
-            if (!isApiSuccess(joinRes)) {
-                throw new Error(joinRes && joinRes.resultData ? joinRes.resultData.errMsg : '응모권 참여 실패');
-            }
-            const raffleData = joinRes && joinRes.resultData && joinRes.resultData.ecEventRaffleInfo;
-            const count = raffleData && raffleData[0] ? raffleData[0].raffleTicketCount : 0;
-            return { raffleTicketCount: count };
+            const targetData = targetRes && targetRes.resultData && targetRes.resultData.ecEventTargetCheck;
+            const isTarget = targetData && targetData[0] && targetData[0].isTarget === '1';
+            return { isTarget: !!isTarget };
         }
 
         // IF-CX-051 당첨자 선정
@@ -492,7 +488,7 @@
             }
             const res = await requestJson(API_CONFIG.drawUrl, {
                 method: 'POST',
-                body: JSON.stringify({ eventId: API_CONFIG.eventId, acntNo: API_CONFIG.acntNo })
+                body: JSON.stringify(getBaseRequestBody())
             });
             if (!res || !res.resultData || !res.resultData.isSuccess) {
                 throw new Error(res && res.resultData ? res.resultData.errMsg : '서버 오류');
@@ -626,7 +622,6 @@
             }
 
             try {
-                setApiStatus('이벤트 목록 조회 중...');
                 const eventRes = await requestJson(API_CONFIG.eventListUrl, {
                     method: 'POST',
                     body: JSON.stringify({})
@@ -636,7 +631,9 @@
                 }
 
                 const eventList = ensureArray(eventRes.resultData.ecEventList);
-                const selectedEvent = pickCurrentEvent(eventList);
+                const selectedEvent = Number.isFinite(API_CONFIG.eventId)
+                    ? (eventList.find(function(event) { return Number(event.eventId) === Number(API_CONFIG.eventId); }) || pickCurrentEvent(eventList))
+                    : pickCurrentEvent(eventList);
                 if (!selectedEvent) {
                     throw new Error('조회 가능한 이벤트가 없습니다.');
                 }
@@ -648,7 +645,6 @@
                 applyEventMeta(selectedEvent);
                 applyNoticeContents(selectedEvent && selectedEvent.dispContents);
 
-                setApiStatus('이벤트 항목 조회 중...');
                 const prizeRes = await requestJson(API_CONFIG.prizeListUrl, {
                     method: 'POST',
                     body: JSON.stringify({ eventId: API_CONFIG.eventId })
@@ -679,40 +675,28 @@
                     ]);
                 }
             } catch (err) {
-                setApiStatus('이벤트 목록/항목 조회 실패: 기본 항목으로 진행합니다.', true);
                 console.warn('[roulette] loadEventDefinitions failed', err);
             }
         }
 
-        // 초기화 시 대상 여부 및 응모권 수를 확인합니다.
+        // 초기화 시 응모권 수를 확인합니다.
         async function loadRaffleStatus() {
             try {
-                setApiStatus('이벤트 정보를 확인하는 중...');
-                const result = await checkTargetAndGetTicket();
-                if (!result.isTarget) {
-                    setApiStatus('이벤트 참여 대상이 아닙니다.', true);
-                    joinButton.disabled = true;
-                    joinButton.textContent = '참여 불가';
-                    raffleButton.disabled = true;
-                    raffleButton.textContent = '참여 불가';
-                    return;
-                }
-                if (result.raffleTicketCount <= 0) {
-                    setApiStatus('응모권이 없습니다.', true);
+                const raffleInfo = await requestRaffleInfo();
+                const ticketCount = Math.max(0, Number(raffleInfo.raffleTicketCount) || 0);
+
+                setAvailableTicketCount(ticketCount);
+                if (ticketCount <= 0) {
                     joinButton.disabled = true;
                     joinButton.textContent = '응모권 소진';
-                    raffleButton.disabled = true;
-                    raffleButton.textContent = '응모권 소진';
-                    return;
+                } else {
+                    joinButton.disabled = false;
+                    restoreJoinButtonLabel();
                 }
-                setAvailableTicketCount(result.raffleTicketCount);
-                setApiStatus('');
-                joinButton.disabled = false;
-                restoreJoinButtonLabel();
+
                 raffleButton.disabled = false;
                 raffleButton.textContent = '응모권 참여';
             } catch (err) {
-                setApiStatus('이벤트 확인 실패: 기본 모드로 진행합니다.', true);
                 console.warn('[roulette] loadRaffleStatus failed', err);
             }
         }
@@ -820,36 +804,10 @@
             ctx.restore();
         }
 
-        // POST /api/roulette/init - 서버에서 acntNo / eventId 를 가져옵니다.
-        async function initPageConfig() {
-            if (!API_CONFIG.enabled) {
-                API_CONFIG.acntNo = '0000000000';
-                API_CONFIG.eventId = 1;
-                return;
-            }
-            try {
-                setApiStatus('사용자 정보 확인 중...');
-                const res = await requestJson(API_CONFIG.initUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({})
-                });
-                if (res && res.acntNo) {
-                    API_CONFIG.acntNo  = res.acntNo;
-                }
-                if (res && res.eventId) {
-                    API_CONFIG.eventId = res.eventId;
-                }
-            } catch (err) {
-                setApiStatus('초기화 실패: 기본값으로 진행합니다.', true);
-                console.warn('[roulette] initPageConfig failed', err);
-                // 서버 장애 시 fallback (절대 JS 하드코딩 노출 금지 — 빈값 유지)
-            }
-        }
-
         // 목표 인덱스까지 감속 애니메이션으로 룰렛을 회전시킵니다.
         function spin(targetIndex, drawResult) {
             if (rouletteState.spinning || rouletteState.items.length < 2) {
-                return;
+                return Promise.resolve();
             }
 
             let safeTargetIndex = targetIndex;
@@ -871,26 +829,29 @@
             const startTime = performance.now();
             const startRotation = rouletteState.currentRotation;
 
-            function animate(now) {
-                const elapsed = now - startTime;
-                const progress = Math.min(elapsed / duration, 1);
+            return new Promise(function(resolve) {
+                function animate(now) {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
 
-                const eased = 1 - Math.pow(1 - progress, 4);
-                rouletteState.currentRotation = startRotation + (finalTargetAngle - startRotation) * eased;
+                    const eased = 1 - Math.pow(1 - progress, 4);
+                    rouletteState.currentRotation = startRotation + (finalTargetAngle - startRotation) * eased;
 
-                drawWheel(rouletteState.currentRotation);
+                    drawWheel(rouletteState.currentRotation);
 
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    rouletteState.spinning = false;
-                    joinButton.disabled = false;
-                    const landedIndex = getLandedIndex(rouletteState.currentRotation);
-                    showResult(landedIndex, drawResult);
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        rouletteState.spinning = false;
+                        joinButton.disabled = false;
+                        const landedIndex = getLandedIndex(rouletteState.currentRotation);
+                        showResult(landedIndex, drawResult);
+                        resolve();
+                    }
                 }
-            }
 
-            requestAnimationFrame(animate);
+                requestAnimationFrame(animate);
+            });
         }
 
         // 당첨 결과 모달에 당첨 여부 및 쿠폰명을 표시합니다.
@@ -916,7 +877,6 @@
                 return;
             }
             if (rouletteState.availableTicketCount <= 0) {
-                setApiStatus('응모권이 없습니다.', true);
                 joinButton.disabled = true;
                 restoreJoinButtonLabel();
                 return;
@@ -924,35 +884,61 @@
 
             try {
                 setJoinButtonLoading(true, '서버 통신중...');
-                setApiStatus('추첨 중...');
                 const drawResult = await requestDrawResult();
-                setAvailableTicketCount(rouletteState.availableTicketCount - 1);
                 const targetIndex = findItemIndexByCouponName(
                     drawResult.isWinning === '1' ? drawResult.winningCouponName : null
                 );
-                setApiStatus(drawResult.isWinning === '1' ? '당첨! 결과를 확인하세요.' : '아쉽게도 꽝!');
-                spin(targetIndex, drawResult);
+
+                // 사용자가 요청한대로 "룰렛 완료 후" 응모권 수를 재조회합니다.
+                await spin(targetIndex, drawResult);
+                const latest = await requestRaffleInfo();
+                setAvailableTicketCount(latest.raffleTicketCount);
             } catch (error) {
-                setApiStatus('서버 오류: 랜덤으로 진행합니다.', true);
                 console.warn('[roulette] handleSpinClick failed', error);
-                spin(null, null);
+                await spin(null, null);
             } finally {
                 setJoinButtonLoading(false);
             }
         }
 
-        // 페이지 초기화 시 대상/응모권 확인 후 캔버스를 최초 렌더링합니다.
+        // init에서 eventId/acntNo를 이미 가지고 있다는 전제 하에 유효성을 확인합니다.
+        function validateInitConfig() {
+            const eventId = Number(API_CONFIG.eventId);
+            if (!Number.isFinite(eventId)) {
+                throw new Error('init payload(eventId)가 없습니다.');
+            }
+            API_CONFIG.eventId = eventId;
+            API_CONFIG.acntNo = API_CONFIG.acntNo ? String(API_CONFIG.acntNo) : '';
+        }
+
+        // 페이지 초기화 시 이벤트/혜택/응모권 순으로 로드합니다.
         async function init() {
             setJoinButtonLoading(true, '초기화 중...');
             raffleButton.disabled = true;
             raffleButton.textContent = '초기화 중...';
-            drawWheel(rouletteState.currentRotation);       // 로딩 상태 즉시 표시
-            await initPageConfig();                         // 1. 서버에서 acntNo / eventId 주입
-            await loadEventDefinitions();                   // 2. 이벤트 목록 / 경품 항목 서버에서 가져옴
-            drawWheel(rouletteState.currentRotation);       // 3. 경품 항목이 반영된 휠 렌더링
-            await loadRaffleStatus();                       // 4. 대상 여부 / 응모권 수 확인
-            if (!joinButton.disabled) {
-                setJoinButtonLoading(false);
+            drawWheel(rouletteState.currentRotation);
+
+            try {
+                if (API_CONFIG.enabled) {
+                    validateInitConfig();
+                } else {
+                    API_CONFIG.eventId = API_CONFIG.eventId || 1;
+                    API_CONFIG.acntNo = API_CONFIG.acntNo || '0000000000';
+                }
+
+                await loadEventDefinitions();
+                drawWheel(rouletteState.currentRotation);
+                await loadRaffleStatus();
+            } catch (error) {
+                joinButton.disabled = true;
+                joinButton.textContent = '초기화 필요';
+                raffleButton.disabled = true;
+                raffleButton.textContent = '초기화 필요';
+                console.warn('[roulette] init failed', error);
+            } finally {
+                if (!joinButton.disabled) {
+                    setJoinButtonLoading(false);
+                }
             }
         }
 
@@ -966,29 +952,35 @@
 
         joinButton.addEventListener('click', handleSpinClick);
 
-        // 응모권 참여 버튼 - 응모권 +1 API 호출
+        // 응모권 참여 버튼 - IF-CX-052 확인 후 IF-CX-050으로 응모권 수를 리프레시
         raffleButton.addEventListener('click', async () => {
-            if (raffleButton.disabled || rouletteState.requestPending) {
+            if (rouletteState.raffleJoinClickedOnce || raffleButton.disabled || rouletteState.requestPending) {
                 return;
             }
 
+            rouletteState.raffleJoinClickedOnce = true;
+
             try {
                 raffleButton.disabled = true;
-                raffleButton.textContent = '확인 중...';
-                setApiStatus('응모권을 추가하는 중입니다...');
+                raffleButton.textContent = '응모권 참여 ✓';
 
-                const result = await requestRaffleJoin();
-                setAvailableTicketCount(result.raffleTicketCount);
-                setApiStatus('');
-                raffleButton.disabled = false;
+                const targetResult = await requestTargetCheck();
+                if (!targetResult.isTarget) {
+                    joinButton.disabled = true;
+                    joinButton.textContent = '참여 불가';
+                    return;
+                }
+
+                const latest = await requestRaffleInfo();
+                setAvailableTicketCount(latest.raffleTicketCount);
+
+                raffleButton.disabled = true;
                 raffleButton.textContent = '응모권 참여 ✓';
                 rouletteState.restoreStatusOnModalClose = false;
-                openModal('응모권 획득', '', '룰렛판에서 "시작" 버튼을 눌러주세요.');
+                openModal('응모권 참여', '', '응모권 참여 완료하였습니다.');
             } catch (error) {
-                setApiStatus('응모권 확인 실패: ' + (error.message || ''), true);
                 console.warn('[roulette] raffleButton click failed', error);
-                raffleButton.disabled = false;
-                raffleButton.textContent = '응모권 참여';
+                raffleButton.textContent = '응모권 참여 ✓';
             }
         });
 

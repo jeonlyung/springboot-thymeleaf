@@ -58,9 +58,9 @@
          ORDER BY SORT_ORD ASC, PRIZE_ID ASC
     </select>
 
-    <select id="selectAcntNoByUsrIdAndEventId" resultType="string">
-        SELECT /* selectAcntNoByUsrIdAndEventId */
-               ACNT_NO
+    <select id="selectTargetYnByUsrId" resultType="string">
+        SELECT /* selectTargetYnByUsrId */
+               IS_TARGET_YN
           FROM TB_RLT_EVENT_TARGET_F
          WHERE EVENT_ID = #{eventId}
            AND USR_ID = #{usrId}
@@ -68,84 +68,31 @@
          LIMIT 1
     </select>
 
-    <select id="selectAnyAcntNoByUsrId" resultType="string">
-        SELECT /* selectAnyAcntNoByUsrId */
-               ACNT_NO
-          FROM TB_RLT_EVENT_TARGET_F
-         WHERE USR_ID = #{usrId}
-           AND USE_YN = 'Y'
-         ORDER BY TARGET_ID DESC
-         LIMIT 1
-    </select>
-
-    <select id="selectTargetYn" resultType="string">
-        SELECT /* selectTargetYn */
-               IS_TARGET_YN
-          FROM TB_RLT_EVENT_TARGET_F
-         WHERE EVENT_ID = #{eventId}
-           AND ACNT_NO = #{acntNo}
-           AND USE_YN = 'Y'
-         LIMIT 1
-    </select>
-
-    <insert id="upsertDefaultTarget">
-        INSERT /* upsertDefaultTarget */
-          INTO TB_RLT_EVENT_TARGET_F (
-               EVENT_ID
-             , ACNT_NO
-             , USR_ID
-             , IS_TARGET_YN
-             , TARGET_COUPON_NM
-             , USE_YN
-             , FST_REG_DTM
-             , FST_REG_ID
-             , LST_CHG_DTM
-             , LST_CHG_ID
-               )
-        VALUES (
-               #{eventId}
-             , #{acntNo}
-             , NULL
-             , 'Y'
-             , NULL
-             , 'Y'
-             , NOW()
-             , 'SYSTEM'
-             , NOW()
-             , 'SYSTEM'
-               )
-        ON DUPLICATE KEY UPDATE
-               IS_TARGET_YN = 'Y'
-             , USE_YN       = 'Y'
-             , LST_CHG_DTM  = NOW()
-             , LST_CHG_ID   = 'SYSTEM'
-    </insert>
-
-    <select id="selectTargetCouponName" resultType="string">
-        SELECT /* selectTargetCouponName */
+    <select id="selectTargetCouponNameByUsrId" resultType="string">
+        SELECT /* selectTargetCouponNameByUsrId */
                TARGET_COUPON_NM
           FROM TB_RLT_EVENT_TARGET_F
          WHERE EVENT_ID = #{eventId}
-           AND ACNT_NO = #{acntNo}
+           AND USR_ID = #{usrId}
            AND USE_YN = 'Y'
          LIMIT 1
     </select>
 
-    <select id="selectRaffleTicketCount" resultType="int">
-        SELECT /* selectRaffleTicketCount */
+    <select id="selectRaffleTicketCountByUsrId" resultType="int">
+        SELECT /* selectRaffleTicketCountByUsrId */
                RAFFLE_TICKET_CNT
           FROM TB_RLT_RAFFLE_BAL_F
          WHERE EVENT_ID = #{eventId}
-           AND ACNT_NO = #{acntNo}
+           AND USR_ID = #{usrId}
            AND USE_YN = 'Y'
          LIMIT 1
     </select>
 
-    <insert id="upsertDefaultRaffleBalance">
-        INSERT /* upsertDefaultRaffleBalance */
+    <insert id="upsertDefaultRaffleBalanceByUsrId">
+        INSERT /* upsertDefaultRaffleBalanceByUsrId */
           INTO TB_RLT_RAFFLE_BAL_F (
                EVENT_ID
-             , ACNT_NO
+             , USR_ID
              , RAFFLE_TICKET_CNT
              , USE_YN
              , FST_REG_DTM
@@ -155,8 +102,8 @@
                )
         VALUES (
                #{eventId}
-             , #{acntNo}
-             , 3
+             , #{usrId}
+             , 0
              , 'Y'
              , NOW()
              , 'SYSTEM'
@@ -164,34 +111,30 @@
              , 'SYSTEM'
                )
         ON DUPLICATE KEY UPDATE
-               RAFFLE_TICKET_CNT = CASE
-                                        WHEN RAFFLE_TICKET_CNT &lt; 3 THEN 3
-                                        ELSE RAFFLE_TICKET_CNT
-                                   END
-             , USE_YN            = 'Y'
+               USE_YN            = 'Y'
              , LST_CHG_DTM       = NOW()
              , LST_CHG_ID        = 'SYSTEM'
     </insert>
 
-    <update id="incrementRaffleTicketCount">
-        UPDATE /* incrementRaffleTicketCount */
+    <update id="incrementRaffleTicketCountByUsrId">
+        UPDATE /* incrementRaffleTicketCountByUsrId */
                TB_RLT_RAFFLE_BAL_F
            SET RAFFLE_TICKET_CNT = RAFFLE_TICKET_CNT + 1
              , LST_CHG_DTM       = NOW()
              , LST_CHG_ID        = 'SYSTEM'
          WHERE EVENT_ID          = #{eventId}
-           AND ACNT_NO           = #{acntNo}
+           AND USR_ID            = #{usrId}
            AND USE_YN            = 'Y'
     </update>
 
-    <update id="decrementRaffleTicketCount">
-        UPDATE /* decrementRaffleTicketCount */
+    <update id="decrementRaffleTicketCountByUsrId">
+        UPDATE /* decrementRaffleTicketCountByUsrId */
                TB_RLT_RAFFLE_BAL_F
            SET RAFFLE_TICKET_CNT = RAFFLE_TICKET_CNT - 1
              , LST_CHG_DTM       = NOW()
              , LST_CHG_ID        = 'SYSTEM'
          WHERE EVENT_ID          = #{eventId}
-           AND ACNT_NO           = #{acntNo}
+           AND USR_ID            = #{usrId}
            AND USE_YN            = 'Y'
            AND RAFFLE_TICKET_CNT &gt; 0
     </update>
@@ -200,7 +143,7 @@
         INSERT /* insertDrawHistory */
           INTO TB_RLT_DRAW_H (
                EVENT_ID
-             , ACNT_NO
+             , USR_ID
              , DRAW_RSLT_CD
              , WINNING_COUPON_NM
              , WINNING_COUPON_CD
@@ -213,7 +156,7 @@
                )
         VALUES (
                #{eventId}
-             , #{acntNo}
+             , #{usrId}
              , #{drawResultCode}
              , #{winningCouponName}
              , #{winningCouponCode}

@@ -30,9 +30,8 @@ public class RouletteServiceImpl implements RouletteService {
     private final Random random = new Random();
 
     /**
-     * 페이지 초기화 - acntNo / eventId 반환
-     * acntNo: 실제 CXM 연동 전, 서버 고정값 사용
-     *         연동 후에는 usrId 로 CXM DB 조회해서 반환
+     * 페이지 초기화 - eventId 반환
+     * acntNo 레거시 제거로 빈 문자열을 반환합니다.
      */
     @Override
     public RoulettePageInitResDto getPageInit(String usrId) {
@@ -41,20 +40,8 @@ public class RouletteServiceImpl implements RouletteService {
         RouletteEventDbDto currentEvent = findCurrentEvent();
         Long eventId = currentEvent != null ? currentEvent.getEventId() : null;
 
-        String acntNo = null;
-        if (eventId != null && usrId != null && !usrId.isBlank()) {
-            acntNo = rouletteMapper.selectAcntNoByUsrIdAndEventId(usrId, eventId);
-        }
-        if ((acntNo == null || acntNo.isBlank()) && usrId != null && !usrId.isBlank()) {
-            acntNo = rouletteMapper.selectAnyAcntNoByUsrId(usrId);
-        }
-        if (acntNo == null || acntNo.isBlank()) {
-            // 대상 데이터 미매핑 환경에서도 룰렛을 테스트할 수 있도록 기본 고객번호를 사용합니다.
-            acntNo = "1234567890";
-        }
-
         return RoulettePageInitResDto.builder()
-                .acntNo(acntNo != null ? acntNo : "")
+                .acntNo("")
                 .eventId(eventId)
                 .build();
     }
@@ -127,10 +114,9 @@ public class RouletteServiceImpl implements RouletteService {
      */
     @Override
     public RouletteRaffleInfoResDto getRaffleInfo(RouletteRaffleInfoReqDto reqDto) {
-        log.info("[RouletteService] getRaffleInfo - eventId={}, acntNo={}", reqDto.getEventId(), reqDto.getAcntNo());
+        log.info("[RouletteService] getRaffleInfo - eventId={}, usrId={}", reqDto.getEventId(), reqDto.getUsrId());
 
-        ensureDefaultTargetAndBalance(reqDto.getEventId(), reqDto.getAcntNo());
-        Integer ticketCount = rouletteMapper.selectRaffleTicketCount(reqDto.getEventId(), reqDto.getAcntNo());
+        Integer ticketCount = rouletteMapper.selectRaffleTicketCountByUsrId(reqDto.getEventId(), reqDto.getUsrId());
         int safeTicketCount = Math.max(ticketCount != null ? ticketCount : 0, 0);
 
         return RouletteRaffleInfoResDto.builder()
@@ -151,12 +137,29 @@ public class RouletteServiceImpl implements RouletteService {
     @Override
     @Transactional
     public RouletteRaffleInfoResDto joinRaffle(RouletteRaffleInfoReqDto reqDto) {
-        log.info("[RouletteService] joinRaffle - eventId={}, acntNo={}", reqDto.getEventId(), reqDto.getAcntNo());
+        log.info("[RouletteService] joinRaffle - eventId={}, usrId={}", reqDto.getEventId(), reqDto.getUsrId());
 
-        ensureDefaultTargetAndBalance(reqDto.getEventId(), reqDto.getAcntNo());
-        rouletteMapper.incrementRaffleTicketCount(reqDto.getEventId(), reqDto.getAcntNo());
+        String targetYn = rouletteMapper.selectTargetYnByUsrId(reqDto.getEventId(), reqDto.getUsrId());
+        if (!"Y".equalsIgnoreCase(targetYn)) {
+            return RouletteRaffleInfoResDto.builder()
+                    .resultCode(200)
+                    .resultMsg("정상 처리되었습니다.")
+                    .resultData(RouletteRaffleInfoResDto.ResultData.builder()
+                            .isSuccess(false)
+                            .errMsg("이벤트 참여 대상이 아닙니다.")
+                            .ecEventRaffleInfo(List.of(
+                                    RouletteRaffleInfoResDto.EcEventRaffleInfo.builder()
+                                            .raffleTicketCount(0)
+                                            .build()
+                            ))
+                            .build())
+                    .build();
+        }
 
-        Integer ticketCount = rouletteMapper.selectRaffleTicketCount(reqDto.getEventId(), reqDto.getAcntNo());
+        rouletteMapper.upsertDefaultRaffleBalanceByUsrId(reqDto.getEventId(), reqDto.getUsrId());
+        rouletteMapper.incrementRaffleTicketCountByUsrId(reqDto.getEventId(), reqDto.getUsrId());
+
+        Integer ticketCount = rouletteMapper.selectRaffleTicketCountByUsrId(reqDto.getEventId(), reqDto.getUsrId());
         int safeTicketCount = Math.max(ticketCount != null ? ticketCount : 0, 0);
 
         return RouletteRaffleInfoResDto.builder()
@@ -181,18 +184,16 @@ public class RouletteServiceImpl implements RouletteService {
     @Override
     @Transactional
     public RouletteDrawResDto drawEvent(RouletteDrawReqDto reqDto) {
-        log.info("[RouletteService] drawEvent - eventId={}, acntNo={}", reqDto.getEventId(), reqDto.getAcntNo());
+        log.info("[RouletteService] drawEvent - eventId={}, usrId={}", reqDto.getEventId(), reqDto.getUsrId());
 
         Long eventId = reqDto.getEventId();
-        String acntNo = reqDto.getAcntNo();
-
-        ensureDefaultTargetAndBalance(eventId, acntNo);
-        String targetYn = rouletteMapper.selectTargetYn(eventId, acntNo);
+        String usrId = reqDto.getUsrId();
+        String targetYn = rouletteMapper.selectTargetYnByUsrId(eventId, usrId);
         if (!"Y".equalsIgnoreCase(targetYn)) {
             return buildDrawFailure("참여 대상이 아닙니다.");
         }
 
-        Integer currentTicket = rouletteMapper.selectRaffleTicketCount(eventId, acntNo);
+        Integer currentTicket = rouletteMapper.selectRaffleTicketCountByUsrId(eventId, usrId);
         if (currentTicket == null || currentTicket <= 0) {
             return buildDrawFailure("응모권이 없습니다.");
         }
@@ -205,14 +206,14 @@ public class RouletteServiceImpl implements RouletteService {
         RoulettePrizeDbDto pickedPrize = pickPrizeByWeight(prizeRows);
         boolean isWin = "Y".equalsIgnoreCase(pickedPrize.getWinningPrizeYn());
 
-        int affected = rouletteMapper.decrementRaffleTicketCount(eventId, acntNo);
+        int affected = rouletteMapper.decrementRaffleTicketCountByUsrId(eventId, usrId);
         if (affected <= 0) {
             return buildDrawFailure("응모권 차감에 실패했습니다.");
         }
 
         rouletteMapper.insertDrawHistory(RouletteDrawHistoryDbDto.builder()
                 .eventId(eventId)
-                .acntNo(acntNo)
+                .usrId(usrId)
                 .drawResultCode(isWin ? "1" : "0")
                 .winningCouponName(isWin ? pickedPrize.getCouponName() : null)
                 .winningCouponCode(isWin ? pickedPrize.getCouponCode() : null)
@@ -241,13 +242,12 @@ public class RouletteServiceImpl implements RouletteService {
      */
     @Override
     public RouletteTargetCheckResDto checkEventTarget(RouletteTargetCheckReqDto reqDto) {
-        log.info("[RouletteService] checkEventTarget - eventId={}, acntNo={}", reqDto.getEventId(), reqDto.getAcntNo());
+        log.info("[RouletteService] checkEventTarget - eventId={}, usrId={}", reqDto.getEventId(), reqDto.getUsrId());
 
-        ensureDefaultTargetAndBalance(reqDto.getEventId(), reqDto.getAcntNo());
-        String targetYn = rouletteMapper.selectTargetYn(reqDto.getEventId(), reqDto.getAcntNo());
+        String targetYn = rouletteMapper.selectTargetYnByUsrId(reqDto.getEventId(), reqDto.getUsrId());
         boolean isTarget = "Y".equalsIgnoreCase(targetYn);
         String targetCouponName = isTarget
-                ? rouletteMapper.selectTargetCouponName(reqDto.getEventId(), reqDto.getAcntNo())
+                ? rouletteMapper.selectTargetCouponNameByUsrId(reqDto.getEventId(), reqDto.getUsrId())
                 : null;
 
         return RouletteTargetCheckResDto.builder()
@@ -312,12 +312,5 @@ public class RouletteServiceImpl implements RouletteService {
         return prizeRows.get(prizeRows.size() - 1);
     }
 
-    private void ensureDefaultTargetAndBalance(Long eventId, String acntNo) {
-        if (eventId == null || acntNo == null || acntNo.isBlank()) {
-            return;
-        }
-        rouletteMapper.upsertDefaultTarget(eventId, acntNo);
-        rouletteMapper.upsertDefaultRaffleBalance(eventId, acntNo);
-    }
 }
 

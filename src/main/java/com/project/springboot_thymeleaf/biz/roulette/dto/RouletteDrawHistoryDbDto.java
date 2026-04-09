@@ -13,7 +13,7 @@ import lombok.*;
 public class RouletteDrawHistoryDbDto {
 
     private Long eventId;
-    private String acntNo;
+    private String usrId;
     private String drawResultCode;
     private String winningCouponName;
     private String winningCouponCode;

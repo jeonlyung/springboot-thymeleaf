@@ -22,5 +22,8 @@ public class RouletteTargetCheckReqDto {
 
     /** 전자카드고객번호 (PK, String, 길이 10) */
     private String acntNo;
+
+    /** 로그인 사용자 ID(OAuth2 email) */
+    private String usrId;
 }
 

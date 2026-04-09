@@ -19,23 +19,18 @@ public interface RouletteMapper {
 
     List<RoulettePrizeDbDto> selectPrizeListByEventId(@Param("eventId") Long eventId);
 
-    String selectAcntNoByUsrIdAndEventId(@Param("usrId") String usrId, @Param("eventId") Long eventId);
+    String selectTargetYnByUsrId(@Param("eventId") Long eventId, @Param("usrId") String usrId);
 
-    String selectAnyAcntNoByUsrId(@Param("usrId") String usrId);
+    String selectTargetCouponNameByUsrId(@Param("eventId") Long eventId, @Param("usrId") String usrId);
 
-    String selectTargetYn(@Param("eventId") Long eventId, @Param("acntNo") String acntNo);
+    Integer selectRaffleTicketCountByUsrId(@Param("eventId") Long eventId, @Param("usrId") String usrId);
 
-    int upsertDefaultTarget(@Param("eventId") Long eventId, @Param("acntNo") String acntNo);
+    int upsertDefaultRaffleBalanceByUsrId(@Param("eventId") Long eventId, @Param("usrId") String usrId);
 
-    String selectTargetCouponName(@Param("eventId") Long eventId, @Param("acntNo") String acntNo);
+    int incrementRaffleTicketCountByUsrId(@Param("eventId") Long eventId, @Param("usrId") String usrId);
 
-    Integer selectRaffleTicketCount(@Param("eventId") Long eventId, @Param("acntNo") String acntNo);
 
-    int upsertDefaultRaffleBalance(@Param("eventId") Long eventId, @Param("acntNo") String acntNo);
-
-    int incrementRaffleTicketCount(@Param("eventId") Long eventId, @Param("acntNo") String acntNo);
-
-    int decrementRaffleTicketCount(@Param("eventId") Long eventId, @Param("acntNo") String acntNo);
+    int decrementRaffleTicketCountByUsrId(@Param("eventId") Long eventId, @Param("usrId") String usrId);
 
     int insertDrawHistory(RouletteDrawHistoryDbDto historyDto);
 }
