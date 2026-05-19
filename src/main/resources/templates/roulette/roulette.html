@@ -289,8 +289,8 @@
         const eventIdFromQuery = params.get('eventId');
         const acntNoFromQuery = params.get('acntNo');
 
-        if (eventIdFromQuery != null) {
-            API_CONFIG.eventId = Number(eventIdFromQuery);
+        if (eventIdFromQuery == null || acntNoFromQuery != null) {
+            openModal('시스템 에러', '', '서버와 연결이ㅣ 실패하였습니다.\n 관리자에게 문의해주시기 바랍니다.')
         }
         if (acntNoFromQuery != null) {
             API_CONFIG.acntNo = acntNoFromQuery;
@@ -572,6 +572,8 @@
             if (!noticeContents) { return; }
             const html = typeof dispContents === 'string' ? dispContents.trim() : '';
             if (!html) { return; } // 값이 없으면 템플릿 기본 안내문 유지
+
+            // 제공된 HTML에서 허용된 태그/속성만 남기고 새니타이징하여 표시
             noticeContents.innerHTML = sanitizeHtml(html);
         }
 
