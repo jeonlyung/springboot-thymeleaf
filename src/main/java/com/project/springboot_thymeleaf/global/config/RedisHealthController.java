@@ -40,6 +40,7 @@ public class RedisHealthController {
     public String dashboard(Model model) {
         boolean connected = false;
         String pingResult = "FAIL";
+        String redisError = null;
         Properties info = new Properties();
         long dbSize = 0;
 
@@ -61,13 +62,14 @@ public class RedisHealthController {
             Long size = connection.serverCommands().dbSize();
             dbSize = size != null ? size : 0L;
         } catch (Exception e) {
+            redisError = e.getMessage();
             log.error("[Redis Dashboard] 연결 오류 - {}", e.getMessage());
         }
 
         // 전체 키 목록
-        Set<String> keys = redisTemplate.keys("*");
+        Set<String> keys = safeKeys("*");
         List<Map<String, Object>> keyList = new ArrayList<>();
-        List<String> sortedKeys = new ArrayList<>(keys != null ? keys : Collections.emptySet());
+        List<String> sortedKeys = new ArrayList<>(keys);
 
         Collections.sort(sortedKeys);
         for (String key : sortedKeys) {
@@ -113,6 +115,7 @@ public class RedisHealthController {
 
         model.addAttribute("connected", connected);
         model.addAttribute("pingResult", pingResult);
+        model.addAttribute("redisError", redisError);
         model.addAttribute("dbSize", dbSize);
         model.addAttribute("redisVersion", info.getProperty("redis_version", "N/A"));
         model.addAttribute("usedMemory", info.getProperty("used_memory_human", "N/A"));
@@ -181,7 +184,7 @@ public class RedisHealthController {
             @RequestParam(defaultValue = "*") String pattern) {
         Map<String, Object> result = new LinkedHashMap<>();
         try {
-            Set<String> safeKeys = redisTemplate.keys(pattern);
+            Set<String> safeKeys = safeKeys(pattern);
             result.put("status", "OK");
             result.put("count", safeKeys.size());
             result.put("keys", safeKeys);
@@ -216,7 +219,7 @@ public class RedisHealthController {
             result.put("key", key);
             result.put("type", type);
             result.put("value", value);
-            result.put("ttl", ttl != null && ttl >= 0 ? ttl + "s" : "영구");
+            result.put("ttl", ttl >= 0 ? ttl + "s" : "영구");
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             result.put("status", "FAIL");
@@ -308,7 +311,7 @@ public class RedisHealthController {
             @RequestParam(defaultValue = "*") String pattern) {
         Map<String, Object> result = new LinkedHashMap<>();
         try {
-            Set<String> keys = redisTemplate.keys(pattern);
+            Set<String> keys = safeKeys(pattern);
             List<String> sortedKeys = new ArrayList<>(keys);
             Collections.sort(sortedKeys);
 
@@ -353,5 +356,14 @@ public class RedisHealthController {
             entry.put("value", "-");
         }
         return entry;
+    }
+
+    private Set<String> safeKeys(String pattern) {
+        try {
+            return redisTemplate.keys(pattern);
+        } catch (Exception e) {
+            log.warn("[Redis Dashboard] 키 조회 실패 - pattern: {}, 빈 목록으로 대체. cause={}", pattern, e.getMessage());
+            return Collections.emptySet();
+        }
     }
 }
