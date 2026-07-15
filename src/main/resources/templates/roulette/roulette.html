@@ -288,12 +288,21 @@
         const params = new URLSearchParams(window.location.search || '');
         const eventIdFromQuery = params.get('eventId');
         const acntNoFromQuery = params.get('acntNo');
+        let initParamErrorMessage = '';
 
-        if (eventIdFromQuery == null || acntNoFromQuery != null) {
-            openModal('시스템 에러', '', '서버와 연결이ㅣ 실패하였습니다.\n 관리자에게 문의해주시기 바랍니다.')
+        if (eventIdFromQuery != null && eventIdFromQuery.trim() !== '') {
+            const parsedEventId = Number(eventIdFromQuery);
+            if (Number.isFinite(parsedEventId)) {
+                API_CONFIG.eventId = parsedEventId;
+            }
         }
-        if (acntNoFromQuery != null) {
-            API_CONFIG.acntNo = acntNoFromQuery;
+
+        if (acntNoFromQuery != null && acntNoFromQuery.trim() !== '') {
+            API_CONFIG.acntNo = acntNoFromQuery.trim();
+        }
+
+        if (!Number.isFinite(Number(API_CONFIG.eventId))) {
+            initParamErrorMessage = '초기 eventId 파라미터가 올바르지 않습니다.\n관리자에게 문의해주시기 바랍니다.';
         }
 
         // 룰렛 항목 (IF-CX-049 응답으로 채워짐)
@@ -441,8 +450,31 @@
                 ...options
             });
             if (!response.ok) { throw new Error('HTTP ' + response.status); }
+
+            if (response.redirected && response.url && response.url.includes('/login')) {
+                throw new Error('로그인이 필요합니다.');
+            }
+
             const ct = response.headers.get('content-type') || '';
-            return ct.includes('application/json') ? response.json() : null;
+            if (!ct.includes('application/json')) {
+                throw new Error('JSON 응답이 아닙니다. API 경로/인증 상태를 확인해 주세요.');
+            }
+
+            return response.json();
+        }
+
+        function ensureFallbackItems(message) {
+            if (rouletteState.items.length >= 2) {
+                return;
+            }
+            rouletteState.items = [
+                { id: 'pending_1', label: '이벤트 준비중', desc: '이벤트 항목을 준비 중입니다.', color: '#5B8CEE' },
+                { id: 'pending_2', label: '다음 기회', desc: '잠시 후 다시 시도해 주세요.', color: '#DA5F66' }
+            ];
+
+            if (message) {
+                openModal('안내', '룰렛 항목 조회 실패', message);
+            }
         }
 
         // IF-CX-050 응모권 횟수 조회
@@ -668,7 +700,7 @@
                         mappedItems.push({
                             id: 'prize_' + index + '_' + splitIndex,
                             label: couponName,
-                            desc: '당첨 혜택이 지급됩니다.',
+                            desc: '당첨 혜택이 지급됩니다.\n[마이페이지 > 포인트 > 쿠폰북]에서 \n지급 내역을 확인하실 수 있습니다.',
                             color: pickColor(mappedItems.length)
                         });
                     });
@@ -680,10 +712,18 @@
                     rouletteState.items = mappedItems.concat([
                         { id: 'miss', label: '다음 기회', desc: '다음 기회에 더 큰 혜택!', color: '#DA5F66' }
                     ]);
+                } else {
+                    ensureFallbackItems('현재 노출 가능한 룰렛 항목이 없습니다.\n잠시 후 다시 시도해 주세요.');
                 }
             } catch (err) {
-                console.warn('[roulette] loadEventDefinitions failed:', err && err.message ? err.message : 'error');
+                const message = err && err.message ? err.message : '이벤트 항목 조회 중 오류가 발생했습니다.';
+                console.warn('[roulette] loadEventDefinitions failed:', message);
+                ensureFallbackItems(message);
             }
+        }
+
+        function showApiToast(message) {
+            openModal('안내', '', message || '요청 처리 중 오류가 발생했습니다.');
         }
 
         // 초기화 시 응모권 수를 확인합니다.
@@ -1031,6 +1071,10 @@
 
             canvas.style.cursor = (distance <= 46 && !rouletteState.spinning && !rouletteState.requestPending) ? 'pointer' : 'default';
         });
+
+        if (initParamErrorMessage) {
+            openModal('시스템 에러', '', initParamErrorMessage);
+        }
 
         init();
     })();
