@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1320" role="img" aria-labelledby="title desc">
+  <title id="title">PC Guidance Hero</title>
+  <desc id="desc">PC guidance image</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f5f5f5"/>
+      <stop offset="100%" stop-color="#e5e7eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1320" fill="url(#bg)"/>
+  <rect x="84" y="160" width="912" height="1000" rx="28" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="160" y="312" font-size="78" font-weight="700" fill="#202124" font-family="Arial, sans-serif">PC Access</text>
+  <text x="160" y="392" font-size="40" fill="#4b5563" font-family="Arial, sans-serif">Use mobile phone to install app</text>
+  <rect x="190" y="470" width="700" height="430" rx="18" fill="#111827"/>
+  <rect x="222" y="502" width="636" height="350" rx="12" fill="#1f2937"/>
+  <text x="270" y="710" font-size="44" fill="#e5e7eb" font-family="Arial, sans-serif">Open this page on your phone</text>
+  <text x="160" y="980" font-size="34" fill="#6b7280" font-family="Arial, sans-serif">Android and iOS only</text>
+</svg>
+

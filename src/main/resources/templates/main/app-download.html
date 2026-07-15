@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APP다운로드</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", "맑은 고딕", sans-serif;
+            background: #2f3a52;
+            color: #202124;
+            min-height: 100vh;
+            padding: 24px 12px;
+        }
+        .wrap {
+            width: min(100%, 420px);
+            margin: 0 auto;
+            background: #ececec;
+            border: 1px solid #c7c7c7;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            height: 58px;
+            border-bottom: 1px solid #d6d6d6;
+            background: #f2f2f2;
+        }
+        .header .back {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 1px solid #cfcfcf;
+            border-radius: 4px;
+            background: #fff;
+            color: #666;
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .header h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.04em; color: #3d3d3d; }
+
+        .content { padding: 0 0 24px; }
+        .platform-view { display: none; }
+        .platform-view.active { display: block; }
+
+        .hero {
+            width: 100%;
+            display: block;
+        }
+
+        .download-zone {
+            background: #1f1f1f;
+            padding: 12px 16px 16px;
+        }
+        .download-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            height: 56px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #ffffff 0%, #d6d6d6 100%);
+            color: #2b2b2b;
+            font-size: 26px;
+            font-weight: 700;
+            text-decoration: none;
+            border: 1px solid #999;
+            cursor: pointer;
+        }
+        .download-btn .go {
+            display: inline-grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            background: #1dc9be;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .guide {
+            padding: 18px 16px 0;
+        }
+        .guide-gallery {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .guide-gallery img {
+            width: 100%;
+            display: block;
+            border: 1px solid #d1d1d1;
+            background: #fff;
+        }
+
+        .pc-box {
+            margin: 18px 16px 0;
+            border: 1px solid #d1d1d1;
+            background: #fff;
+            padding: 16px;
+            text-align: center;
+        }
+        .pc-box h2 { font-size: 20px; margin-bottom: 8px; }
+        .pc-box p { font-size: 15px; line-height: 1.4; color: #555; }
+        .pc-box .hint { margin-top: 10px; font-size: 13px; color: #777; }
+
+        @media (max-width: 480px) {
+            body { padding: 0; }
+            .wrap { width: 100%; min-height: 100vh; }
+            .header h1 { font-size: 28px; }
+            .download-btn { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header class="header">
+        <a href="javascript:history.back()" class="back" aria-label="뒤로가기">◀</a>
+        <h1>APP다운로드</h1>
+    </header>
+
+    <main class="content">
+        <img id="hero-image" class="hero" src="./images/app-download/app_1.jpg" alt="더비온2.0 앱 안내">
+
+        <section id="view-android" class="platform-view" aria-label="Android 다운로드 안내">
+            <div class="download-zone">
+                <a id="btn-android" class="download-btn" href="#" type="application/vnd.android.package-archive">
+                    더비온2.0 다운로드 <span class="go">GO</span>
+                </a>
+            </div>
+            <div class="guide">
+                <div class="guide-gallery">
+                    <img id="android-guide-1" src="./images/app-download/android-guide.svg" alt="안드로이드 더비온2.0 설치 안내 이미지 1">
+                    <img id="android-guide-2" src="./images/app-download/app_2.jpg" alt="안드로이드 더비온2.0 설치 안내 이미지 2">
+                </div>
+            </div>
+        </section>
+
+        <section id="view-ios" class="platform-view" aria-label="iOS 다운로드 안내">
+            <div class="download-zone">
+                <a id="btn-ios" class="download-btn" href="#" role="button">
+                    더비온2.0 다운로드 <span class="go">GO</span>
+                </a>
+            </div>
+            <div class="guide">
+                <div class="guide-gallery">
+                    <img id="ios-guide-1" src="./images/app-download/app_2.jpg" alt="iOS 더비온2.0 설치 안내 이미지 1">
+                    <img id="ios-guide-2" src="./images/app-download/ios-guide.svg" alt="iOS 더비온2.0 설치 안내 이미지 2">
+                </div>
+            </div>
+        </section>
+
+        <section id="view-pc" class="platform-view" aria-label="PC 다운로드 안내">
+            <div class="pc-box">
+                <h2>PC 접속 안내</h2>
+                <p>모바일 앱 설치는 스마트폰에서만 가능합니다.</p>
+                <p class="hint">휴대폰에서 이 페이지를 열어 설치를 진행해 주세요.</p>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    // 이 블록만 수정하면 이미지/설치 경로를 한 번에 제어할 수 있습니다.
+    var APP_DOWNLOAD_CONFIG = {
+        androidManifest: 'application/vnd.android.package-archive',
+        androidApkUrl: 'apk다운로드 URL',
+        iosInstallUrl: 'plist다운로드 URL',
+        image: {
+            hero: './images/app-download/app_1.jpg',
+            androidGuide1: './images/app-download/android-guide.svg',
+            androidGuide2: './images/app-download/app_2.jpg',
+            iosGuide1: './images/app-download/app_2.jpg',
+            iosGuide2: './images/app-download/ios-guide.svg'
+        }
+    };
+
+    var androidView = document.getElementById('view-android');
+    var iosView = document.getElementById('view-ios');
+    var pcView = document.getElementById('view-pc');
+
+    var heroImage = document.getElementById('hero-image');
+    var androidGuide1 = document.getElementById('android-guide-1');
+    var androidGuide2 = document.getElementById('android-guide-2');
+    var iosGuide1 = document.getElementById('ios-guide-1');
+    var iosGuide2 = document.getElementById('ios-guide-2');
+
+    var androidButton = document.getElementById('btn-android');
+    var iosButton = document.getElementById('btn-ios');
+
+    function applyConfigToUi() {
+        heroImage.setAttribute('src', APP_DOWNLOAD_CONFIG.image.hero);
+        androidGuide1.setAttribute('src', APP_DOWNLOAD_CONFIG.image.androidGuide1);
+        androidGuide2.setAttribute('src', APP_DOWNLOAD_CONFIG.image.androidGuide2);
+        iosGuide1.setAttribute('src', APP_DOWNLOAD_CONFIG.image.iosGuide1);
+        iosGuide2.setAttribute('src', APP_DOWNLOAD_CONFIG.image.iosGuide2);
+
+        androidButton.setAttribute('type', APP_DOWNLOAD_CONFIG.androidManifest);
+        androidButton.setAttribute('href', APP_DOWNLOAD_CONFIG.androidApkUrl);
+        iosButton.setAttribute('href', APP_DOWNLOAD_CONFIG.iosInstallUrl);
+    }
+
+    // Android: APK 링크만 직접 처리
+    function renderAndroidSource() {
+        androidView.classList.add('active');
+        iosView.classList.remove('active');
+        pcView.classList.remove('active');
+    }
+
+    // iOS: 설치 확인 후 plist 링크 이동
+    function renderIosSource() {
+        androidView.classList.remove('active');
+        iosView.classList.add('active');
+        pcView.classList.remove('active');
+        iosButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            if (window.confirm('더비온을 설치하시겠습니까?')) {
+                window.location.href = APP_DOWNLOAD_CONFIG.iosInstallUrl;
+            }
+        });
+    }
+
+    // PC: 설치 버튼 없이 안내 화면만 표시
+    function renderPcSource() {
+        androidView.classList.remove('active');
+        iosView.classList.remove('active');
+        pcView.classList.add('active');
+    }
+
+    var userAgent = (navigator.userAgent || '').toLowerCase();
+    var isIos = /iphone|ipad|ipod|macintosh|mac os/.test(userAgent);
+    var isAndroid = /android/.test(userAgent);
+
+    applyConfigToUi();
+
+    if (isAndroid) {
+        renderAndroidSource();
+        return;
+    }
+
+    if (isIos) {
+        renderIosSource();
+        return;
+    }
+
+    renderPcSource();
+})();
+</script>
+</body>
+</html>
+
+

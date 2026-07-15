@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 760" role="img" aria-labelledby="title desc">
+  <title id="title">PC QR Guide</title>
+  <desc id="desc">PC QR guide image</desc>
+  <rect width="1080" height="760" fill="#ffffff"/>
+  <rect x="40" y="40" width="1000" height="680" fill="#f8fafc" stroke="#cbd5e1" stroke-width="4"/>
+  <text x="74" y="132" font-size="60" font-weight="700" fill="#0f172a" font-family="Arial, sans-serif">Scan QR on your phone</text>
+  <line x1="74" y1="170" x2="1010" y2="170" stroke="#94a3b8" stroke-width="3"/>
+  <rect x="110" y="220" width="320" height="320" fill="#111827"/>
+  <rect x="132" y="242" width="276" height="276" fill="#ffffff"/>
+  <path d="M170 280h60v60h-60zM240 280h60v60h-60zM310 280h60v60h-60zM170 350h60v60h-60zM310 350h60v60h-60zM170 420h60v60h-60zM240 420h60v60h-60zM310 420h60v60h-60z" fill="#111827"/>
+  <text x="490" y="320" font-size="44" fill="#111827" font-family="Arial, sans-serif">1. Open camera app</text>
+  <text x="490" y="400" font-size="44" fill="#111827" font-family="Arial, sans-serif">2. Scan QR code</text>
+  <text x="490" y="480" font-size="44" fill="#111827" font-family="Arial, sans-serif">3. Open download page</text>
+</svg>
+

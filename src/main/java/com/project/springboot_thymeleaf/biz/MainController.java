@@ -53,6 +53,12 @@ public class MainController {
         return "main/main";
     }
 
+    @GetMapping({"/app-download", "/comp/view/kraAppList.do"})
+    public String appDownload() {
+        log.info("=== 앱 다운로드 페이지 진입 ===");
+        return "main/app-download";
+    }
+
     /**
      * OAuth2User에서 사용자 정보 추출
      */
