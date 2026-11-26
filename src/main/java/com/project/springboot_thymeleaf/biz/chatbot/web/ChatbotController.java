@@ -3,9 +3,9 @@ package com.project.springboot_thymeleaf.biz.chatbot.web;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.springboot_thymeleaf.biz.chatbot.config.ChatbotProperties;
-import com.project.springboot_thymeleaf.biz.chatbot.dto.ChatMessage;
-import com.project.springboot_thymeleaf.biz.chatbot.dto.ChatRequest;
-import com.project.springboot_thymeleaf.biz.chatbot.service.ChatRateLimiter;
+import com.project.springboot_thymeleaf.biz.chatbot.dto.ChatbotMessageDto;
+import com.project.springboot_thymeleaf.biz.chatbot.dto.ChatbotChatReqDto;
+import com.project.springboot_thymeleaf.biz.chatbot.service.ChatbotRateLimitService;
 import com.project.springboot_thymeleaf.biz.chatbot.service.ChatbotService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class ChatbotController {
 
     private final ChatbotProperties props;
     private final ChatbotService service;
-    private final ChatRateLimiter limiter;
+    private final ChatbotRateLimitService rateLimitService;
     private final ObjectMapper mapper;
 
     @GetMapping("/config")
@@ -44,16 +44,16 @@ public class ChatbotController {
     }
 
     @PostMapping("/chat")
-    public ResponseEntity<Flux<ServerSentEvent<String>>> chat(@RequestBody ChatRequest req, HttpServletRequest http) {
+    public ResponseEntity<Flux<ServerSentEvent<String>>> chat(@RequestBody ChatbotChatReqDto reqDto, HttpServletRequest http) {
         if (!props.isEnabled()) {
             return error(HttpStatus.SERVICE_UNAVAILABLE, "챗봇이 비활성화되어 있습니다.");
         }
-        if (!limiter.tryAcquire(http.getRemoteAddr())) {
+        if (!rateLimitService.tryAcquire(http.getRemoteAddr())) {
             return error(HttpStatus.TOO_MANY_REQUESTS, "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.");
         }
-        List<ChatMessage> history;
+        List<ChatbotMessageDto> history;
         try {
-            history = service.sanitize(req == null ? null : req.messages());
+            history = service.sanitize(reqDto == null ? null : reqDto.getMessages());
         } catch (IllegalArgumentException e) {
             return error(HttpStatus.BAD_REQUEST, e.getMessage());
         }

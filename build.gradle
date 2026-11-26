@@ -41,6 +41,9 @@ dependencies {
     // [통신] WebClient
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // [AI] Claude 외부 LLM (chatbot.provider=claude 일 때 사용)
+    implementation 'com.anthropic:anthropic-java:3.3.0'
+
     // [보안] 
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'

@@ -172,6 +172,13 @@ server:
 # 챗봇 ↔ ai-serving(라우터) 연동. 키는 환경변수로만 주입한다.
 chatbot:
   enabled: ${CHATBOT_ENABLED:true}
+  # 어떤 LLM 에 붙을지: openai = ai-serving/Ollama/vLLM 같은 자체 구축(OpenAI 호환), claude = Anthropic API(외부)
+  # 바꿀 때는 CHATBOT_PROVIDER 환경변수만 바꾸고 재기동하면 된다.
+  provider: ${CHATBOT_PROVIDER:openai}
+  # 아래 두 줄은 provider=claude 일 때만 쓴다. 키는 절대 여기 적지 말고 환경변수로만 넣을 것
+  anthropic-api-key: ${ANTHROPIC_API_KEY:}
+  anthropic-model: ${ANTHROPIC_MODEL:claude-haiku-5-5}
+  # 아래 base-url / api-key / model 은 provider=openai 일 때 쓰는 값
   base-url: ${AI_SERVING_BASE_URL:http://localhost:8000/v1}
   api-key: ${AI_SERVING_API_KEY:}
   model: ${AI_SERVING_MODEL:answer}       # 카탈로그 id 또는 별칭(answer/classify/agent)

@@ -1,24 +1,38 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
+<!--
+    챗봇 위젯 (모든 페이지 우하단)
+    common/layout.html 에서 th:replace 로 한 번만 넣어 준다.
+    동작은 static/js/chatbot.js, 모양은 static/css/chatbot.css
+-->
 <th:block th:fragment="chatbotWidget">
     <link rel="stylesheet" th:href="@{/css/chatbot.css}">
 
-    <button type="button" id="cb-toggle" class="cb-toggle" aria-label="챗봇 열기" hidden>🐶</button>
+    <!-- 열기 버튼: 처음엔 숨겨 두고, /chatbot/config 가 enabled 로 답하면 js 에서 보여 줌 -->
+    <button type="button" id="chatbotOpenButton" class="cb-toggle" aria-label="챗봇 열기" hidden>🐶</button>
 
-    <section id="cb-panel" class="cb-panel" role="dialog" aria-label="댕댕이 챗봇" hidden>
+    <!-- 챗봇 창 -->
+    <section id="chatbotPanel" class="cb-panel" role="dialog" aria-label="댕댕이 챗봇" hidden>
+        <!-- 상단: 제목 / 대화 지우기 / 닫기 -->
         <header class="cb-header">
             <span>🐶 댕댕이 도우미</span>
             <span>
-                <button type="button" id="cb-reset" class="cb-icon-btn" title="대화 지우기">↺</button>
-                <button type="button" id="cb-close" class="cb-icon-btn" aria-label="닫기">✕</button>
+                <button type="button" id="chatbotResetButton" class="cb-icon-btn" title="대화 지우기">↺</button>
+                <button type="button" id="chatbotCloseButton" class="cb-icon-btn" aria-label="닫기">✕</button>
             </span>
         </header>
-        <div id="cb-log" class="cb-log" aria-live="polite"></div>
-        <form id="cb-form" class="cb-form" autocomplete="off">
-            <textarea id="cb-input" rows="1" placeholder="무엇이든 물어보세요" maxlength="1000"></textarea>
-            <button type="submit" id="cb-send">전송</button>
+
+        <!-- 대화 내용: 말풍선(.cb-msg)이 js 에서 여기에 하나씩 붙는다. aria-live 는 스크린리더용 -->
+        <div id="chatbotMessageList" class="cb-log" aria-live="polite"></div>
+
+        <!-- 입력창: maxlength 는 서버 chatbot.max-message-length(1000) 와 같게 -->
+        <form id="chatbotForm" class="cb-form" autocomplete="off">
+            <textarea id="chatbotInput" rows="1" placeholder="무엇이든 물어보세요" maxlength="1000"></textarea>
+            <button type="submit" id="chatbotSendButton">전송</button>
         </form>
+
+        <!-- 안내 문구 -->
         <p class="cb-note">AI 답변은 부정확할 수 있어요. 건강 문제는 수의사와 상담하세요.</p>
     </section>
 

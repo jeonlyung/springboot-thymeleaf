@@ -15,6 +15,20 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "chatbot")
 public class ChatbotProperties {
     private boolean enabled = true;
+    /**
+     * 어디에 질문을 보낼지.
+     *   openai : OpenAI 호환 서버(ai-serving, Ollama, vLLM 등 직접 띄우는 쪽). 아래 baseUrl/apiKey/model 을 쓴다.
+     *   claude : Anthropic API(외부). 아래 anthropicApiKey/anthropicModel 을 쓴다.
+     * 값이 openai 도 claude 도 아니면 openai 로 동작한다.
+     */
+    private String provider = "openai";
+    /** provider=claude 일 때만 쓰는 API 키. 코드/yml 에 직접 적지 말고 환경변수(ANTHROPIC_API_KEY)로만 넣는다. */
+    private String anthropicApiKey = "";
+    /**
+     * Claude 모델 id. 기본은 제일 싼 haiku. 답이 아쉬우면 claude-sonnet-5-5 / claude-opus-5-5 로 올리면 되는데
+     * 그만큼 호출 단가가 올라간다. (환경변수 ANTHROPIC_MODEL 로 바꿈)
+     */
+    private String anthropicModel = "claude-haiku-5-5";
     /** 라우터 주소 (끝의 /v1 포함). 예: http://localhost:8000/v1 */
     private String baseUrl = "http://localhost:8000/v1";
     /** ROUTER_API_KEYS 중 하나. 비어 있으면 Authorization 헤더를 보내지 않는다(개발용). */
