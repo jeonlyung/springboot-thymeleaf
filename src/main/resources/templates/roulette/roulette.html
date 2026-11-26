@@ -139,6 +139,18 @@
         .modal-desc     { color: #60607a; margin: 8px 0 16px; font-size: 0.9rem; white-space: pre-line; }
         .btn-close      { width: 100%; padding: 12px 16px; font-size: 0.95rem; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; background: linear-gradient(135deg, #5b46f6 0%, #7c5dfa 100%); color: #fff; box-shadow: 0 6px 20px rgba(91,70,246,.4); }
 
+        /* ── 응모권 이력 팝업 전용 (신규 클래스, 기존 모달 스타일에는 영향 없음) ── */
+        .history-modal-content { max-width: 320px; max-height: 72vh; display: flex; flex-direction: column; }
+        .history-list   { list-style: none; margin: 12px 0 16px; padding: 0; max-height: 260px; overflow-y: auto; text-align: left; }
+        .history-list li { display: flex; align-items: center; gap: 6px; padding: 10px 10px; border-radius: 10px; background: #f6f6fa; font-size: 0.88rem; color: #3d3d57; }
+        .history-list li + li { margin-top: 6px; }
+        .history-list .history-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .history-list .history-count { flex-shrink: 0; width: 34px; white-space: nowrap; text-align: center; color: #5b46f6; font-weight: 700; }
+        .history-list .history-date  { flex-shrink: 0; width: 70px; text-align: right; color: #8a8aa0; font-size: 0.78rem; }
+        .history-empty  { color: #8a8aa0; font-size: 0.88rem; text-align: center; padding: 24px 0; }
+        .btn-raffle-history-close { width: 100%; padding: 12px 16px; font-size: 0.95rem; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; background: linear-gradient(135deg, #5b46f6 0%, #7c5dfa 100%); color: #fff; box-shadow: 0 6px 20px rgba(91,70,246,.4); }
+        .btn-history-link { margin-top: 2px; padding: 6px 4px; background: none; border: none; color: #eaf6ff; font-size: 0.85rem; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-shadow: var(--shadow-text); }
+
         /* ── 유의사항 ── */
         .notice-card  { position: relative; z-index: 2; width: min(100%, 360px); margin-top: 20px; padding: 16px 18px; border-radius: 18px; background: rgba(2,64,111,.48); border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 10px 24px rgba(0,38,71,.18); backdrop-filter: blur(10px); }
         .notice-title { font-size: 1rem; font-weight: 900; color: #fff9e0; letter-spacing: -0.03em; text-shadow: 0 1px 4px rgba(0,0,0,.30); }
@@ -239,6 +251,8 @@
                 <button id="joinButton" class="btn-join" type="button">참여가능</button>
                 <button id="raffleButton" class="btn-raffle" type="button">응모권 참여</button>
             </div>
+            <!-- TODO(임시): 응모권 획득 이력 API가 아직 없어 임시 위치/목업 데이터로 연결 -->
+            <button id="raffleHistoryButton" class="btn-history-link" type="button">응모권 이력 보기</button>
         </div>
 
         <section class="notice-card" aria-label="참여 유의사항">
@@ -259,6 +273,14 @@
             <h2 id="resultText">당첨 결과</h2>
             <p id="resultDesc" class="modal-desc">당첨 내용을 확인해 주세요.</p>
             <button id="closeModal" class="btn-close" type="button">확인</button>
+        </div>
+    </div>
+
+    <div id="raffleHistoryModal" class="roulette-modal" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal-content history-modal-content">
+            <h2>응모권 획득 이력</h2>
+            <ul id="raffleHistoryList" class="history-list"></ul>
+            <button id="raffleHistoryCloseButton" class="btn-raffle-history-close" type="button">닫기</button>
         </div>
     </div>
 </div>
@@ -325,6 +347,10 @@
         const resultModal = document.getElementById('resultModal');
         const joinButton = document.getElementById('joinButton');
         const raffleButton = document.getElementById('raffleButton');
+        const raffleHistoryButton = document.getElementById('raffleHistoryButton');
+        const raffleHistoryModal = document.getElementById('raffleHistoryModal');
+        const raffleHistoryCloseButton = document.getElementById('raffleHistoryCloseButton');
+        const raffleHistoryList = document.getElementById('raffleHistoryList');
         const noticeContents = document.getElementById('noticeContents');
         const eventTitle = document.getElementById('eventTitle');
         const eventPeriod = document.getElementById('eventPeriod');
@@ -428,6 +454,60 @@
                 restoreJoinButtonLabel();
             }
             rouletteState.restoreStatusOnModalClose = false;
+        }
+
+        // 이력 목록을 팝업에 렌더링합니다.
+        function renderRaffleHistory(items) {
+            raffleHistoryList.innerHTML = '';
+            if (!items || items.length === 0) {
+                const empty = document.createElement('li');
+                empty.className = 'history-empty';
+                empty.textContent = '획득 이력이 없습니다.';
+                raffleHistoryList.appendChild(empty);
+                return;
+            }
+            items.forEach(function(item) {
+                const li = document.createElement('li');
+                const label = document.createElement('span');
+                label.className = 'history-label';
+                label.textContent = item.label;
+                const count = document.createElement('span');
+                count.className = 'history-count';
+                count.textContent = (Number(item.count) || 0) + '개';
+                const date = document.createElement('span');
+                date.className = 'history-date';
+                date.textContent = item.date;
+                li.appendChild(label);
+                li.appendChild(count);
+                li.appendChild(date);
+                raffleHistoryList.appendChild(li);
+            });
+        }
+
+        // 응모권 이력 팝업 열기/닫기
+        // 전용 조회 API가 아직 없어 임시 목업 데이터로 UI만 구성합니다.
+        function openRaffleHistoryModal() {
+            const items = [
+                { date: '2026.10.09', label: '출석 체크 보상', count: 1 },
+                { date: '2026.10.08', label: '친구 초대 보상', count: 3 },
+                { date: '2026.10.07', label: '이벤트 참여 보상', count: 2 },
+                { date: '2026.10.06', label: '출석 체크 보상', count: 1 },
+                { date: '2026.10.05', label: '룰렛 꽝 위로 보상', count: 1 },
+                { date: '2026.10.04', label: '출석 체크 보상', count: 1 },
+                { date: '2026.10.03', label: '커뮤니티 글쓰기 보상', count: 1 },
+                { date: '2026.10.02', label: '출석 체크 보상', count: 1 },
+                { date: '2026.10.01', label: '신규 가입 보상', count: 1 },
+                { date: '2026.09.30', label: '이벤트 참여 보상', count: 2 }
+            ];
+
+            renderRaffleHistory(items);
+            raffleHistoryModal.style.display = 'flex';
+            raffleHistoryModal.setAttribute('aria-hidden', false);
+        }
+
+        function closeRaffleHistoryModal() {
+            raffleHistoryModal.style.display = 'none';
+            raffleHistoryModal.setAttribute('aria-hidden', 'true');
         }
 
         // CSRF 요청 헤더 변환
@@ -1010,6 +1090,14 @@
         resultModal.addEventListener('click', (e) => {
             if (e.target === resultModal) {
                 closeResultModal();
+            }
+        });
+
+        raffleHistoryButton.addEventListener('click', openRaffleHistoryModal);
+        raffleHistoryCloseButton.addEventListener('click', closeRaffleHistoryModal);
+        raffleHistoryModal.addEventListener('click', (e) => {
+            if (e.target === raffleHistoryModal) {
+                closeRaffleHistoryModal();
             }
         });
 

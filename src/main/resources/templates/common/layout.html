@@ -27,6 +27,9 @@
     <!-- 푸터 -->
     <div th:replace="~{common/fragments/footer :: footerNav}"></div>
 
+    <!-- 챗봇 위젯 (ai-serving 연동) -->
+    <div th:replace="~{common/fragments/chatbot :: chatbotWidget}"></div>
+
     <!-- 페이지별 스크립트 -->
     <th:block layout:fragment="script"></th:block>
 

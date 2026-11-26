@@ -69,3 +69,11 @@ Response shape convention for roulette DTOs: `{ resultCode, resultMsg, resultDat
 ### Frontend
 
 Server-rendered Thymeleaf templates under `src/main/resources/templates/`, using `thymeleaf-layout-dialect` with a shared `common/layout.html` + `common/fragments/`. No frontend build step — plain JS in `static/js/` (`app.js`, `common.js`) and plain CSS per page in `static/css/`.
+
+### Chatbot (ai-serving 연동)
+
+- `biz/chatbot/` — 모든 페이지 우하단 플로팅 위젯(`templates/common/fragments/chatbot.html`, `static/js/chatbot.js`, `static/css/chatbot.css`; `layout.html` 에서 include).
+- 브라우저 → `POST /chatbot/chat`(SSE) → `ChatbotService`(WebClient) → ai-serving 라우터 `/v1/chat/completions`. 대화 이력은 브라우저(sessionStorage)가 보유, 서버는 무상태. system 프롬프트는 서버가 붙이고 클라이언트의 system role 은 버린다.
+- 컨트롤러 패키지에 `.api` 를 넣지 말 것(`CustomInterceptor` 가 Authorization 헤더를 요구). `/chatbot/**` 는 permitAll + IP 당 분당 제한(`ChatRateLimiter`).
+- 설정(env): `AI_SERVING_BASE_URL`(기본 `http://localhost:8000/v1`), `AI_SERVING_API_KEY`(라우터 `ROUTER_API_KEYS` 중 하나), `AI_SERVING_MODEL`(기본 `answer`), `CHATBOT_ENABLED`.
+- 로컬 확인: ai-serving 에서 `make mock-up` → 이 앱 `./gradlew bootRun`. 사용자 대화 내용은 로그에 남기지 않는다.

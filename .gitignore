@@ -43,3 +43,10 @@ out/
 /fix-jwt-import.sh
 
 /dump.rdb
+
+### local ###
+.DS_Store
+.claude/settings.local.json
+.env
+.env.*
+!.env.example

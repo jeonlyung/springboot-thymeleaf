@@ -168,3 +168,12 @@ server:
     whitelabel:
       enabled: false
 
+
+# 챗봇 ↔ ai-serving(라우터) 연동. 키는 환경변수로만 주입한다.
+chatbot:
+  enabled: ${CHATBOT_ENABLED:true}
+  base-url: ${AI_SERVING_BASE_URL:http://localhost:8000/v1}
+  api-key: ${AI_SERVING_API_KEY:}
+  model: ${AI_SERVING_MODEL:answer}       # 카탈로그 id 또는 별칭(answer/classify/agent)
+  max-tokens: 1024
+  rate-limit-per-minute: 20               # IP 당
