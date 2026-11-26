@@ -29,6 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 챗봇 답변을 만들어 주는 서비스.
@@ -51,12 +53,20 @@ public class ChatbotServiceImpl implements ChatbotService {
 
     private static final Set<String> ALLOWED_ROLES = Set.of("user", "assistant");
 
+    /** 맵이 이 크기를 넘으면 지난 분 항목을 정리한다. (IP 가 계속 늘어서 메모리가 커지는 것 방지) */
+    private static final int RATE_LIMIT_CLEANUP_THRESHOLD = 10_000;
+
+    /** 한 분 단위 호출 카운터. minute 이 바뀌면 새로 시작한다. */
+    private record RateWindow(long minute, AtomicInteger count) {}
+
     private final ChatbotProperties props;
     private final ObjectMapper mapper;
     /** openai 호환 서버 호출용. provider 가 뭐든 만들어 두지만 claude 일 땐 안 쓴다. */
     private final WebClient client;
     /** Claude 호출용. provider=claude 이고 API 키가 있을 때만 만든다(그 외엔 null). */
     private final AnthropicClient claude;
+    /** IP 별 호출 횟수. 서버 메모리에만 있어서 서버가 여러 대면 대수만큼 한도가 늘어난다(그때는 Redis 로 옮길 것) */
+    private final ConcurrentHashMap<String, RateWindow> rateWindows = new ConcurrentHashMap<>();
 
     public ChatbotServiceImpl(ChatbotProperties props, ObjectMapper mapper, WebClient.Builder builder) {
         this.props = props;
@@ -78,6 +88,23 @@ public class ChatbotServiceImpl implements ChatbotService {
             b.defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + props.getApiKey());
         }
         this.client = b.build();
+    }
+
+    @Override
+    public boolean checkRateLimit(String key) {
+        return checkRateLimit(key, System.currentTimeMillis());
+    }
+
+    /** 현재 시각을 직접 넘길 수 있는 버전. 테스트에서 시간을 흘려보내려고 따로 열어 뒀다. */
+    public boolean checkRateLimit(String key, long nowMillis) {
+        long minute = nowMillis / 60_000;
+        if (rateWindows.size() > RATE_LIMIT_CLEANUP_THRESHOLD) {
+            rateWindows.values().removeIf(w -> w.minute() < minute);
+        }
+        // 같은 분이면 기존 카운터를 쓰고, 분이 바뀌었거나 처음이면 0 부터 다시 센다
+        RateWindow w = rateWindows.compute(key, (k, old) ->
+                old == null || old.minute() != minute ? new RateWindow(minute, new AtomicInteger()) : old);
+        return w.count().incrementAndGet() <= props.getRateLimitPerMinute();
     }
 
     /**

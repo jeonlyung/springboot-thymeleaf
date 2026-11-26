@@ -3,7 +3,6 @@ package com.project.springboot_thymeleaf.biz.chatbot;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.springboot_thymeleaf.biz.chatbot.config.ChatbotProperties;
 import com.project.springboot_thymeleaf.biz.chatbot.dto.ChatbotMessageDto;
-import com.project.springboot_thymeleaf.biz.chatbot.service.impl.ChatbotRateLimitServiceImpl;
 import com.project.springboot_thymeleaf.biz.chatbot.service.ChatbotService;
 import com.project.springboot_thymeleaf.biz.chatbot.service.impl.ChatbotServiceImpl;
 import com.sun.net.httpserver.HttpServer;
@@ -101,12 +100,12 @@ class ChatbotServiceTest {
     @Test
     void rateLimiterBlocksAfterLimitAndResetsNextMinute() {
         props.setRateLimitPerMinute(2);
-        var rl = new ChatbotRateLimitServiceImpl(props);
+        var rl = svc();
         long t = 120_000;
-        assertTrue(rl.tryAcquire("ip", t));
-        assertTrue(rl.tryAcquire("ip", t));
-        assertFalse(rl.tryAcquire("ip", t));
-        assertTrue(rl.tryAcquire("other", t));
-        assertTrue(rl.tryAcquire("ip", t + 60_000));
+        assertTrue(rl.checkRateLimit("ip", t));
+        assertTrue(rl.checkRateLimit("ip", t));
+        assertFalse(rl.checkRateLimit("ip", t));
+        assertTrue(rl.checkRateLimit("other", t));
+        assertTrue(rl.checkRateLimit("ip", t + 60_000));
     }
 }

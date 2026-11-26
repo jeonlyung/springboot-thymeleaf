@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.springboot_thymeleaf.biz.chatbot.config.ChatbotProperties;
 import com.project.springboot_thymeleaf.biz.chatbot.dto.ChatbotMessageDto;
 import com.project.springboot_thymeleaf.biz.chatbot.dto.ChatbotChatReqDto;
-import com.project.springboot_thymeleaf.biz.chatbot.service.ChatbotRateLimitService;
 import com.project.springboot_thymeleaf.biz.chatbot.service.ChatbotService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,6 @@ public class ChatbotController {
 
     private final ChatbotProperties props;
     private final ChatbotService service;
-    private final ChatbotRateLimitService rateLimitService;
     private final ObjectMapper mapper;
 
     @GetMapping("/config")
@@ -48,7 +46,7 @@ public class ChatbotController {
         if (!props.isEnabled()) {
             return error(HttpStatus.SERVICE_UNAVAILABLE, "챗봇이 비활성화되어 있습니다.");
         }
-        if (!rateLimitService.tryAcquire(http.getRemoteAddr())) {
+        if (!service.checkRateLimit(http.getRemoteAddr())) {
             return error(HttpStatus.TOO_MANY_REQUESTS, "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.");
         }
         List<ChatbotMessageDto> history;

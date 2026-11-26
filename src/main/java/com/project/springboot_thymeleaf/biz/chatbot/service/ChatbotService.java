@@ -13,6 +13,15 @@ import java.util.List;
 public interface ChatbotService {
 
     /**
+     * 호출 횟수 제한 확인 (확인하는 순간 횟수도 1 증가)
+     * 챗봇은 로그인 없이(permitAll) 쓸 수 있어서, 막 호출해서 LLM 비용이 나가지 않게 IP 별로 분당 횟수를 막는다.
+     *
+     * @param key 제한 단위 (현재는 접속 IP)
+     * @return true 면 허용, false 면 분당 한도(chatbot.rate-limit-per-minute) 초과
+     */
+    boolean checkRateLimit(String key);
+
+    /**
      * 클라이언트가 보낸 대화 이력 검증/정리
      * POST /chatbot/chat 요청 처리 전에 호출
      *
